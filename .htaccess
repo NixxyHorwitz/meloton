@@ -1,0 +1,65 @@
+Options -Indexes
+RewriteEngine On
+RewriteBase /
+
+# Block direct access to sensitive files
+RewriteRule ^bootstrap\.php$  - [F,L]
+RewriteRule ^install\.sql$    - [F,L]
+RewriteRule ^migrate\.sql$    - [F,L]
+RewriteRule ^\.env$           - [F,L]
+
+# Pass real files/dirs through
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ── Auth routes ────────────────────────────
+RewriteRule ^login/?$    auth/login.php    [L,QSA]
+RewriteRule ^register/?$ auth/register.php [L,QSA]
+RewriteRule ^logout/?$   auth/logout.php   [L,QSA]
+
+# ── User routes ────────────────────────────
+RewriteRule ^home/?$        user/home.php        [L,QSA]
+RewriteRule ^videos/?$      user/videos.php      [L,QSA]
+RewriteRule ^watch/?$       user/watch.php       [L,QSA]
+RewriteRule ^profile/?$     user/profile.php     [L,QSA]
+RewriteRule ^deposit/?$     user/deposit.php     [L,QSA]
+RewriteRule ^withdraw/?$    user/withdraw.php    [L,QSA]
+RewriteRule ^upgrade/?$     user/upgrade.php     [L,QSA]
+RewriteRule ^checkin/?$     user/checkin.php     [L,QSA]
+RewriteRule ^missions/?$    user/missions.php    [L,QSA]
+RewriteRule ^redeem/?$      user/redeem.php      [L,QSA]
+RewriteRule ^invest/?$      user/invest.php      [L,QSA]
+RewriteRule ^plinko/?$      user/plinko.php      [L,QSA]
+RewriteRule ^plinko-shop/?$ user/plinko_shop.php [L,QSA]
+RewriteRule ^events/?$      user/events.php      [L,QSA]
+RewriteRule ^referral/?$    user/referral.php    [L,QSA]
+RewriteRule ^history/?$     user/history.php     [L,QSA]
+RewriteRule ^pay/?$         user/pay.php         [L,QSA]
+RewriteRule ^maintenance/?$ user/maintenance.php [L,QSA]
+RewriteRule ^panduan/?$     user/panduan.php     [L,QSA]
+RewriteRule ^notifications/?$ user/notifications.php [L,QSA]
+RewriteRule ^edit-rekening/?$ user/edit_rekening.php [L,QSA]
+RewriteRule ^notif_action/?$  notif_action.php       [L,QSA]
+RewriteRule ^livechat/?$      user/livechat.php      [L,QSA]
+RewriteRule ^chat_action/?$   chat_action.php        [L,QSA]
+
+# ── Console routes ─────────────────────────
+RewriteRule ^console/login/?$         console/login.php         [L,QSA]
+RewriteRule ^console/logout/?$        console/logout.php        [L,QSA]
+RewriteRule ^console/payment/?$       console/payment.php       [L,QSA]
+RewriteRule ^console/missions/?$      console/missions.php      [L,QSA]
+RewriteRule ^console/seo/?$           console/seo.php           [L,QSA]
+RewriteRule ^console/panduan/?$       console/panduan.php       [L,QSA]
+RewriteRule ^console/contacts/?$      console/contacts.php      [L,QSA]
+RewriteRule ^console/analytics/?$     console/analytics.php     [L,QSA]
+RewriteRule ^console/notifications/?$ console/notifications.php [L,QSA]
+RewriteRule ^console/livechat/?$      console/livechat.php      [L,QSA]
+RewriteRule ^console/staff/?$         console/staff.php         [L,QSA]
+RewriteRule ^console/staff_roles/?$   console/staff_roles.php   [L,QSA]
+RewriteRule ^console/banks/?$         console/banks.php         [L,QSA]
+RewriteRule ^console/investments/?$   console/investments.php   [L,QSA]
+RewriteRule ^console/user_txns/?$     console/user_txns.php     [L,QSA]
+
+# ── Custom error pages ─────────────────────
+ErrorDocument 404 /404.php

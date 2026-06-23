@@ -1,0 +1,37 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Uploads (user-generated content, bisa besar)
+uploads/
+
+# Compiled/cache
+*.log
+*.cache
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Composer (jika ada)
+vendor/
+composer.lock
+
+# Node (jika ada)
+node_modules/
+
+# Standalone log utility script
+post_receiver.php
+
+# PHP error logs
+error_log
+*error_log

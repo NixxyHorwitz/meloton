@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /console/
+Disallow: /auth/
+Disallow: /uploads/
+
+Sitemap: https://nontonkuy.online/sitemap.xml

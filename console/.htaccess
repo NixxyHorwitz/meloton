@@ -1,0 +1,15 @@
+Options -Indexes
+# Prevent direct access to auth.php and partials
+<Files "auth.php">
+  Order deny,allow
+  Deny from all
+</Files>
+<FilesMatch "^(auth|header|footer)\.php$">
+  Order deny,allow
+  Deny from all
+</FilesMatch>
+<FilesMatch "\.php$">
+  # Allow PHP files
+  Order allow,deny
+  Allow from all
+</FilesMatch>

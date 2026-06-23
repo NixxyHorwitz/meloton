@@ -1,0 +1,671 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/bootstrap.php';
+
+if (!isset($update)) {
+    $json   = file_get_contents('php://input');
+    $update = json_decode($json, true);
+}
+
+if (!$update) { http_response_code(200); return; }
+
+$token = setting($pdo, 'tg_bot_token', '');
+if (!$token) { http_response_code(200); exit; }
+
+$admin_chat_id = setting($pdo, 'tg_chat_id', '');
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function wh_tg_api(string $token, string $method, array $post): ?array {
+    $ch = curl_init("https://api.telegram.org/bot{$token}/{$method}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $post,
+    ]);
+    $res = curl_exec($ch);
+    return json_decode($res ?: '{}', true);
+}
+
+function wh_tg_api_json(string $token, string $method, array $body): void {
+    $ch = curl_init("https://api.telegram.org/bot{$token}/{$method}");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_POSTFIELDS     => json_encode($body),
+    ]);
+    curl_exec($ch);
+}
+
+function answer_cb(string $token, string $cb_id, string $text): void {
+    wh_tg_api($token, 'answerCallbackQuery', ['callback_query_id' => $cb_id, 'text' => $text, 'show_alert' => false]);
+}
+
+function edit_msg(string $token, $chat_id, $msg_id, string $text, ?array $kb = null): void {
+    $body = ['chat_id' => $chat_id, 'message_id' => $msg_id, 'text' => $text, 'parse_mode' => 'HTML'];
+    if ($kb !== null) $body['reply_markup'] = ['inline_keyboard' => $kb];
+    wh_tg_api_json($token, 'editMessageText', $body);
+}
+
+function send_msg(string $token, $chat_id, string $text, ?array $kb = null, $thread_id = null): ?int {
+    $body = ['chat_id' => $chat_id, 'text' => $text, 'parse_mode' => 'HTML'];
+    if ($kb !== null) $body['reply_markup'] = ['inline_keyboard' => $kb];
+    if ($thread_id) $body['message_thread_id'] = (int)$thread_id;
+    $ch = curl_init("https://api.telegram.org/bot{$token}/sendMessage");
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_POSTFIELDS     => json_encode($body),
+    ]);
+    $res = curl_exec($ch);
+    $data = json_decode($res ?: '{}', true);
+    return $data['result']['message_id'] ?? null;
+}
+
+/** Save pending reject state to settings table */
+function set_tg_state(PDO $pdo, $chat_id, string $state): void {
+    $key = 'tg_state_' . $chat_id;
+    $pdo->prepare("INSERT INTO settings (`key`,`value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value`=?")
+        ->execute([$key, $state, $state]);
+}
+
+/** Get and clear pending state */
+function get_tg_state(PDO $pdo, $chat_id): string {
+    $key = 'tg_state_' . $chat_id;
+    $s = $pdo->prepare("SELECT `value` FROM settings WHERE `key`=?");
+    $s->execute([$key]);
+    return (string)($s->fetchColumn() ?: '');
+}
+
+function clear_tg_state(PDO $pdo, $chat_id): void {
+    $pdo->prepare("DELETE FROM settings WHERE `key`=?")->execute(['tg_state_' . $chat_id]);
+}
+
+/** Do the actual deposit reject */
+function do_depo_reject(PDO $pdo, int $id, string $reason): string {
+    $pdo->beginTransaction();
+    $dep = $pdo->prepare("SELECT * FROM deposits WHERE id=? FOR UPDATE");
+    $dep->execute([$id]);
+    $dep = $dep->fetch();
+    if (!$dep || $dep['status'] !== 'pending') {
+        $pdo->rollBack();
+        return 'Deposit tidak ditemukan atau bukan pending.';
+    }
+    $note = $reason ?: 'Rejected via Bot';
+    $pdo->prepare("UPDATE deposits SET status='rejected', admin_note=? WHERE id=?")->execute([$note, $id]);
+    $pdo->commit();
+    return 'ok';
+}
+
+/** Do the actual withdraw reject */
+function do_wd_reject(PDO $pdo, int $id, string $reason): string {
+    $pdo->beginTransaction();
+    $wd = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? FOR UPDATE");
+    $wd->execute([$id]);
+    $wd = $wd->fetch();
+    if (!$wd || $wd['status'] !== 'pending') {
+        $pdo->rollBack();
+        return 'WD tidak ditemukan atau bukan pending.';
+    }
+    $note = $reason ?: 'Rejected via Bot';
+    $pdo->prepare("UPDATE withdrawals SET status='rejected', admin_note=? WHERE id=?")->execute([$note, $id]);
+    $pdo->prepare("UPDATE users SET balance_wd=balance_wd+? WHERE id=?")->execute([$wd['amount'], $wd['user_id']]);
+    $pdo->commit();
+    return 'ok';
+}
+
+/** Do the actual withdraw hold (no refund) */
+function do_wd_hold(PDO $pdo, int $id, string $reason): string {
+    $pdo->beginTransaction();
+    $wd = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? FOR UPDATE");
+    $wd->execute([$id]);
+    $wd = $wd->fetch();
+    if (!$wd || $wd['status'] !== 'pending') {
+        $pdo->rollBack();
+        return 'WD tidak ditemukan atau bukan pending.';
+    }
+    $note = $reason ?: 'Hold via Bot (Selesai non-refund)';
+    $pdo->prepare("UPDATE withdrawals SET status='hold', admin_note=?, processed_at=NOW() WHERE id=?")->execute([$note, $id]);
+    $pdo->commit();
+    return 'ok';
+}
+
+// ── Callback Query Handler ───────────────────────────────────────────────────
+
+if (isset($update['callback_query'])) {
+    $cb      = $update['callback_query'];
+    $data    = $cb['data'] ?? '';
+    $chat_id = $cb['message']['chat']['id'] ?? '';
+    $msg_id  = $cb['message']['message_id'] ?? '';
+    $cb_id   = $cb['id'] ?? '';
+    $orig    = $cb['message']['text'] ?? '';
+    $thread_id = $cb['message']['message_thread_id'] ?? null;
+
+    if ((string)$chat_id !== (string)$admin_chat_id) {
+        answer_cb($token, $cb_id, "⚠️ Akses Ditolak! Chat ID anda ({$chat_id}) tidak cocok dengan ID Admin di pengaturan.");
+        http_response_code(200); return;
+    }
+
+    // ── REFRESH ──────────────────────────────────────────────────────────────
+    if (preg_match('/^refresh_(depo|wd)_(\d+)$/', $data, $m)) {
+        $type = $m[1];
+        $id   = (int)$m[2];
+
+        if ($type === 'depo') {
+            $row = $pdo->prepare("SELECT d.*, u.username FROM deposits d JOIN users u ON u.id=d.user_id WHERE d.id=?");
+            $row->execute([$id]); $row = $row->fetch();
+            if (!$row) {
+                answer_cb($token, $cb_id, '⚠️ Deposit tidak ditemukan.');
+            } elseif ($row['status'] !== 'pending') {
+                if ($row['status'] === 'confirmed') {
+                    $msg = "✅ <b>DEPOSIT QRIS BERHASIL (CONFIRMED)</b>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username']) . "</code>\n";
+                    $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+                    $msg .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s', strtotime($row['confirmed_at'] ?? $row['created_at'])) . " WIB</code>\n";
+                    $msg .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+                    $msg .= "✅ <b>Status:</b> <code>Sukses via Callback</code>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "<i>Pembayaran terverifikasi otomatis oleh sistem. Saldo telah ditambahkan ke akun pengguna.</i>";
+                } else {
+                    $msg = "❌ <b>DEPOSIT QRIS DITOLAK (REJECTED)</b>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username']) . "</code>\n";
+                    $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+                    $msg .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s', strtotime($row['created_at'])) . " WIB</code>\n";
+                    $msg .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+                    $msg .= "❌ <b>Status:</b> <code>Rejected</code>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "<i>Alasan: " . htmlspecialchars($row['admin_note'] ?: '-') . "</i>";
+                }
+                edit_msg($token, $chat_id, $msg_id, $msg, []);
+                answer_cb($token, $cb_id, '✅ Status deposit berhasil diperbarui!');
+            } else {
+                answer_cb($token, $cb_id, '⏳ Deposit masih pending, belum terbayar.');
+            }
+        } else {
+            $row = $pdo->prepare("SELECT w.*, u.username FROM withdrawals w JOIN users u ON u.id=w.user_id WHERE w.id=?");
+            $row->execute([$id]); $row = $row->fetch();
+            if (!$row) {
+                answer_cb($token, $cb_id, '⚠️ WD tidak ditemukan.');
+            } elseif ($row['status'] !== 'pending') {
+                $icon = $row['status'] === 'approved' ? '✅' : '❌';
+                $status_lbl = $row['status'] === 'approved' ? 'Approved' : ($row['status'] === 'hold' ? 'Hold' : 'Rejected');
+                
+                $msg = "<b>💸 WITHDRAW DI-HANDLE ({$status_lbl})</b>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username']) . "</code>\n";
+                $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+                $msg .= "🏦 <b>Bank:</b> <code>" . htmlspecialchars($row['bank_name']) . " - " . htmlspecialchars($row['account_number']) . "</code>\n";
+                $msg .= "👨‍💼 <b>a/n:</b> <code>" . htmlspecialchars($row['account_name']) . "</code>\n";
+                $msg .= "📌 <b>Status:</b> <code>{$icon} {$status_lbl}</code>\n";
+                if ($row['admin_note']) {
+                    $msg .= "📝 <b>Note:</b> <code>" . htmlspecialchars($row['admin_note']) . "</code>\n";
+                }
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "<i>Penarikan dana telah diproses oleh admin.</i>";
+
+                edit_msg($token, $chat_id, $msg_id, $msg, []);
+                answer_cb($token, $cb_id, '✅ Status WD berhasil diperbarui!');
+            } else {
+                answer_cb($token, $cb_id, '⏳ WD masih pending, belum diproses admin.');
+            }
+        }
+        http_response_code(200); exit;
+    }
+
+    // ── APPROVE ──────────────────────────────────────────────────────────────
+    if (preg_match('/^depo_approve_(\d+)$/', $data, $m)) {
+        $id = (int)$m[1];
+        $pdo->beginTransaction();
+        $dep = $pdo->prepare("SELECT d.*, u.username FROM deposits d JOIN users u ON u.id = d.user_id WHERE d.id=? FOR UPDATE");
+        $dep->execute([$id]); $dep = $dep->fetch();
+        if ($dep && $dep['status'] === 'pending') {
+            $pdo->prepare("UPDATE deposits SET status='confirmed', confirmed_at=NOW() WHERE id=?")->execute([$id]);
+            $pdo->prepare("UPDATE users SET balance_dep=balance_dep+? WHERE id=?")->execute([$dep['amount'], $dep['user_id']]);
+            $pdo->commit();
+            answer_cb($token, $cb_id, '✅ Deposit Approved!');
+            
+            $msg = "✅ <b>DEPOSIT QRIS BERHASIL (CONFIRMED)</b>\n";
+            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($dep['username']) . "</code>\n";
+            $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$dep['amount']) . "</code>\n";
+            $msg .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s') . " WIB</code>\n";
+            $msg .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+            $msg .= "✅ <b>Status:</b> <code>Approved via Bot</code>\n";
+            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $msg .= "<i>Deposit telah disetujui secara manual oleh admin via Telegram Bot.</i>";
+            edit_msg($token, $chat_id, $msg_id, $msg, []);
+        } else {
+            $pdo->rollBack();
+            answer_cb($token, $cb_id, '⚠️ Sudah diproses atau tidak ditemukan.');
+        }
+        http_response_code(200); exit;
+    }
+
+    // ── DEPO ACC EXPIRED ─────────────────────────────────────────────────────
+    if (preg_match('/^depo_accexp_(\d+)$/', $data, $m)) {
+        $id = (int)$m[1];
+        $pdo->beginTransaction();
+        try {
+            $dep = $pdo->prepare("SELECT * FROM deposits WHERE id=? FOR UPDATE");
+            $dep->execute([$id]); $dep = $dep->fetch();
+            if ($dep && $dep['status'] === 'rejected') {
+                // 1. Credit balance_dep to user
+                $pdo->prepare("UPDATE users SET balance_dep=balance_dep+? WHERE id=?")->execute([$dep['amount'], $dep['user_id']]);
+                // 2. Mark deposit as confirmed
+                $pdo->prepare("UPDATE deposits SET status='confirmed', admin_note='Acc Expired via Bot', confirmed_at=NOW() WHERE id=?")->execute([$id]);
+                
+                // 3. Check referral commission (bypass if upline is a promotor)
+                $referer = $pdo->prepare(
+                    "SELECT u2.id, u2.is_promotor FROM users u JOIN users u2 ON u2.referral_code=u.referred_by WHERE u.id=?"
+                );
+                $referer->execute([$dep['user_id']]);
+                $ref = $referer->fetch();
+                if ($ref && $ref['id'] && (int)$ref['is_promotor'] !== 1) {
+                    $pct = (float) setting($pdo, 'referral_commission_percent', '5');
+                    $commission = round(($dep['amount'] * $pct) / 100, 2);
+                    if ($commission > 0) {
+                        $pdo->prepare("UPDATE users SET balance_wd=balance_wd+? WHERE id=?")->execute([$commission, $ref['id']]);
+                        $pdo->prepare("INSERT INTO referral_commissions (user_id,from_user_id,amount) VALUES (?,?,?)")
+                            ->execute([$ref['id'], $dep['user_id'], $commission]);
+                    }
+                }
+                $pdo->commit();
+                answer_cb($token, $cb_id, '✅ Deposit Expired Berhasil Di-Acc!');
+                
+                $u_stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+                $u_stmt->execute([$dep['user_id']]);
+                $uname = $u_stmt->fetchColumn() ?: 'User';
+                
+                $msg = "✅ <b>DEPOSIT QRIS BERHASIL (CONFIRMED)</b>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($uname) . "</code>\n";
+                $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$dep['amount']) . "</code>\n";
+                $msg .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s') . " WIB</code>\n";
+                $msg .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+                $msg .= "✅ <b>Status:</b> <code>Approved (Acc Expired)</code>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "<i>Deposit yang kedaluwarsa disetujui kembali oleh admin via Telegram Bot.</i>";
+                edit_msg($token, $chat_id, $msg_id, $msg, []);
+            } else {
+                $pdo->rollBack();
+                answer_cb($token, $cb_id, '⚠️ Deposit harus berstatus Rejected.');
+            }
+        } catch (\Throwable $th) {
+            $pdo->rollBack();
+            answer_cb($token, $cb_id, '⚠️ Error: ' . $th->getMessage());
+        }
+        http_response_code(200); exit;
+    }
+
+    if (preg_match('/^wd_approve_(\d+)$/', $data, $m)) {
+        $id = (int)$m[1];
+        $pdo->beginTransaction();
+        $wd = $pdo->prepare("SELECT w.*, u.username FROM withdrawals w JOIN users u ON u.id = w.user_id WHERE w.id=? FOR UPDATE");
+        $wd->execute([$id]); $wd = $wd->fetch();
+        if ($wd && $wd['status'] === 'pending') {
+            $pdo->prepare("UPDATE withdrawals SET status='approved', processed_at=NOW() WHERE id=?")->execute([$id]);
+            $pdo->commit();
+            answer_cb($token, $cb_id, '✅ Withdraw Approved!');
+            
+            $msg = "<b>💸 WITHDRAW DI-HANDLE (Approved)</b>\n";
+            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($wd['username']) . "</code>\n";
+            $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$wd['amount']) . "</code>\n";
+            $msg .= "🏦 <b>Bank:</b> <code>" . htmlspecialchars($wd['bank_name']) . " - " . htmlspecialchars($wd['account_number']) . "</code>\n";
+            $msg .= "👨‍💼 <b>a/n:</b> <code>" . htmlspecialchars($wd['account_name']) . "</code>\n";
+            $msg .= "📌 <b>Status:</b> <code>✅ Approved via Bot</code>\n";
+            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $msg .= "<i>Penarikan dana disetujui oleh admin via Telegram Bot.</i>";
+            edit_msg($token, $chat_id, $msg_id, $msg, []);
+        } else {
+            $pdo->rollBack();
+            answer_cb($token, $cb_id, '⚠️ Sudah diproses atau tidak ditemukan.');
+        }
+        http_response_code(200); exit;
+    }
+
+    // ── ADMIN REQUEST APPROVE / REJECT ───────────────────────────────────────
+    if (preg_match('/^req_(approve|reject)_(\d+)$/', $data, $m)) {
+        $action = $m[1]; // approve or reject
+        $id = (int)$m[2];
+        
+        try {
+            $pdo->beginTransaction();
+            $req = $pdo->prepare("SELECT r.*, u.username, u.balance_dep FROM admin_requests r JOIN users u ON u.id = r.user_id WHERE r.id=? FOR UPDATE");
+            $req->execute([$id]); $req = $req->fetch();
+            
+            if ($req && $req['status'] === 'pending') {
+                $new_status = $action === 'approve' ? 'approved' : 'rejected';
+                $pdo->prepare("UPDATE admin_requests SET status=?, updated_at=NOW() WHERE id=?")->execute([$new_status, $id]);
+                
+                if ($action === 'approve') {
+                    if ($req['type'] === 'change_bank') {
+                        $payload = json_decode($req['payload'], true);
+                        $pdo->prepare("UPDATE users SET bank_name=?, account_number=?, account_name=? WHERE id=?")
+                            ->execute([$payload['bank_name'], $payload['account_number'], $payload['account_name'], $req['user_id']]);
+                        
+                        $msg = "✅ <b>REQUEST GANTI REKENING (APPROVED)</b>\n";
+                        $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                        $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";
+                        $msg .= "🏦 <b>Bank Baru:</b> <code>{$payload['bank_name']}</code>\n";
+                        $msg .= "💳 <b>Nomor:</b> <code>{$payload['account_number']}</code>\n";
+                        $msg .= "👨‍💼 <b>A.N:</b> <code>{$payload['account_name']}</code>\n";
+                        $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                        $msg .= "<i>Perubahan rekening telah disetujui.</i>";
+                        
+                    } elseif ($req['type'] === 'refund_level') {
+                        $s = $pdo->prepare("SELECT u.membership_id, u.refund_cut_percent, m.price, m.name FROM users u LEFT JOIN memberships m ON u.membership_id = m.id WHERE u.id=?");
+                        $s->execute([$req['user_id']]);
+                        $uInfo = $s->fetch();
+                        
+                        if ($uInfo && $uInfo['membership_id']) {
+                            $oStmt = $pdo->prepare("SELECT amount FROM upgrade_orders WHERE user_id=? AND membership_id=? AND status='confirmed' ORDER BY id DESC LIMIT 1");
+                            $oStmt->execute([$req['user_id'], $uInfo['membership_id']]);
+                            $basePrice = (float)$oStmt->fetchColumn();
+                            if (!$basePrice) $basePrice = (float)$uInfo['price'];
+                            
+                            $pct = (float)$uInfo['refund_cut_percent'];
+                            $refundAmt = $basePrice * ((100 - $pct) / 100);
+                            
+                            // Cancel pending & hold WDs
+                            $wds = $pdo->prepare("SELECT id, amount FROM withdrawals WHERE user_id = ? AND status IN ('pending', 'hold') FOR UPDATE");
+                            $wds->execute([$req['user_id']]);
+                            $wd_refund_total = 0;
+                            foreach ($wds->fetchAll() as $w) {
+                                $wd_refund_total += (float)$w['amount'];
+                                $pdo->prepare("UPDATE withdrawals SET status = 'rejected', admin_note = 'Dibatalkan (Refund Level)', processed_at = NOW() WHERE id = ?")->execute([$w['id']]);
+                            }
+                            
+                            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ?, balance_wd = balance_wd + ?, membership_id = NULL, membership_expires_at = NULL WHERE id = ?")
+                                ->execute([$refundAmt, $wd_refund_total, $req['user_id']]);
+                                
+                            $notifTitle = "Refund Level Disetujui ✅";
+                            $notifMsg = "Refund untuk level {$uInfo['name']} telah disetujui. Saldo " . format_rp($refundAmt) . " (setelah potongan {$pct}%) telah dikembalikan ke Saldo Beli kamu.";
+                            if ($wd_refund_total > 0) {
+                                $notifMsg .= " Semua penarikan yang tertunda juga dibatalkan dan saldo " . format_rp($wd_refund_total) . " dikembalikan ke Saldo WD kamu.";
+                            }
+                            $pdo->prepare("INSERT INTO notifications (title, message, type, icon, target_type, target_user_ids, action_url, action_text) VALUES (?, ?, 'success', '💰', 'single', ?, '/user/upgrade.php', 'Cek Saldo')")
+                                ->execute([$notifTitle, $notifMsg, json_encode([$req['user_id']])]);
+                                
+                            $msg = "✅ <b>REQUEST REFUND LEVEL (APPROVED)</b>\n";
+                            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                            $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";
+                            $msg .= "🏆 <b>Level Dibatalkan:</b> <code>{$uInfo['name']}</code>\n";
+                            $msg .= "💵 <b>Saldo Dikembalikan:</b> <code>" . format_rp($refundAmt) . " (potongan {$pct}%)</code>\n";
+                            if ($wd_refund_total > 0) {
+                                $msg .= "🔙 <b>WD Dikembalikan:</b> <code>" . format_rp($wd_refund_total) . "</code>\n";
+                            }
+                            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                            $msg .= "<i>Refund level telah disetujui dan saldo berhasil dikembalikan.</i>";
+                        } else {
+                            $pdo->rollBack();
+                            answer_cb($token, $cb_id, '⚠️ User tidak memiliki level aktif untuk di-refund.');
+                            http_response_code(200); exit;
+                        }
+                    }
+                } else {
+                    // Rejected
+                    $title = $req['type'] === 'change_bank' ? 'GANTI REKENING' : 'REFUND LEVEL';
+                    $msg = "❌ <b>REQUEST {$title} (REJECTED)</b>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";
+                    $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $msg .= "<i>Permintaan ini telah DITOLAK.</i>";
+                }
+                
+                $pdo->commit();
+                answer_cb($token, $cb_id, "✅ Request {$new_status}!");
+                edit_msg($token, $chat_id, $msg_id, $msg, []);
+            } else {
+                $pdo->rollBack();
+                answer_cb($token, $cb_id, '⚠️ Sudah diproses atau tidak ditemukan.');
+            }
+        } catch (\Throwable $th) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            answer_cb($token, $cb_id, '⚠️ Error DB: ' . $th->getMessage());
+        }
+        http_response_code(200); exit;
+    }
+
+    // ── EDIT REFUND CUT ──────────────────────────────────────────────────────
+    if (preg_match('/^edit_refcut_(\d+)$/', $data, $m)) {
+        $uid = (int)$m[1];
+        answer_cb($token, $cb_id, "📝 Ketik persentase potongan baru (contoh: 25)...");
+        $prompt_msg_id = send_msg($token, $chat_id, "📝 <b>Ketik angka persentase potongan refund baru</b> (0 - 100) untuk User ID: <b>{$uid}</b> lalu kirim sebagai pesan.", [], $thread_id);
+        $state = implode('|', ['awaiting_refcut', $uid, $msg_id, base64_encode($orig), (int)$prompt_msg_id]);
+        set_tg_state($pdo, $chat_id, $state);
+        http_response_code(200); exit;
+    }
+
+    // ── TOGGLE REFUND ACCESS ────────────────────────────────────────────────
+    if (preg_match('/^toggle_ref_(\d+)$/', $data, $m)) {
+        $uid = (int)$m[1];
+        $s = $pdo->prepare("SELECT is_refund_enabled FROM users WHERE id=?");
+        $s->execute([$uid]);
+        $curr = (int)$s->fetchColumn();
+        $new_val = $curr ? 0 : 1;
+        $pdo->prepare("UPDATE users SET is_refund_enabled=? WHERE id=?")->execute([$new_val, $uid]);
+        
+        $txt = $new_val ? "✅ Akses refund diaktifkan." : "🔒 Akses refund diblokir.";
+        answer_cb($token, $cb_id, $txt);
+        http_response_code(200); exit;
+    }
+
+    // ── REJECT / HOLD (ask for reason) ─────────────────────────────────────────
+    if (preg_match('/^(depo|wd)_(reject|hold)_(\d+)$/', $data, $m)) {
+        $type   = $m[1];
+        $action = $m[2];
+        $id     = (int)$m[3];
+        $act_id = "{$type}_{$action}";
+        $label  = $action === 'hold' ? 'Hold' : 'penolakan';
+        
+        $table = $type === 'depo' ? 'deposits' : 'withdrawals';
+        $item = $pdo->prepare("SELECT u.username FROM {$table} t JOIN users u ON u.id=t.user_id WHERE t.id=?");
+        $item->execute([$id]);
+        $uname = $item->fetchColumn() ?: 'Unknown';
+        
+        answer_cb($token, $cb_id, "📝 Ketik alasan {$label}...");
+        // Send prompt and capture its message_id
+        $prompt_msg_id = send_msg($token, $chat_id,
+            "📝 <b>Ketik alasan {$label}</b> untuk {$type} #{$id} (User: <b>{$uname}</b>) dan kirim sebagai pesan.\n\nAtau tekan tombol di bawah untuk langsung memproses tanpa alasan.",
+            [[['text' => '⏭ Skip (Tanpa Alasan)', 'callback_data' => "{$act_id}_skip_{$id}"]]], $thread_id
+        );
+        // Save state: awaiting_reason|type|action|id|orig_msg_id|orig_b64|prompt_msg_id
+        $state = implode('|', ['awaiting_reason', $type, $action, $id, $msg_id, base64_encode($orig), (int)$prompt_msg_id]);
+        set_tg_state($pdo, $chat_id, $state);
+        http_response_code(200); exit;
+    }
+
+    // ── REJECT / HOLD SKIP (no reason) ─────────────────────────────────────────
+    if (preg_match('/^(depo|wd)_(reject|hold)_skip_(\d+)$/', $data, $m)) {
+        $type   = $m[1];
+        $action = $m[2];
+        $id     = (int)$m[3];
+        clear_tg_state($pdo, $chat_id);
+
+        if ($type === 'depo') {
+            $res = do_depo_reject($pdo, $id, '');
+            $icon = '❌'; $status = 'Rejected';
+        } else {
+            if ($action === 'hold') {
+                $res = do_wd_hold($pdo, $id, '');
+                $icon = '⏸'; $status = 'Hold';
+            } else {
+                $res = do_wd_reject($pdo, $id, '');
+                $icon = '❌'; $status = 'Rejected';
+            }
+        }
+
+        if ($res === 'ok') {
+            answer_cb($token, $cb_id, "{$icon} " . ucfirst($action) . " tanpa alasan.");
+            
+            if ($type === 'depo') {
+                $row = $pdo->prepare("SELECT d.*, u.username FROM deposits d JOIN users u ON u.id=d.user_id WHERE d.id=?");
+                $row->execute([$id]); $row = $row->fetch();
+                $msg = "❌ <b>DEPOSIT QRIS DITOLAK (REJECTED)</b>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username'] ?? 'User') . "</code>\n";
+                $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+                $msg .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s') . " WIB</code>\n";
+                $msg .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+                $msg .= "❌ <b>Status:</b> <code>Rejected via Bot</code>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "<i>Deposit ditolak oleh admin via Telegram Bot tanpa alasan.</i>";
+            } else {
+                $row = $pdo->prepare("SELECT w.*, u.username FROM withdrawals w JOIN users u ON u.id=w.user_id WHERE w.id=?");
+                $row->execute([$id]); $row = $row->fetch();
+                $msg = "<b>💸 WITHDRAW DI-HANDLE ({$status})</b>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username'] ?? 'User') . "</code>\n";
+                $msg .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+                $msg .= "🏦 <b>Bank:</b> <code>" . htmlspecialchars($row['bank_name']) . " - " . htmlspecialchars($row['account_number']) . "</code>\n";
+                $msg .= "👨‍💼 <b>a/n:</b> <code>" . htmlspecialchars($row['account_name']) . "</code>\n";
+                $msg .= "📌 <b>Status:</b> <code>{$icon} {$status}</code>\n";
+                $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $msg .= "<i>Penarikan dana di-{$status} oleh admin via Telegram Bot tanpa alasan.</i>";
+            }
+            edit_msg($token, $chat_id, $msg_id, $msg, []);
+        } else {
+            answer_cb($token, $cb_id, '⚠️ ' . $res);
+        }
+        http_response_code(200); exit;
+    }
+    // Fallback for callback_query: do not exit, so it can fall through
+}
+
+// ── Message Handler (for reject reason text) ─────────────────────────────────
+
+if (isset($update['message'])) {
+    $msg     = $update['message'];
+    $chat_id = $msg['chat']['id'] ?? '';
+    $text    = trim($msg['text'] ?? '');
+    $thread_id = $msg['message_thread_id'] ?? null;
+
+    if (empty($text)) {
+        return; // Fall through for other types of messages
+    }
+
+    if (trim((string)$chat_id) !== trim((string)$admin_chat_id)) {
+        return; // Fall through
+    }
+
+    // Command: !sethere [option] or /sethere [option]
+    if (preg_match('/^[!\/]sethere\s+([a-zA-Z0-9_]+)/i', $text, $m)) {
+        $option = strtolower($m[1]);
+        $allowed = ['log', 'wd', 'depo', 'user_baru', 'permintaan'];
+        if (in_array($option, $allowed)) {
+            $key = 'tg_topic_' . $option;
+            $val = $thread_id ? (string)$thread_id : '';
+            $pdo->prepare("INSERT INTO settings (`key`,`value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value`=?")
+                ->execute([$key, $val, $val]);
+            send_msg($token, $chat_id, "✅ Topic untuk <b>{$option}</b> berhasil diset ke thread ini.", null, $thread_id);
+        } else {
+            send_msg($token, $chat_id, "⚠️ Option tidak valid. Gunakan: " . implode(', ', $allowed), null, $thread_id);
+        }
+        http_response_code(200); exit;
+    }
+
+    $state = get_tg_state($pdo, $chat_id);
+    if (!$state) { return; }
+
+    $parts = explode('|', $state, 7);
+    
+    if ($parts[0] === 'awaiting_refcut') {
+        [, $uid, $orig_msg_id, $orig_b64, $prompt_msg_id] = array_pad($parts, 5, 0);
+        $uid = (int)$uid;
+        $orig_msg_id = (int)$orig_msg_id;
+        $prompt_msg_id = (int)$prompt_msg_id;
+        $new_cut = (int)$text;
+        
+        clear_tg_state($pdo, $chat_id);
+        
+        if ($new_cut >= 0 && $new_cut <= 100) {
+            $pdo->prepare("UPDATE users SET refund_cut_percent=? WHERE id=?")->execute([$new_cut, $uid]);
+            $msg = "✅ Persentase potongan refund untuk User ID {$uid} berhasil diubah menjadi <b>{$new_cut}%</b>.";
+        } else {
+            $msg = "⚠️ Angka tidak valid. Harus antara 0 - 100.";
+        }
+        
+        if ($prompt_msg_id) {
+            edit_msg($token, $chat_id, $prompt_msg_id, $msg, []);
+        } else {
+            send_msg($token, $chat_id, $msg, []);
+        }
+        http_response_code(200); exit;
+    }
+
+    if ($parts[0] !== 'awaiting_reason') { return; }
+
+    [, $type, $action, $id, $orig_msg_id, $orig_b64, $prompt_msg_id] = array_pad($parts, 7, 0);
+    $id            = (int)$id;
+    $orig_msg_id   = (int)$orig_msg_id;
+    $prompt_msg_id = (int)$prompt_msg_id;
+    $orig_text     = base64_decode($orig_b64);
+    $reason        = $text;
+
+    clear_tg_state($pdo, $chat_id);
+
+    if ($type === 'depo') {
+        $res = do_depo_reject($pdo, $id, $reason);
+        $icon = '❌'; $status = 'Rejected';
+    } else {
+        if ($action === 'hold') {
+            $res = do_wd_hold($pdo, $id, $reason);
+            $icon = '⏸'; $status = 'Hold';
+        } else {
+            $res = do_wd_reject($pdo, $id, $reason);
+            $icon = '❌'; $status = 'Rejected';
+        }
+    }
+
+    if ($res === 'ok') {
+        if ($type === 'depo') {
+            $row = $pdo->prepare("SELECT d.*, u.username FROM deposits d JOIN users u ON u.id=d.user_id WHERE d.id=?");
+            $row->execute([$id]); $row = $row->fetch();
+            $new_text = "❌ <b>DEPOSIT QRIS DITOLAK (REJECTED)</b>\n";
+            $new_text .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $new_text .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username'] ?? 'User') . "</code>\n";
+            $new_text .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+            $new_text .= "🕒 <b>Time:</b> <code>" . date('d-m-Y H:i:s') . " WIB</code>\n";
+            $new_text .= "💳 <b>Method:</b> <code>QRIS Otomatis</code>\n";
+            $new_text .= "❌ <b>Status:</b> <code>Rejected via Bot</code>\n";
+            $new_text .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $new_text .= "<i>Alasan: " . htmlspecialchars($reason) . "</i>";
+        } else {
+            $row = $pdo->prepare("SELECT w.*, u.username FROM withdrawals w JOIN users u ON u.id=w.user_id WHERE w.id=?");
+            $row->execute([$id]); $row = $row->fetch();
+            $new_text = "<b>💸 WITHDRAW DI-HANDLE ({$status})</b>\n";
+            $new_text .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $new_text .= "👤 <b>User:</b> <code>" . htmlspecialchars($row['username'] ?? 'User') . "</code>\n";
+            $new_text .= "💵 <b>Amount:</b> <code>" . format_rp((float)$row['amount']) . "</code>\n";
+            $new_text .= "🏦 <b>Bank:</b> <code>" . htmlspecialchars($row['bank_name']) . " - " . htmlspecialchars($row['account_number']) . "</code>\n";
+            $new_text .= "👨‍💼 <b>a/n:</b> <code>" . htmlspecialchars($row['account_name']) . "</code>\n";
+            $new_text .= "📌 <b>Status:</b> <code>{$icon} {$status}</code>\n";
+            $new_text .= "📝 <b>Note:</b> <code>" . htmlspecialchars($reason) . "</code>\n";
+            $new_text .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+            $new_text .= "<i>Penarikan dana di-{$status} oleh admin via Telegram Bot dengan alasan.</i>";
+        }
+        edit_msg($token, $chat_id, $orig_msg_id, $new_text, []);
+        
+        $table = $type === 'depo' ? 'deposits' : 'withdrawals';
+        $item = $pdo->prepare("SELECT u.username FROM {$table} t JOIN users u ON u.id=t.user_id WHERE t.id=?");
+        $item->execute([$id]);
+        $uname = $item->fetchColumn() ?: 'Unknown';
+
+        // Edit the prompt message to confirm the reason was received
+        if ($prompt_msg_id) {
+            edit_msg($token, $chat_id, $prompt_msg_id,
+                "{$icon} <b>" . strtoupper($type) . " #{$id} (User: {$uname}) " . ($action==='hold'?'di-hold':'ditolak') . "</b>\n📝 Alasan: <i>" . htmlspecialchars($reason) . "</i>");
+        }
+    } else {
+        send_msg($token, $chat_id, "⚠️ Gagal: {$res}");
+    }
+
+    http_response_code(200); exit;
+}
