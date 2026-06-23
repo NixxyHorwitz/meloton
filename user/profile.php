@@ -63,7 +63,7 @@ try {
     $_contact_btns = $pdo->query("SELECT * FROM contact_buttons WHERE is_active=1 ORDER BY sort_order ASC, id ASC")->fetchAll();
 } catch (\Throwable) { $_contact_btns = []; }
 
-$pageTitle  = 'Profil — NontonKuy';
+$pageTitle  = 'Profil — Meloton';
 $activePage = 'profile';
 require dirname(__DIR__) . '/partials/header.php';
 

@@ -109,7 +109,7 @@ if ($wd_require_level && $wd_min_level > 0) {
     $min_level_name = $lv->fetchColumn() ?: "Level {$wd_min_level}";
 }
 
-$pageTitle  = 'Beranda — NontonKuy';
+$pageTitle  = 'Beranda — Meloton';
 $activePage = 'home';
 require dirname(__DIR__) . '/partials/header.php';
 ?>
@@ -196,7 +196,7 @@ if ($is_newcomer):
     <i class="ph-bold ph-book-open-text" style="font-size:18px; color:var(--brand)"></i>
   </div>
   <div style="flex:1">
-    <div style="font-size:11px; font-weight:700; color:var(--ink); margin-bottom:2px">Baru gabung di NontonKuy?</div>
+    <div style="font-size:11px; font-weight:700; color:var(--ink); margin-bottom:2px">Baru gabung di Meloton?</div>
     <div style="font-size:10px; color:var(--text-muted)">Yuk baca panduan dulu supaya paham cara dapetin duitnya!</div>
   </div>
   <a href="/panduan" class="btn btn--primary btn--sm" style="font-size:10px; padding:6px 12px; border-radius:8px; white-space:nowrap;">Panduan</a>
@@ -440,7 +440,7 @@ if ($is_newcomer):
 // Popup settings from DB
 $popup_enabled      = setting($pdo, 'popup_enabled', '1') === '1';
 $popup_title        = setting($pdo, 'popup_title',   'Hei, sudah baca panduan?');
-$popup_body         = setting($pdo, 'popup_body',    'Biar makin lancar dapat reward, yuk baca dulu cara kerja NontonKuy! Dari cara tonton, jenis saldo, sampai tips withdraw.');
+$popup_body         = setting($pdo, 'popup_body',    'Biar makin lancar dapat reward, yuk baca dulu cara kerja Meloton! Dari cara tonton, jenis saldo, sampai tips withdraw.');
 $popup_cta_text     = setting($pdo, 'popup_cta_text', 'Baca Panduan');
 $popup_cta_url      = setting($pdo, 'popup_cta_url',  '/panduan');
 $popup_delay        = max(0, (int) setting($pdo, 'popup_delay', '1500'));

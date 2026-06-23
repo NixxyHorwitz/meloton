@@ -1,6 +1,6 @@
-# TontonKuy Agent Workflow & Guidelines
+# Meloton Agent Workflow & Guidelines
 
-Welcome to the **TontonKuy** project! This document is created for future AI agents to understand the architecture, design system, and core rules of this codebase. Always read this file before making major changes.
+Welcome to the **Meloton** project! This document is created for future AI agents to understand the architecture, design system, and core rules of this codebase. Always read this file before making major changes.
 
 ## 1. Project Architecture
 

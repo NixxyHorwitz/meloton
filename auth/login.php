@@ -46,8 +46,8 @@ end_login:
 ?>
 <?php
 // Load SEO settings
-$_seo_title  = setting($pdo, 'seo_title', 'NontonKuy');
-$_seo_desc   = setting($pdo, 'seo_description', 'Tonton video dan kumpulkan reward di NontonKuy!');
+$_seo_title  = setting($pdo, 'seo_title', 'Meloton');
+$_seo_desc   = setting($pdo, 'seo_description', 'Tonton video dan kumpulkan reward di Meloton!');
 $_seo_kw     = setting($pdo, 'seo_keywords', '');
 $_seo_og     = setting($pdo, 'seo_og_image', '');
 $_seo_robots = setting($pdo, 'seo_robots', 'index,follow');

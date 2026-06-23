@@ -29,7 +29,7 @@ $absolute_fav = $_favicon ? (preg_match('~^https?://~', $_favicon) ? $_favicon :
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= htmlspecialchars($pageTitle) ?> — NontonKuy Admin</title>
+<title><?= htmlspecialchars($pageTitle) ?> — Meloton Admin</title>
 <?php if ($absolute_fav): ?>
 <link rel="icon" href="<?= htmlspecialchars($absolute_fav) ?>?v=<?= @filemtime(dirname(__DIR__, 2) . $_favicon) ?: time() ?>">
 <link rel="apple-touch-icon" href="<?= htmlspecialchars($absolute_fav) ?>?v=<?= @filemtime(dirname(__DIR__, 2) . $_favicon) ?: time() ?>">
@@ -214,7 +214,7 @@ body { background: #0f1117; color: #e0e0f0; min-height: 100vh; }
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
     </div>
     <div>
-      <div class="c-sidebar__brand">NontonKuy</div>
+      <div class="c-sidebar__brand">Meloton</div>
       <div class="c-sidebar__sub">Admin Console</div>
     </div>
   </div>

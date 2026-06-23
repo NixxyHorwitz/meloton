@@ -99,7 +99,7 @@ require __DIR__ . '/partials/header.php';
               <div class="c-form-group">
                 <label class="c-label">Isi / Body Popup</label>
                 <textarea name="popup_body" class="c-form-control" rows="3"
-                          placeholder="Teks yang muncul di dalam popup..."><?= htmlspecialchars($s('popup_body','Biar makin lancar dapat reward, yuk baca dulu cara kerja NontonKuy! Dari cara tonton, jenis saldo, sampai tips withdraw.')) ?></textarea>
+                          placeholder="Teks yang muncul di dalam popup..."><?= htmlspecialchars($s('popup_body','Biar makin lancar dapat reward, yuk baca dulu cara kerja Meloton! Dari cara tonton, jenis saldo, sampai tips withdraw.')) ?></textarea>
               </div>
             </div>
             <div class="col-md-6">
@@ -127,7 +127,7 @@ require __DIR__ . '/partials/header.php';
                     <div style="font-weight:900;font-size:14px" id="prev_title"><?= htmlspecialchars($s('popup_title','📖 Hei, sudah baca panduan?')) ?></div>
                     <span style="color:#999;font-size:18px">✕</span>
                   </div>
-                  <div style="font-size:12px;color:#555;margin-bottom:12px;line-height:1.5" id="prev_body"><?= htmlspecialchars($s('popup_body','Biar makin lancar dapat reward, yuk baca dulu cara kerja NontonKuy!')) ?></div>
+                  <div style="font-size:12px;color:#555;margin-bottom:12px;line-height:1.5" id="prev_body"><?= htmlspecialchars($s('popup_body','Biar makin lancar dapat reward, yuk baca dulu cara kerja Meloton!')) ?></div>
                   <div style="display:flex;gap:8px">
                     <div style="background:#111;color:#fff;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;flex:1;text-align:center" id="prev_cta"><?= htmlspecialchars($s('popup_cta_text','📖 Baca Panduan →')) ?></div>
                     <div style="border:2px solid #111;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700">Nanti</div>

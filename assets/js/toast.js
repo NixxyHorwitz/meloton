@@ -1,5 +1,5 @@
 /**
- * TontonKuy — Neobrutalism Toast System
+ * Meloton — Neobrutalism Toast System
  * Usage: nToast('Pesan kamu', 'success'|'error'|'info'|'warn')
  *        nToast.copy('teks') — copy + toast otomatis
  */

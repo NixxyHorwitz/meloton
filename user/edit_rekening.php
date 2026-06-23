@@ -88,7 +88,7 @@ foreach ($channels as $c) {
 $banks    = array_filter($channels, fn($c) => $c['type'] === 'bank');
 $ewallets = array_filter($channels, fn($c) => $c['type'] === 'ewallet');
 
-$pageTitle  = 'Edit Rekening — NontonKuy';
+$pageTitle  = 'Edit Rekening — Meloton';
 $activePage = 'profile';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

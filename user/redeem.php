@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 done_redeem:
 
-$pageTitle  = 'Redeem Code — NontonKuy';
+$pageTitle  = 'Redeem Code — Meloton';
 $activePage = 'redeem';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

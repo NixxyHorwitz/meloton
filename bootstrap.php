@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // ============================================================
-// BOOTSTRAP — NontonKuy Platform
+// BOOTSTRAP — Meloton Platform
 // ============================================================
 
 // Load .env

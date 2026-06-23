@@ -11,7 +11,7 @@ $maintenance_msg ??= setting($pdo, 'maintenance_message', 'Sistem sedang dalam p
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Maintenance — NontonKuy</title>
+<title>Maintenance — Meloton</title>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
 <style>
   .maint-shell {

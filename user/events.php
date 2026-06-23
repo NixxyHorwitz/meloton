@@ -9,7 +9,7 @@ if (!$plinko_enabled) {
     redirect('/home');
 }
 
-$pageTitle  = 'Event Khusus — NontonKuy';
+$pageTitle  = 'Event Khusus — Meloton';
 $activePage = 'events';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

@@ -20,7 +20,7 @@ $ALL_MISSIONS = [
     ['slug'=>'lifetime_first_ref',  'category'=>'lifetime', 'title'=>'Daftarkan 1 Referral',       'desc'=>'Ajak 1 teman bergabung via kode referralmu.','target'=>1,   'reward'=>5000,  'icon'=>'ph-user-plus'],
     ['slug'=>'lifetime_5_refs',     'category'=>'lifetime', 'title'=>'Agen Rekruter',               'desc'=>'Ajak 5 teman bergabung via kode referralmu.','target'=>5,   'reward'=>15000, 'icon'=>'ph-users-three'],
     ['slug'=>'lifetime_first_wd',   'category'=>'lifetime', 'title'=>'Penarikan Pertama',           'desc'=>'Lakukan penarikan saldo pertama kalinya.',   'target'=>1,   'reward'=>3000,  'icon'=>'ph-money'],
-    ['slug'=>'lifetime_100_videos', 'category'=>'lifetime', 'title'=>'Penonton Sejati',             'desc'=>'Tonton total 100 video di NontonKuy.',       'target'=>100, 'reward'=>10000, 'icon'=>'ph-popcorn'],
+    ['slug'=>'lifetime_100_videos', 'category'=>'lifetime', 'title'=>'Penonton Sejati',             'desc'=>'Tonton total 100 video di Meloton.',       'target'=>100, 'reward'=>10000, 'icon'=>'ph-popcorn'],
     ['slug'=>'lifetime_upgrade',    'category'=>'lifetime', 'title'=>'Member Premium',              'desc'=>'Upgrade ke paket membership berbayar.',      'target'=>1,   'reward'=>8000,  'icon'=>'ph-crown'],
 ];
 
@@ -152,7 +152,7 @@ $lifetime = array_filter($missions_data, fn($m) => $m['category'] === 'lifetime'
 
 $claimed_today = count(array_filter($missions_data, fn($m) => $m['claimed']));
 
-$pageTitle  = 'Misi — NontonKuy';
+$pageTitle  = 'Misi — Meloton';
 $activePage = 'missions';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

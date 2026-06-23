@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle  = 'Lapak Koin Plinko — NontonKuy';
+$pageTitle  = 'Lapak Koin Plinko — Meloton';
 $activePage = 'plinko-shop';
 require dirname(__DIR__) . '/partials/header.php';
 

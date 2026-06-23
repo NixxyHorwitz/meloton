@@ -4,4 +4,4 @@ Disallow: /console/
 Disallow: /auth/
 Disallow: /uploads/
 
-Sitemap: https://nontonkuy.online/sitemap.xml
+Sitemap: https://Meloton.online/sitemap.xml

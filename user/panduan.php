@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
 
-$pageTitle  = 'Panduan — NontonKuy';
+$pageTitle  = 'Panduan — Meloton';
 $activePage = 'panduan';
 
 // ── Settings ────────────────────────────────────────────────
@@ -10,7 +10,7 @@ $free_limit  = (int)   setting($pdo, 'free_watch_limit', '5');
 $min_wd      = (float) setting($pdo, 'min_withdraw', '50000');
 $ref_bonus   = (float) setting($pdo, 'referral_bonus', '1000');
 
-$panduan_intro    = setting($pdo, 'panduan_intro',      'Cara kerja platform reward video NontonKuy');
+$panduan_intro    = setting($pdo, 'panduan_intro',      'Cara kerja platform reward video Meloton');
 $panduan_step1    = setting($pdo, 'panduan_step1',      'Buat akun gratis, tidak perlu verifikasi ribet. Langsung bisa mulai tonton.');
 $panduan_step2    = setting($pdo, 'panduan_step2',      'Setiap video yang ditonton hingga selesai akan otomatis memberikan reward ke Saldo Penarikan kamu.');
 $panduan_step3    = setting($pdo, 'panduan_step3',      'Reward terkumpul di Saldo Penarikan. Cek progresmu di halaman Beranda kapan saja.');
@@ -87,7 +87,7 @@ require dirname(__DIR__) . '/partials/header.php';
 <div class="panduan-header">
   <div class="panduan-header__icon">📖</div>
   <div>
-    <div class="panduan-header__title">Panduan NontonKuy</div>
+    <div class="panduan-header__title">Panduan Meloton</div>
     <div class="panduan-header__sub"><?= htmlspecialchars($panduan_intro) ?></div>
   </div>
 </div>

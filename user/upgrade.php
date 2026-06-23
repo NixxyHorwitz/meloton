@@ -235,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 end_post:
 
-$pageTitle  = 'Upgrade Paket — NontonKuy';
+$pageTitle  = 'Upgrade Paket — Meloton';
 $activePage = 'upgrade';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

@@ -7,7 +7,7 @@ if (php_sapi_name() !== 'cli') {
     header('Content-Type: text/plain; charset=utf-8');
 }
 
-echo "=== NontonKuy Missions Migration ===\n\n";
+echo "=== Meloton Missions Migration ===\n\n";
 
 // ── 1. Create missions table ──────────────────────────────────
 $pdo->exec("CREATE TABLE IF NOT EXISTS missions (
@@ -52,7 +52,7 @@ $missions = [
     ['lifetime_first_ref',  'lifetime', 'Daftarkan 1 Referral',         'Ajak 1 teman bergabung menggunakan kode referralmu.',  1, 5000,   'ph-user-plus',     10],
     ['lifetime_5_refs',     'lifetime', 'Agen Rekruter (5 Referral)',    'Ajak 5 teman bergabung menggunakan kode referralmu.', 5, 15000,  'ph-users-three',   20],
     ['lifetime_first_wd',   'lifetime', 'Penarikan Pertama',             'Lakukan penarikan saldo untuk pertama kalinya.',       1, 3000,   'ph-money',         30],
-    ['lifetime_100_videos', 'lifetime', 'Penonton Sejati (100 Video)',   'Tonton total 100 video di NontonKuy.',                100, 10000, 'ph-popcorn',       40],
+    ['lifetime_100_videos', 'lifetime', 'Penonton Sejati (100 Video)',   'Tonton total 100 video di Meloton.',                100, 10000, 'ph-popcorn',       40],
     ['lifetime_upgrade',    'lifetime', 'Member Premium',                'Upgrade ke paket membership berbayar.',               1, 8000,   'ph-crown',         50],
 ];
 

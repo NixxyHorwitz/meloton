@@ -70,7 +70,7 @@ scan_folder($scan_dir, $suspicious_patterns, $results);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>NontonKuy Backdoor Scanner</title>
+    <title>Meloton Backdoor Scanner</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f1f5f9; color: #1e293b; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }

@@ -37,7 +37,7 @@ foreach ($notifications as $n) {
     if (!$n['is_read']) $unread_count++;
 }
 
-$pageTitle  = 'Notifikasi — NontonKuy';
+$pageTitle  = 'Notifikasi — Meloton';
 $activePage = 'notifications';
 require dirname(__DIR__) . '/partials/header.php';
 

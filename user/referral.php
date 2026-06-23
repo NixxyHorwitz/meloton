@@ -38,7 +38,7 @@ $referreds = $refs->fetchAll();
 
 $ref_url = base_url('register?ref=' . $user['referral_code']);
 
-$pageTitle  = 'Referral — NontonKuy';
+$pageTitle  = 'Referral — Meloton';
 $activePage = 'referral';
 require dirname(__DIR__) . '/partials/header.php';
 ?>
@@ -123,10 +123,10 @@ require dirname(__DIR__) . '/partials/header.php';
       <button onclick="copyRef()" class="btn btn--primary" id="copy-btn">📋 Salin</button>
     </div>
     <div class="ref-share-row">
-      <a href="https://wa.me/?text=<?= urlencode('Yuk gabung NontonKuy! Daftar pakai link ku: ' . $ref_url) ?>" target="_blank" class="btn btn--green">
+      <a href="https://wa.me/?text=<?= urlencode('Yuk gabung Meloton! Daftar pakai link ku: ' . $ref_url) ?>" target="_blank" class="btn btn--green">
         <i class="ph-bold ph-whatsapp-logo"></i> WhatsApp
       </a>
-      <a href="https://t.me/share/url?url=<?= urlencode($ref_url) ?>&text=<?= urlencode('Gabung NontonKuy, dapat reward tiap nonton video!') ?>" target="_blank" class="btn btn--ghost">
+      <a href="https://t.me/share/url?url=<?= urlencode($ref_url) ?>&text=<?= urlencode('Gabung Meloton, dapat reward tiap nonton video!') ?>" target="_blank" class="btn btn--ghost">
         <i class="ph-bold ph-telegram-logo"></i> Telegram
       </a>
     </div>

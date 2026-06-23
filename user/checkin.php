@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
     }
 }
 
-$pageTitle  = 'Check-in Harian — NontonKuy';
+$pageTitle  = 'Check-in Harian — Meloton';
 $activePage = 'checkin';
 require dirname(__DIR__) . '/partials/header.php';
 

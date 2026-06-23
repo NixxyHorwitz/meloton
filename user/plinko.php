@@ -162,7 +162,7 @@ try {
     $history = $h_stmt->fetchAll();
 } catch (\Throwable $e) {}
 
-$pageTitle  = 'Mini Game Plinko — NontonKuy';
+$pageTitle  = 'Mini Game Plinko — Meloton';
 $activePage = 'plinko';
 require dirname(__DIR__) . '/partials/header.php';
 ?>

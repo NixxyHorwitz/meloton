@@ -133,7 +133,7 @@ end_dep:
 $deps = $pdo->prepare("SELECT * FROM deposits WHERE user_id=? ORDER BY created_at DESC LIMIT 6");
 $deps->execute([$user['id']]); $deps = $deps->fetchAll();
 
-$pageTitle  = 'Isi Saldo — NontonKuy';
+$pageTitle  = 'Isi Saldo — Meloton';
 $activePage = 'deposit';
 require dirname(__DIR__) . '/partials/header.php';
 ?>
