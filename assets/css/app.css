@@ -49,6 +49,11 @@ html { font-size: 14px; scroll-behavior: smooth; overflow-x: hidden; }
 body {
   font-family: 'Nunito', sans-serif;
   background-color: var(--bg);
+  background-image:
+    radial-gradient(#f0d9a0 2px, transparent 2px),
+    radial-gradient(#f0d9a0 2px, transparent 2px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
   color: var(--ink);
   min-height: 100vh;
   display: flex;
@@ -104,9 +109,10 @@ body {
 .card__link { font-size: 13px; color: var(--brand); text-decoration: none; font-weight: 800; }
 
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.section-title { font-size: 16px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
-.section-link { font-size: 13px; color: var(--brand); text-decoration: none; font-weight: 500; transition: color 0.2s; }
-.section-link:hover { color: var(--brand-hover); }
+.section-title { font-size: 15px; font-weight: 900; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.section-title i { font-size: 18px; }
+.section-link { font-size: 13px; color: #c47f17; text-decoration: none; font-weight: 800; background: #fef8e8; border: 1.5px solid #d4a64a; padding: 4px 10px; border-radius: 20px; }
+.section-link:hover { background: #f0a500; color: #fff; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 28px; padding: 10px 20px; font-size: 14px; font-weight: 800; font-family: inherit; cursor: pointer; text-decoration: none; line-height: 1.5; transition: transform .08s; position: relative; overflow: hidden; }
 .btn::after { content:''; position:absolute; top:3px; left:12%; right:12%; height:40%; background:linear-gradient(180deg,rgba(255,255,255,.45) 0%,rgba(255,255,255,0) 100%); border-radius:20px; pointer-events:none; }
@@ -374,9 +380,12 @@ body {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 12px;
-  background: rgba(0, 0, 0, 0.12);
+  background: #fef8e8;
+  border: 2.5px solid #e8d5a3;
   padding: 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
+  margin-top: 10px;
+  margin-bottom: 14px;
 }
 
 .user-hero-card__stat-item {
@@ -388,31 +397,32 @@ body {
 
 .user-hero-card__stat-label {
   font-size: 10px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 800;
+  color: #9a6b3a;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .user-hero-card__stat-val {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 900;
+  color: #5a3510;
 }
 
 .user-hero-card__progress-track {
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 3px;
+  height: 8px;
+  background: #e8d5a3;
+  border-radius: 4px;
   overflow: hidden;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .user-hero-card__progress-bar {
   height: 100%;
-  background: var(--white);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #f0a500, #2ecc71);
+  border-radius: 4px;
+  transition: width 0.5s ease;
 }
 
 .user-hero-card__referral-wrap {
@@ -423,32 +433,31 @@ body {
 
 .user-hero-card__referral-code {
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  background: rgba(255, 255, 255, 0.18);
-  padding: 3px 8px;
-  border-radius: 4px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: #fff;
+  color: #5a3510;
+  padding: 4px 10px;
+  border-radius: 8px;
   font-family: monospace;
+  border: 1.5px solid #e8d5a3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-hero-card__copy-btn {
-  background: transparent;
+  background: linear-gradient(180deg, #ffe082, #f0a500);
   border: none;
-  color: var(--white);
+  color: #8b5e0a;
   cursor: pointer;
-  padding: 4px;
+  padding: 5px 8px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
-  opacity: 0.8;
-}
-
-.user-hero-card__copy-btn:hover {
-  opacity: 1;
+  box-shadow: 0 2px 0 #c47f17;
+  font-size: 13px;
 }
 
 /* Balance Card Layout - Gold Outer Card style */
@@ -509,15 +518,15 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
-  font-size: 11px;
+  padding: 10px 12px;
+  font-size: 12px;
   font-weight: 900;
   border-radius: 14px;
   text-decoration: none;
   text-align: center;
   width: 100%;
   transition: transform .08s, box-shadow .08s;
-  margin-top: 6px;
+  margin-top: 8px;
   position: relative;
   overflow: hidden;
   border: none;
@@ -531,6 +540,7 @@ body {
   color: #8b5e0a;
   box-shadow: 0 4px 0 #c47f17;
   border: 2px solid #ffe599;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
 }
 
 .balance-card__btn--deposit {
@@ -538,6 +548,7 @@ body {
   color: #fff;
   box-shadow: 0 4px 0 #1a5fa0;
   border: 2px solid #6ec6ff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .balance-card__footer {

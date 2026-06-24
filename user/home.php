@@ -208,24 +208,24 @@ if ($is_newcomer):
   <div class="balance-card__grid">
     <div class="balance-card__col">
       <div class="balance-card__label">
-        <i class="ph-fill ph-wallet"></i> Saldo Penarikan
+        <i class="ph-fill ph-wallet" style="color:#f0a500"></i> Saldo Penarikan
       </div>
-      <div class="balance-card__value">
+      <div class="balance-card__value" style="color:#27ae60">
         <?= format_rp((float)$user['balance_wd']) ?>
       </div>
-      <a href="/withdraw" class="balance-card__btn balance-card__btn--withdraw">Tarik Saldo</a>
+      <a href="/withdraw" class="balance-card__btn balance-card__btn--withdraw">⬆ Tarik Saldo</a>
     </div>
     
     <div class="balance-card__divider"></div>
     
     <div class="balance-card__col">
       <div class="balance-card__label">
-        <i class="ph-fill ph-bank"></i> Saldo Beli
+        <i class="ph-fill ph-bank" style="color:#2e86de"></i> Saldo Beli
       </div>
-      <div class="balance-card__value">
+      <div class="balance-card__value" style="color:#2e86de">
         <?= format_rp((float)$user['balance_dep']) ?>
       </div>
-      <a href="/deposit" class="balance-card__btn balance-card__btn--deposit">Isi Saldo</a>
+      <a href="/deposit" class="balance-card__btn balance-card__btn--deposit">⬇ Isi Saldo</a>
     </div>
   </div>
 </div>
@@ -234,35 +234,51 @@ if ($is_newcomer):
 <div class="quick-actions">
   <div class="quick-actions__grid">
     <a href="/deposit" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-download-simple"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#5bb8f5,#2e86de);box-shadow:0 5px 0 #1a5fa0;border-color:#6ec6ff;color:#fff;">
+        <i class="ph-fill ph-download-simple"></i>
+      </div>
       <span class="quick-actions__label">Top Up</span>
     </a>
     <a href="/withdraw" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-upload-simple"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#7bed9f,#2ecc71);box-shadow:0 5px 0 #27ae60;border-color:#a3f3bb;color:#fff;">
+        <i class="ph-fill ph-upload-simple"></i>
+      </div>
       <span class="quick-actions__label">Tarik</span>
     </a>
     <a href="/history" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-receipt"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#a78bfa,#7c3aed);box-shadow:0 5px 0 #5b21b6;border-color:#c4b5fd;color:#fff;">
+        <i class="ph-fill ph-receipt"></i>
+      </div>
       <span class="quick-actions__label">Riwayat</span>
     </a>
     <a href="/missions" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-target"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#f97316,#ea580c);box-shadow:0 5px 0 #c2410c;border-color:#fdba74;color:#fff;">
+        <i class="ph-fill ph-target"></i>
+      </div>
       <span class="quick-actions__label">Misi</span>
     </a>
     <a href="/checkin" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-calendar-check"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#f472b6,#db2777);box-shadow:0 5px 0 #9d174d;border-color:#f9a8d4;color:#fff;">
+        <i class="ph-fill ph-calendar-check"></i>
+      </div>
       <span class="quick-actions__label">Absen</span>
     </a>
     <a href="/redeem" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-gift"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#34d399,#059669);box-shadow:0 5px 0 #047857;border-color:#6ee7b7;color:#fff;">
+        <i class="ph-fill ph-gift"></i>
+      </div>
       <span class="quick-actions__label">Redeem</span>
     </a>
     <a href="/referral" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-users"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#fb923c,#dc2626);box-shadow:0 5px 0 #991b1b;border-color:#fca5a5;color:#fff;">
+        <i class="ph-fill ph-users"></i>
+      </div>
       <span class="quick-actions__label">Referral</span>
     </a>
     <a href="/panduan" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-book-open"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:linear-gradient(180deg,#60a5fa,#1d4ed8);box-shadow:0 5px 0 #1e3a8a;border-color:#93c5fd;color:#fff;">
+        <i class="ph-fill ph-book-open"></i>
+      </div>
       <span class="quick-actions__label">Panduan</span>
     </a>
   </div>
@@ -286,10 +302,10 @@ if ($is_newcomer):
 <?php if (!empty($notif_preview)): ?>
 <div style="margin-bottom:16px">
   <div class="section-header" style="margin-bottom:8px">
-    <div class="section-title" style="font-size:14px; display:flex; align-items:center; gap:6px">
-      <i class="ph-fill ph-bell-ringing" style="color:var(--brand)"></i> Notifikasi
+    <div class="section-title" style="font-size:14px;">
+      <i class="ph-fill ph-bell-ringing" style="color:#e11d48"></i> Notifikasi
       <?php if ($notif_unread > 0): ?>
-      <span style="background:var(--brand); color:#fff; font-size:9px; font-weight:700; border-radius:10px; padding:1px 6px;"><?= $notif_unread > 9 ? '9+' : $notif_unread ?></span>
+      <span style="background:#e11d48; color:#fff; font-size:9px; font-weight:800; border-radius:10px; padding:2px 7px;"><?= $notif_unread > 9 ? '9+' : $notif_unread ?></span>
       <?php endif; ?>
     </div>
     <a href="/notifications" class="section-link">Lihat Semua →</a>
@@ -346,8 +362,8 @@ if ($is_newcomer):
 </style>
 
 <div class="section-header" style="margin-bottom:10px">
-  <div class="section-title" style="display:flex; align-items:center; gap:6px">
-    <i class="ph-fill ph-video-camera" style="color:var(--brand)"></i> Video Tersedia
+  <div class="section-title">
+    <i class="ph-fill ph-video-camera" style="color:#7c3aed"></i> Video Tersedia
   </div>
   <a href="/videos" class="section-link">Lihat Semua →</a>
 </div>
