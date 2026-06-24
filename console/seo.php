@@ -159,20 +159,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($data === false || strlen($data) > 5 * 1024 * 1024) {
                 $flash = '❌ File terlalu besar atau corrupt. Maksimal 5MB.'; $flashType = 'error';
             } else {
-                $ext = $type === 'jpeg' ? 'jpg' : $type;
-                if (!in_array($ext, ['png','jpg','webp'])) $ext = 'png';
-                $filename = 'og_image_' . time() . '.' . $ext;
-                $uploadDir = dirname(__DIR__) . '/uploads/';
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                $dest = $uploadDir . $filename;
+                $tmpFile = tempnam(sys_get_temp_dir(), 'og_');
+                file_put_contents($tmpFile, $data);
                 
-                if (file_put_contents($dest, $data)) {
-                    setting_set($pdo, 'seo_og_image', '/uploads/' . $filename);
-                    $flash = '✅ OG Image berhasil diupload via secure Base64!';
-                } else {
-                    $flash = '❌ Gagal menyimpan file. Cek permission /uploads/.'; $flashType = 'error';
+                $src = null;
+                $info = @getimagesize($tmpFile);
+                if ($info) {
+                    $src = match((int)$info[2]) {
+                        IMAGETYPE_JPEG => @imagecreatefromjpeg($tmpFile),
+                        IMAGETYPE_PNG  => @imagecreatefrompng($tmpFile),
+                        IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($tmpFile) : null,
+                        default        => null,
+                    };
                 }
+                
+                if (!$src) {
+                    $flash = '❌ File gambar tidak valid.'; $flashType = 'error';
+                } else {
+                    // Kompresi dan crop ke 1200x630 (Standar OG Image)
+                    $targetW = 1200;
+                    $targetH = 630;
+                    $origW = imagesx($src);
+                    $origH = imagesy($src);
+                    
+                    $out = imagecreatetruecolor($targetW, $targetH);
+                    // Background putih untuk gambar transparan
+                    $white = imagecolorallocate($out, 255, 255, 255);
+                    imagefill($out, 0, 0, $white);
+                    
+                    // Hitung rasio untuk crop center
+                    $ratio = max($targetW / $origW, $targetH / $origH);
+                    $newW = (int)($origW * $ratio);
+                    $newH = (int)($origH * $ratio);
+                    $offX = (int)(($targetW - $newW) / 2);
+                    $offY = (int)(($targetH - $newH) / 2);
+                    
+                    imagecopyresampled($out, $src, $offX, $offY, 0, 0, $newW, $newH, $origW, $origH);
+                    
+                    $filename = 'og_image_' . time() . '.jpg';
+                    $uploadDir = dirname(__DIR__) . '/uploads/';
+                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                    $dest = $uploadDir . $filename;
+                    
+                    // Simpan sebagai JPG dengan kualitas 80% (optimal untuk SEO)
+                    if (@imagejpeg($out, $dest, 80)) {
+                        setting_set($pdo, 'seo_og_image', '/uploads/' . $filename);
+                        $flash = '✅ OG Image berhasil diupload, dikompres, dan di-resize ke 1200×630px!';
+                    } else {
+                        $flash = '❌ Gagal menyimpan file. Cek permission /uploads/.'; $flashType = 'error';
+                    }
+                    imagedestroy($out);
+                    imagedestroy($src);
+                }
+                @unlink($tmpFile);
             }
+        } else {
+            $flash = '❌ Format base64 tidak dikenali.'; $flashType = 'error';
         }
     }
 
