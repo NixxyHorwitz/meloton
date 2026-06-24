@@ -102,11 +102,11 @@ require __DIR__ . '/partials/header.php';
         <td>
           <span class="badge bg-secondary" style="font-size:11px"><?= $v['sort_order'] ?></span>
         </td>
-        <td><img src="<?= video_thumb($v['youtube_id'], $v['video_type']) ?>" style="width:80px;height:45px;object-fit:cover;border-radius:6px"></td>
+        <td><img src="<?= video_thumb($v['youtube_id'], $v['video_type'] ?? 'youtube') ?>" style="width:80px;height:45px;object-fit:cover;border-radius:6px"></td>
         <td style="max-width:200px">
           <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= htmlspecialchars($v['title']) ?></div>
           <div style="font-size:11px;color:#666">
-            <span class="badge bg-<?= $v['video_type'] === 'tiktok' ? 'dark' : 'danger' ?>" style="font-size:9px;padding:2px 4px"><?= strtoupper($v['video_type']) ?></span> 
+            <span class="badge bg-<?= ($v['video_type'] ?? 'youtube') === 'tiktok' ? 'dark' : 'danger' ?>" style="font-size:9px;padding:2px 4px"><?= strtoupper($v['video_type'] ?? 'youtube') ?></span> 
             <?= htmlspecialchars($v['youtube_id']) ?>
           </div>
         </td>
@@ -179,7 +179,7 @@ function editVideo(v) {
       <div class="col-4">
         <label class="c-label">Tipe Video</label>
         <select name="video_type" class="c-form-control" required>
-          <option value="youtube" ${v.video_type==='youtube'?'selected':''}>YouTube</option>
+          <option value="youtube" ${v.video_type==='youtube' || !v.video_type ?'selected':''}>YouTube</option>
           <option value="tiktok" ${v.video_type==='tiktok'?'selected':''}>TikTok</option>
         </select>
       </div>
