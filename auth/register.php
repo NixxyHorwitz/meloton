@@ -185,19 +185,142 @@ $final_og_desc = $_seo_desc;
 <?php endif; ?>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
 <style>
-.deco-bar{height:4px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 30px,var(--mint) 30px,var(--mint) 60px,var(--lavender) 60px,var(--lavender) 90px);margin:-20px -20px 16px;}
-.auth-page { position: relative; }
-.step-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+/* Game UI Login/Register Styles */
+.auth-page {
+  background-color: #faebd7;
+}
+.auth-card {
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 8px 0 var(--ink);
+  padding: 32px 24px;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+  max-width: 440px;
+  width: 100%;
+}
+.deco-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #f1c40f 0, #f1c40f 30px, #d1fae5 30px, #d1fae5 60px, #ede9fe 60px, #ede9fe 90px);
+}
+.auth-logo-img {
+  width: 42px; height: 42px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  padding: 2px;
+  background: #fff;
+  flex-shrink: 0;
+}
+.auth-title {
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.auth-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.form-label {
+  font-weight: 800;
+  font-size: 12px;
+  color: #a16238;
+  margin-bottom: 6px;
+  display: block;
+}
+.input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #ffffff;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+.input-wrap:focus-within {
+  border-color: #d97706;
+}
+.input-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+.form-control {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.form-control::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+.input-toggle {
+  background: none;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-switch {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #8c5b35;
+  font-weight: 600;
+}
+.auth-switch a {
+  color: #ff8c00;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+/* Steps specific */
+.step-tabs { display: flex; gap: 6px; margin-bottom: 20px; margin-top: 8px; }
 .step-tab {
-  flex: 1; height: 5px; border-radius: 3px;
-  background: #e0e0e0;
-  border: 1.5px solid var(--ink);
+  flex: 1; height: 6px; border-radius: 4px;
+  background: #f1f5f9;
+  border: 2px solid var(--ink);
   transition: background .3s;
 }
-.step-tab.done { background: var(--lime); }
-.step-tab.active { background: var(--yellow); }
+.step-tab.done { background: #d1fae5; }
+.step-tab.active { background: #f1c40f; }
 .form-step { display: none; }
 .form-step.active { display: block; }
+.btn-nav {
+  background: #f1f5f9;
+  color: #000;
+  font-weight: 900;
+  font-size: 14px;
+  border: none;
+  border-radius: 24px;
+  padding: 14px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.btn-nav:active { transform: scale(0.98); }
+.btn-nav-primary {
+  background: #ffffff;
+  color: #0000ff;
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+}
+.btn-nav-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--ink); }
 </style>
 </head>
 <body>
@@ -205,20 +328,20 @@ $final_og_desc = $_seo_desc;
   <div class="auth-card">
     <div class="deco-bar"></div>
 
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:12px;">
       <?php if ($_favicon): ?>
-      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:8px;border:2px solid var(--ink);flex-shrink:0;">
+      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" class="auth-logo-img">
       <?php else: ?>
-      <span style="font-size:24px;line-height:1;">🎬</span>
+      <div class="auth-logo-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎬</div>
       <?php endif; ?>
       <div>
-        <div style="font-weight:900;font-size:16px;"><?= htmlspecialchars($_seo_title) ?></div>
-        <div style="font-size:10px;color:#666;font-weight:700;">Daftar gratis &amp; langsung tonton!</div>
+        <div class="auth-title"><?= htmlspecialchars($_seo_title) ?></div>
+        <div class="auth-subtitle">Daftar gratis &amp; langsung tonton!</div>
       </div>
     </div>
 
     <?php if ($error): ?>
-    <div class="alert alert--error">⚠️ <?= htmlspecialchars($error) ?></div>
+    <div class="alert alert--error" style="margin-bottom:16px;">⚠️ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
     <!-- Step indicator -->
@@ -259,7 +382,7 @@ $final_og_desc = $_seo_desc;
               placeholder="email@kamu.com" autocomplete="email">
           </div>
         </div>
-        <button type="button" class="btn btn--yellow btn--full btn--lg" onclick="goStep2()">Lanjut →</button>
+        <button type="button" class="btn-nav btn-nav-primary" style="width:100%;margin-top:8px" onclick="goStep2()">Lanjut →</button>
       </div>
 
       <!-- STEP 2: Contact & Password -->
@@ -303,9 +426,9 @@ $final_og_desc = $_seo_desc;
           <input type="hidden" name="referral" value="<?= htmlspecialchars($ref_from_url) ?>">
           <?php endif; ?>
         </div>
-        <div style="display:flex;gap:8px">
-          <button type="button" class="btn btn--ghost" onclick="goStep(1)" style="flex:0 0 auto">← Kembali</button>
-          <button type="button" class="btn btn--yellow btn--full" onclick="goStep3()">Lanjut →</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button type="button" class="btn-nav" onclick="goStep(1)" style="flex:0 0 auto">← Kembali</button>
+          <button type="button" class="btn-nav btn-nav-primary" onclick="goStep3()" style="flex:1">Lanjut →</button>
         </div>
       </div>
 
@@ -359,9 +482,9 @@ $final_og_desc = $_seo_desc;
             <input type="hidden" id="f_acc_name_record" name="acc_name_record" value="<?= htmlspecialchars($_POST['acc_name_record'] ?? '[]') ?>">
           </div>
         </div>
-        <div style="display:flex;gap:8px">
-          <button type="button" class="btn btn--ghost" onclick="goStep(2)" style="flex:0 0 auto">← Kembali</button>
-          <button type="button" class="btn btn--yellow btn--full" onclick="goStep4()">Lanjut →</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button type="button" class="btn-nav" onclick="goStep(2)" style="flex:0 0 auto">← Kembali</button>
+          <button type="button" class="btn-nav btn-nav-primary" onclick="goStep4()" style="flex:1">Lanjut →</button>
         </div>
       </div>
 
@@ -393,11 +516,11 @@ $final_og_desc = $_seo_desc;
           </div>
         </div>
 
-        <div style="display:flex;gap:8px">
-          <button type="button" class="btn btn--ghost" onclick="goStep(3)" style="flex:0 0 auto">← Kembali</button>
-          <button type="submit" id="submit-btn" class="btn btn--primary btn--full no-dbl-submit" disabled
-            style="opacity:.5;cursor:not-allowed">
-            🎉 Daftar Sekarang
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button type="button" class="btn-nav" onclick="goStep(3)" style="flex:0 0 auto">← Kembali</button>
+          <button type="submit" id="submit-btn" class="btn-nav btn-nav-primary no-dbl-submit" disabled
+            style="opacity:.5;cursor:not-allowed;flex:1;">
+            🎉 DAFTAR SEKARANG
           </button>
         </div>
       </div>

@@ -87,54 +87,191 @@ $final_og_desc = $_seo_desc;
 <?php endif; ?>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
 <style>
-.deco-bar{height:4px;background:repeating-linear-gradient(90deg,var(--yellow) 0,var(--yellow) 30px,var(--mint) 30px,var(--mint) 60px,var(--lavender) 60px,var(--lavender) 90px);margin:-20px -20px 16px;}
+/* Game UI Login Styles */
+.auth-page {
+  background-color: #faebd7;
+}
+.auth-card {
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 8px 0 var(--ink);
+  padding: 32px 24px;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+}
+.deco-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #f1c40f 0, #f1c40f 30px, #d1fae5 30px, #d1fae5 60px, #ede9fe 60px, #ede9fe 90px);
+}
+.auth-logo-img {
+  width: 42px; height: 42px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  padding: 2px;
+  background: #fff;
+  flex-shrink: 0;
+}
+.auth-title {
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.auth-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.form-label {
+  font-weight: 800;
+  font-size: 12px;
+  color: #a16238;
+  margin-bottom: 6px;
+  display: block;
+}
+.input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: #ffffff;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+.input-wrap:focus-within {
+  border-color: #d97706;
+}
+.input-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+.form-control {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.form-control::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+.input-toggle {
+  background: none;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-masuk {
+  background: #f1f5f9;
+  color: #000;
+  font-weight: 900;
+  font-size: 14px;
+  border: none;
+  border-radius: 24px;
+  padding: 14px;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.btn-masuk:active { transform: scale(0.98); }
+.btn-daftar {
+  background: #ffffff;
+  color: #0000ff;
+  font-weight: 900;
+  font-size: 14px;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  padding: 14px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-daftar:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+.auth-switch {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #8c5b35;
+  font-weight: 600;
+}
+.auth-switch a {
+  color: #ff8c00;
+  font-weight: 800;
+  text-decoration: none;
+}
 </style>
 </head>
 <div class="auth-page">
   <div class="auth-card">
     <div class="deco-bar"></div>
 
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;margin-top:12px;">
       <?php if ($_favicon): ?>
-      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:8px;border:2px solid var(--ink);flex-shrink:0;">
+      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" class="auth-logo-img">
       <?php else: ?>
-      <span style="font-size:24px;line-height:1;">🎬</span>
+      <div class="auth-logo-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎬</div>
       <?php endif; ?>
       <div>
-        <div style="font-weight:900;font-size:16px;"><?= htmlspecialchars($_seo_title) ?></div>
-        <div style="font-size:10px;color:#666;font-weight:700;">Tonton video &amp; kumpulkan reward</div>
+        <div class="auth-title"><?= htmlspecialchars($_seo_title) ?></div>
+        <div class="auth-subtitle">Tonton video &amp; kumpulkan reward</div>
       </div>
     </div>
 
     <?php if ($error): ?>
-    <div class="alert alert--error">⚠️ <?= htmlspecialchars($error) ?></div>
+    <div class="alert alert--error" style="margin-bottom:16px;">⚠️ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
     <form method="POST">
       <?= csrf_field() ?>
-      <div class="form-group">
-        <label class="form-label">Username / Email</label>
-        <div class="input-wrap">
-          <svg class="input-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input class="form-control" type="text" name="login"
-            value="<?= htmlspecialchars($_POST['login'] ?? '') ?>"
-            placeholder="username atau email" autofocus autocomplete="username">
-        </div>
+      
+      <label class="form-label">Username / Email</label>
+      <div class="input-wrap">
+        <svg class="input-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input class="form-control" type="text" name="login"
+          value="<?= htmlspecialchars($_POST['login'] ?? '') ?>"
+          placeholder="username atau email" autofocus autocomplete="username">
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <div class="input-wrap">
-          <svg class="input-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <input class="form-control" type="password" id="pwd" name="password"
-            placeholder="Password kamu" autocomplete="current-password">
-          <button type="button" class="input-toggle" onclick="document.getElementById('pwd').type=document.getElementById('pwd').type==='password'?'text':'password'">👁</button>
-        </div>
+      
+      <label class="form-label">Password</label>
+      <div class="input-wrap">
+        <svg class="input-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input class="form-control" type="password" id="pwd" name="password"
+          placeholder="Password kamu" autocomplete="current-password">
+        <button type="button" class="input-toggle" onclick="document.getElementById('pwd').type=document.getElementById('pwd').type==='password'?'text':'password'" title="Tampilkan/Sembunyikan">👁</button>
       </div>
-      <button type="submit" class="btn btn--yellow btn--full btn--lg" style="margin-top:4px;">🚀 Masuk</button>
-      <a href="/register" class="btn btn--full" style="margin-top:8px;background:#fff;border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);font-weight:800;font-size:14px;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;">✨ Daftar Gratis</a>
+
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:24px;">
+        <button type="submit" class="btn-masuk">🚀 MASUK</button>
+        <a href="/register" class="btn-daftar">✨ DAFTAR GRATIS</a>
+      </div>
     </form>
 
-    <div class="auth-switch" style="margin-top:14px;">Belum punya akun? <a href="/register">Daftar gratis →</a></div>
+    <div class="auth-switch">Belum punya akun? <a href="/register">Daftar gratis →</a></div>
   </div>
 </div>
 </body>
