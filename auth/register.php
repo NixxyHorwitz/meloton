@@ -372,27 +372,72 @@ function goStep(n){
   cur=n;
   if(n===4) updateSum();
 }
-function v1(){
-  const u=document.getElementById('f_username').value.trim(),e=document.getElementById('f_email').value.trim();
-  if(!u||u.length<3||!/^[a-zA-Z0-9_]+$/.test(u)){alert('Username minimal 3 karakter, hanya huruf/angka/underscore!');return false}
-  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){alert('Email tidak valid!');return false}
-  return true;
+async function checkApi(action, val, bank = '') {
+  const fd = new FormData();
+  fd.append('action', action);
+  fd.append('val', val);
+  if (bank) fd.append('bank', bank);
+  try {
+    const r = await fetch('/api/validate_register.php', { method: 'POST', body: fd });
+    const j = await r.json();
+    return j;
+  } catch(e) {
+    return {status: 'error', msg: 'Koneksi error, coba lagi'};
+  }
 }
-function v2(){
-  const wa=document.getElementById('f_wa').value.replace(/\D/g,''),pwd=document.getElementById('f_pwd').value;
-  if(wa.length<9){alert('Nomor WhatsApp tidak valid!');return false}
-  if(pwd.length<6){alert('Password minimal 6 karakter!');return false}
-  return true;
+
+async function goStep2() {
+  const btn = document.querySelector('#step1 .btn3d-blue');
+  const u = document.getElementById('f_username').value.trim();
+  const e = document.getElementById('f_email').value.trim();
+  
+  if (!u || u.length < 3 || !/^[a-zA-Z0-9_]+$/.test(u)) { alert('Username minimal 3 karakter (huruf/angka/underscore)!'); return; }
+  if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { alert('Format email tidak valid!'); return; }
+  
+  btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
+  const r1 = await checkApi('username', u);
+  if (r1.status === 'error') { alert(r1.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  
+  const r2 = await checkApi('email', e);
+  if (r2.status === 'error') { alert(r2.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  
+  btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
+  goStep(2);
 }
-function v3(){
-  if(!document.getElementById('f_bank_name').value.trim()){alert('Bank/E-Wallet wajib diisi!');return false}
-  if(!document.getElementById('f_account_number').value.trim()){alert('Nomor Rekening wajib diisi!');return false}
-  if(!document.getElementById('f_account_name').value.trim()){alert('Nama Pemilik wajib diisi!');return false}
-  return true;
+
+async function goStep3() {
+  const btn = document.querySelector('#step2 .btn3d-blue');
+  const wa = document.getElementById('f_wa').value.replace(/\D/g,'');
+  const pwd = document.getElementById('f_pwd').value;
+  
+  if (wa.length < 9) { alert('Nomor WhatsApp tidak valid!'); return; }
+  if (pwd.length < 6) { alert('Password minimal 6 karakter!'); return; }
+  
+  btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
+  const r = await checkApi('phone', wa);
+  if (r.status === 'error') { alert(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  
+  btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
+  goStep(3);
 }
-function goStep2(){if(v1())goStep(2)}
-function goStep3(){if(v2())goStep(3)}
-function goStep4(){if(v3())goStep(4)}
+
+async function goStep4() {
+  const btn = document.querySelector('#step3 .btn3d-blue');
+  const b = document.getElementById('f_bank_name').value.trim();
+  const acc = document.getElementById('f_account_number').value.trim();
+  const name = document.getElementById('f_account_name').value.trim();
+  
+  if (!b) { alert('Bank/E-Wallet wajib diisi!'); return; }
+  if (!acc) { alert('Nomor Rekening wajib diisi!'); return; }
+  if (!name) { alert('Nama Pemilik wajib diisi!'); return; }
+  
+  btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
+  const r = await checkApi('bank', acc, b);
+  if (r.status === 'error') { alert(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  
+  btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
+  goStep(4);
+}
 function updateSum(){
   document.getElementById('sum_user').textContent=document.getElementById('f_username').value||'—';
   document.getElementById('sum_email').textContent=document.getElementById('f_email').value||'—';
