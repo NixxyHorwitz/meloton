@@ -41,7 +41,7 @@ function notif_unread_count(PDO $pdo, int $uid): int {
 
 // ── Count unread ──────────────────────────────────────────────────────────────
 if ($action === 'count') {
-    echo json_encode(['count' => notif_unread_count($pdo, $user['id'])]);
+    echo json_encode(['count' => notif_unread_count($pdo, (int)$user['id'])]);
     exit;
 }
 
@@ -49,8 +49,8 @@ if ($action === 'count') {
 if ($action === 'mark_read' && !empty($_POST['id'])) {
     $id = (int)$_POST['id'];
     $pdo->prepare("INSERT IGNORE INTO notification_reads (notification_id, user_id) VALUES (?,?)")
-        ->execute([$id, $user['id']]);
-    echo json_encode(['ok' => true, 'count' => notif_unread_count($pdo, $user['id'])]);
+        ->execute([$id, (int)$user['id']]);
+    echo json_encode(['ok' => true, 'count' => notif_unread_count($pdo, (int)$user['id'])]);
     exit;
 }
 
@@ -64,7 +64,7 @@ if ($action === 'mark_all') {
                AND " . json_uid_condition() . "
                AND (n.expires_at IS NULL OR n.expires_at > NOW())"
         );
-        $notifs->execute([$user['id'], (string)$user['id']]);
+        $notifs->execute([(int)$user['id'], (string)$user['id']]);
     } catch (\Throwable) {
         // Fallback
         $notifs = $pdo->prepare(
@@ -73,11 +73,11 @@ if ($action === 'mark_all') {
              WHERE nr.id IS NULL AND n.target_type='all'
                AND (n.expires_at IS NULL OR n.expires_at > NOW())"
         );
-        $notifs->execute([$user['id']]);
+        $notifs->execute([(int)$user['id']]);
     }
     $stmt = $pdo->prepare("INSERT IGNORE INTO notification_reads (notification_id, user_id) VALUES (?,?)");
     foreach ($notifs->fetchAll() as $n) {
-        $stmt->execute([$n['id'], $user['id']]);
+        $stmt->execute([$n['id'], (int)$user['id']]);
     }
     echo json_encode(['ok' => true]);
     exit;

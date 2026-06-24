@@ -51,8 +51,8 @@ try {
 } catch (\Throwable) { $fwd_channels = []; $channel_logos = []; }
 
 // 1. Sync targets for today and yesterday
-sync_promotor_daily_targets($pdo, $user['id'], date('Y-m-d'));
-sync_promotor_daily_targets($pdo, $user['id'], date('Y-m-d', strtotime('-1 day')));
+sync_promotor_daily_targets($pdo, (int)$user['id'], date('Y-m-d'));
+sync_promotor_daily_targets($pdo, (int)$user['id'], date('Y-m-d', strtotime('-1 day')));
 
 // 2. Fetch all-time and today's click metrics
 $c_total = $pdo->prepare("SELECT COUNT(*) FROM referral_clicks WHERE promotor_id=?");
