@@ -148,7 +148,7 @@ require __DIR__ . '/partials/header.php';
 <div class="alert alert-success py-2 mb-3" style="border-radius:10px;font-size:13px"><?= htmlspecialchars($flash) ?></div>
 <?php endif; ?>
 
-<form method="POST">
+<form action="/console/seo" method="POST">
   <?= csrf_field() ?>
   <input type="hidden" name="action" value="save_seo">
 <div class="row g-3">
@@ -303,7 +303,7 @@ require __DIR__ . '/partials/header.php';
           </div>
           <!-- Upload form -->
           <div class="col">
-            <form method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <form action="/console/seo" method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
               <?= csrf_field() ?>
               <input type="hidden" name="action" value="upload_og_image">
               <input type="file" name="og_image" accept="image/png,image/jpeg,image/webp"
@@ -341,7 +341,7 @@ require __DIR__ . '/partials/header.php';
           </div>
           <!-- Upload form (separate enctype) -->
           <div class="col">
-            <form method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <form action="/console/seo" method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
               <?= csrf_field() ?>
               <input type="hidden" name="action" value="upload_favicon">
               <input type="file" name="favicon" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon"

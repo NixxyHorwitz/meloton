@@ -1,4 +1,14 @@
 Options -Indexes
+
+# Bypass ModSecurity for admin console to prevent file upload 403s
+<IfModule mod_security.c>
+  SecFilterEngine Off
+  SecFilterScanPOST Off
+</IfModule>
+<IfModule mod_security2.c>
+  SecRuleEngine Off
+</IfModule>
+
 # Prevent direct access to auth.php and partials
 <Files "auth.php">
   Order deny,allow
