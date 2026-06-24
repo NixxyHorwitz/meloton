@@ -11,7 +11,57 @@ $s = fn($k,$d='') => setting($pdo,$k,$d);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'save_seo';
 
-    // ── Favicon upload (separate action) ──────────────────────
+    // ── Favicon Base64 Upload ─────────────────────────────────
+    if ($action === 'upload_favicon_b64' && !empty($_POST['b64_data'])) {
+        $b64 = $_POST['b64_data'];
+        if (preg_match('/^data:image\/(\w+);base64,/', $b64, $type)) {
+            $data = substr($b64, strpos($b64, ',') + 1);
+            $type = strtolower($type[1]);
+            $data = base64_decode($data);
+            if ($data === false || strlen($data) > 5 * 1024 * 1024) {
+                $flash = '❌ File terlalu besar atau corrupt. Maksimal 5MB.'; $flashType = 'error';
+            } else {
+                $tmpFile = tempnam(sys_get_temp_dir(), 'fav');
+                file_put_contents($tmpFile, $data);
+                
+                $src = null;
+                $info = @getimagesize($tmpFile);
+                if ($info) {
+                    $src = match((int)$info[2]) {
+                        IMAGETYPE_JPEG => @imagecreatefromjpeg($tmpFile),
+                        IMAGETYPE_PNG  => @imagecreatefrompng($tmpFile),
+                        IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($tmpFile) : null,
+                        IMAGETYPE_GIF  => @imagecreatefromgif($tmpFile),
+                        default        => null,
+                    };
+                }
+                
+                if (!$src) {
+                    $flash = '❌ File gambar tidak valid.'; $flashType = 'error';
+                } else {
+                    $out = imagecreatetruecolor(64, 64);
+                    imagealphablending($out, false);
+                    imagesavealpha($out, true);
+                    $transparent = imagecolorallocatealpha($out, 255, 255, 255, 127);
+                    imagefill($out, 0, 0, $transparent);
+                    imagecopyresampled($out, $src, 0, 0, 0, 0, 64, 64, imagesx($src), imagesy($src));
+                    
+                    $favPath = dirname(__DIR__) . '/assets/favicon.png';
+                    if (@imagepng($out, $favPath, 7)) {
+                        setting_set($pdo, 'favicon_path', '/assets/favicon.png');
+                        $flash = '✅ Favicon berhasil diupload dan dikompres ke 64×64px!';
+                    } else {
+                        $flash = '❌ Gagal menyimpan favicon ke /assets/. Cek permission.'; $flashType = 'error';
+                    }
+                }
+                @unlink($tmpFile);
+            }
+        } else {
+            $flash = '❌ Format base64 tidak dikenali.'; $flashType = 'error';
+        }
+    }
+    
+    // ── Favicon upload (legacy) ──────────────────────────────
     if ($action === 'upload_favicon' && !empty($_FILES['favicon']['tmp_name'])) {
         $maxBytes = 5 * 1024 * 1024; // 5MB
         $tmpFile  = $_FILES['favicon']['tmp_name'];
@@ -99,7 +149,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$flash) $flash = '✅ Pengaturan SEO disimpan!';
     }
 
-    // ── OG Image Upload (dedicated action) ──────────────────────
+    // ── OG Image Base64 Upload ────────────────────────────────
+    if ($action === 'upload_og_image_b64' && !empty($_POST['b64_data'])) {
+        $b64 = $_POST['b64_data'];
+        if (preg_match('/^data:image\/(\w+);base64,/', $b64, $type)) {
+            $data = substr($b64, strpos($b64, ',') + 1);
+            $type = strtolower($type[1]);
+            $data = base64_decode($data);
+            if ($data === false || strlen($data) > 5 * 1024 * 1024) {
+                $flash = '❌ File terlalu besar atau corrupt. Maksimal 5MB.'; $flashType = 'error';
+            } else {
+                $ext = $type === 'jpeg' ? 'jpg' : $type;
+                if (!in_array($ext, ['png','jpg','webp'])) $ext = 'png';
+                $filename = 'og_image_' . time() . '.' . $ext;
+                $uploadDir = dirname(__DIR__) . '/uploads/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                $dest = $uploadDir . $filename;
+                
+                if (file_put_contents($dest, $data)) {
+                    setting_set($pdo, 'seo_og_image', '/uploads/' . $filename);
+                    $flash = '✅ OG Image berhasil diupload via secure Base64!';
+                } else {
+                    $flash = '❌ Gagal menyimpan file. Cek permission /uploads/.'; $flashType = 'error';
+                }
+            }
+        }
+    }
+
+    // ── OG Image Upload (legacy) ──────────────────────────────
     if ($action === 'upload_og_image' && !empty($_FILES['og_image']['tmp_name'])) {
         $maxBytes = 5 * 1024 * 1024;
         $tmpFile  = $_FILES['og_image']['tmp_name'];
@@ -301,14 +378,14 @@ require __DIR__ . '/partials/header.php';
             <div style="font-size:10px;color:#666;text-align:center;margin-top:4px">Belum ada</div>
             <?php endif; ?>
           </div>
-          <!-- Upload form -->
           <div class="col">
-            <form action="/console/seo" method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <form id="form-og" action="/console/seo" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
               <?= csrf_field() ?>
-              <input type="hidden" name="action" value="upload_og_image">
-              <input type="file" name="og_image" accept="image/png,image/jpeg,image/webp"
+              <input type="hidden" name="action" value="upload_og_image_b64">
+              <input type="hidden" name="b64_data" id="b64-og-data">
+              <input type="file" id="file-og" accept="image/png,image/jpeg,image/webp"
                      class="c-form-control" style="flex:1;min-width:180px" required>
-              <button type="submit" class="btn btn-sm text-white" style="background:var(--brand);white-space:nowrap">⬆️ Upload OG Image</button>
+              <button type="button" onclick="uploadBase64('file-og', 'b64-og-data', 'form-og', this)" class="btn btn-sm text-white" style="background:var(--brand);white-space:nowrap">⬆️ Upload OG Image</button>
             </form>
             <div style="font-size:11px;color:#666;margin-top:6px">Format: PNG, JPG, WEBP &mdash; Setelah upload, URL otomatis tersimpan ke pengaturan SEO</div>
           </div>
@@ -339,14 +416,14 @@ require __DIR__ . '/partials/header.php';
             <div style="font-size:10px;color:#666;text-align:center;margin-top:4px">Belum ada</div>
             <?php endif; ?>
           </div>
-          <!-- Upload form (separate enctype) -->
           <div class="col">
-            <form action="/console/seo" method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <form id="form-fav" action="/console/seo" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
               <?= csrf_field() ?>
-              <input type="hidden" name="action" value="upload_favicon">
-              <input type="file" name="favicon" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon"
+              <input type="hidden" name="action" value="upload_favicon_b64">
+              <input type="hidden" name="b64_data" id="b64-fav-data">
+              <input type="file" id="file-fav" accept="image/png,image/jpeg,image/webp,image/gif,image/x-icon"
                      class="c-form-control" style="flex:1;min-width:180px" required>
-              <button type="submit" class="btn btn-sm text-white" style="background:var(--brand);white-space:nowrap">⬆️ Upload Favicon</button>
+              <button type="button" onclick="uploadBase64('file-fav', 'b64-fav-data', 'form-fav', this)" class="btn btn-sm text-white" style="background:var(--brand);white-space:nowrap">⬆️ Upload Favicon</button>
             </form>
             <div style="font-size:11px;color:#666;margin-top:6px">
               Format: PNG, JPG, WEBP, GIF · Sistem akan resize &amp; kompres otomatis ke 64×64px PNG
@@ -357,5 +434,34 @@ require __DIR__ . '/partials/header.php';
     </div>
   </div>
 </div>
+
+<script>
+function uploadBase64(fileId, dataId, formId, btn) {
+    const fileInput = document.getElementById(fileId);
+    if (!fileInput.files || !fileInput.files[0]) {
+        alert("Silakan pilih file gambar terlebih dahulu!");
+        return;
+    }
+    const file = fileInput.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+        alert("Ukuran file maksimal 5MB!");
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = "⏳ Memproses...";
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById(dataId).value = e.target.result;
+        document.getElementById(formId).submit();
+    };
+    reader.onerror = function() {
+        alert("Gagal membaca file!");
+        btn.disabled = false;
+        btn.textContent = "⬆️ Upload";
+    };
+    reader.readAsDataURL(file);
+}
+</script>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>
