@@ -16,6 +16,7 @@ RewriteRule ^ - [L]
 # ── Auth routes ────────────────────────────
 RewriteRule ^login/?$    auth/login.php    [L,QSA]
 RewriteRule ^register/?$ auth/register.php [L,QSA]
+RewriteRule ^register/([A-Za-z0-9_]+)/?$ auth/register.php?ref=$1 [L,QSA]
 RewriteRule ^logout/?$   auth/logout.php   [L,QSA]
 
 # ── User routes ────────────────────────────

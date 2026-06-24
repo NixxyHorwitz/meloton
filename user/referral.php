@@ -36,7 +36,7 @@ $refs = $pdo->prepare(
 $refs->execute([$user['id'], $user['referral_code']]);
 $referreds = $refs->fetchAll();
 
-$ref_url = base_url('register?ref=' . $user['referral_code']);
+$ref_url = base_url('register/' . $user['referral_code']);
 
 $pageTitle  = 'Referral — Meloton';
 $activePage = 'referral';
