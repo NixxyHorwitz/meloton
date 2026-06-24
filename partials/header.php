@@ -67,7 +67,7 @@ i[class^="ph-"] {
       <?php else: ?>
         <i class="ph-fill ph-film-strip" style="font-size:24px;color:var(--brand)"></i>
       <?php endif; ?>
-      <span style="white-space:nowrap">Nonton<strong>Kuy</strong></span>
+      <span style="white-space:nowrap">Melo<strong>ton</strong></span>
     </a>
     <div class="topbar__right">
       <?php if (!empty($user)): ?>
