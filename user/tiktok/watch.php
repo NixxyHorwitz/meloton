@@ -224,14 +224,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
   </div>
 
   <!-- Player -->
-  <div class="yt-wrapper">
+  <div class="yt-wrapper" style="position:relative">
     <div class="tt-overlay" id="tt-overlay">
       <i class="ph-fill ph-tiktok-logo" style="font-size:48px;color:#fff"></i>
       <button class="btn btn--primary" onclick="playTikTok()">Mulai Menonton</button>
       <div style="font-size:11px;color:#aaa">Klik untuk mulai hitung mundur</div>
     </div>
-    <div id="tt-player" style="opacity:0.2;pointer-events:none;transition:opacity 0.3s;width:100%;height:100%;overflow-y:auto">
-      <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@tiktok/video/<?= htmlspecialchars($video['youtube_id']) ?>" data-video-id="<?= htmlspecialchars($video['youtube_id']) ?>" style="max-width: 605px;min-width: 325px;margin:0 auto"> <section> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>
+    <div id="tt-player" style="opacity:0;pointer-events:none;transition:opacity 0.3s;width:100%;height:100%;position:absolute;inset:0">
+      <!-- Invisible overlay to block clicks to the iframe -->
+      <div style="position:absolute;inset:0;z-index:5"></div>
+      
+      <!-- CSS Crop to hide header/footer of iframe (optional, but the overlay prevents clicks anyway) -->
+      <div style="width:100%;height:100%;overflow:hidden;position:relative">
+        <iframe id="tiktok-iframe" src="" allow="autoplay;" style="position:absolute;top:-50px;bottom:-50px;left:0;right:0;width:100%;height:calc(100% + 100px);border:none;"></iframe>
+      </div>
     </div>
   </div>
 
@@ -367,7 +373,10 @@ function playTikTok() {
   document.getElementById('tt-overlay').style.display = 'none';
   const player = document.getElementById('tt-player');
   player.style.opacity = '1';
-  player.style.pointerEvents = 'auto';
+  
+  // Load iframe with autoplay only when user clicks the button
+  const iframe = document.getElementById('tiktok-iframe');
+  iframe.src = "https://www.tiktok.com/embed/v2/<?= htmlspecialchars($video['youtube_id']) ?>?autoplay=1&muted=0";
   
   if (!watchStarted) {
     startWatchSession();
