@@ -231,13 +231,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
       <div style="font-size:11px;color:#aaa">Klik untuk mulai hitung mundur</div>
     </div>
     <div id="tt-player" style="opacity:0;pointer-events:none;transition:opacity 0.3s;width:100%;height:100%;position:absolute;inset:0">
-      <!-- Invisible overlay to block clicks to the iframe -->
-      <div style="position:absolute;inset:0;z-index:5"></div>
+      <!-- Black bar covering top profile UI -->
+      <div style="position:absolute;top:0;left:0;right:0;height:70px;background:#000;z-index:5"></div>
+      <!-- Black bar covering bottom app banner -->
+      <div style="position:absolute;bottom:0;left:0;right:0;height:90px;background:#000;z-index:5"></div>
       
-      <!-- CSS Crop to hide header/footer of iframe (optional, but the overlay prevents clicks anyway) -->
-      <div style="width:100%;height:100%;overflow:hidden;position:relative">
-        <iframe id="tiktok-iframe" src="" allow="autoplay;" style="position:absolute;top:-50px;bottom:-50px;left:0;right:0;width:100%;height:calc(100% + 100px);border:none;"></iframe>
-      </div>
+      <iframe id="tiktok-iframe" src="" allow="autoplay;" style="position:absolute;inset:0;width:100%;height:100%;border:none;"></iframe>
     </div>
   </div>
 
@@ -373,10 +372,14 @@ function playTikTok() {
   document.getElementById('tt-overlay').style.display = 'none';
   const player = document.getElementById('tt-player');
   player.style.opacity = '1';
+  player.style.pointerEvents = 'auto'; // allow clicking the center
   
-  // Load iframe with autoplay only when user clicks the button
+  // Load iframe
   const iframe = document.getElementById('tiktok-iframe');
-  iframe.src = "https://www.tiktok.com/embed/v2/<?= htmlspecialchars($video['youtube_id']) ?>?autoplay=1&muted=0";
+  iframe.src = "https://www.tiktok.com/embed/v2/<?= htmlspecialchars($video['youtube_id']) ?>?lang=id-ID";
+  
+  // Notice to user
+  nToast('Silakan klik logo Play di tengah video untuk memutar', 'info');
   
   if (!watchStarted) {
     startWatchSession();
