@@ -4,22 +4,22 @@
    TONTON — Modern Compact Professional (Red/Pink)
    ============================================= */
 :root {
-  --ink:       #5c3a21;
-  --text-muted:#9e7b60;
-  --bg:        #ff9800;
+  --ink:       #4a2c11; /* Darker brown for better readability */
+  --text-muted:#8c5b35; /* Darker muted text */
+  --bg:        #ffeed4; /* Very light warm background for better contrast against cards */
   --white:     #ffffff;
 
   /* Red/Pinky Professional Palette -> Redirected to Game Style */
-  --brand:     #f39c12;
-  --brand-light: #fff3e0;
+  --brand:     #ff8c00;
+  --brand-light: #ffebb5;
   --brand-hover: #e67e22;
   --accent-1:  #ffb74d;
   --accent-2:  #ffcc80;
 
   /* Functional */
-  --green:     #2ecc71;
+  --green:     #27ae60;
   --red:       #e74c3c;
-  --blue:      #3498db;
+  --blue:      #2980b9;
   --yellow:    #f1c40f;
   
   --mint:      #d1fae5;
@@ -30,15 +30,15 @@
   --lime:      #dcfce7;
   --orange:    #ffedd5;
 
-  /* Soft Shadows & Borders -> Game style chunky shadows */
-  --border:    2px solid #f0e0c9;
-  --border-light: 2px solid #fcf6eb;
-  --shadow-sm: 0 4px 0 #e6a760;
-  --shadow:    0 6px 0 #e6a760;
-  --shadow-lg: 0 8px 0 #e6a760, 0 10px 15px rgba(0,0,0,0.1);
+  /* Soft Shadows & Borders -> High contrast Game style chunky shadows */
+  --border:    3px solid #8c5b35; /* Dark brown borders */
+  --border-light: 3px solid #d4a373;
+  --shadow-sm: 0 4px 0 #8c5b35;
+  --shadow:    0 6px 0 #8c5b35;
+  --shadow-lg: 0 8px 0 #8c5b35, 0 12px 20px rgba(0,0,0,0.15);
 
-  --radius:    20px;
-  --radius-sm: 14px;
+  --radius:    24px;
+  --radius-sm: 16px;
   --max-w:     480px;
   --nav-h:     70px;
 }
@@ -50,10 +50,10 @@ body {
   font-family: 'Fredoka One', 'Varela Round', 'Inter', sans-serif;
   background-color: var(--bg);
   background-image: 
-    radial-gradient(#ffffff33 2px, transparent 2px),
-    radial-gradient(#ffffff33 2px, transparent 2px);
-  background-size: 60px 60px;
-  background-position: 0 0, 30px 30px;
+    radial-gradient(#ffdfb3 3px, transparent 3px),
+    radial-gradient(#ffdfb3 3px, transparent 3px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
   color: var(--ink);
   min-height: 100vh;
   display: flex;
@@ -116,9 +116,9 @@ body {
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; border-radius: 20px; padding: 10px 20px; font-size: 14px; font-weight: 800; font-family: inherit; cursor: pointer; text-decoration: none; line-height: 1.5; transition: all .1s; text-transform: uppercase; letter-spacing: 0.5px; }
 .btn:active { transform: translateY(4px); box-shadow: none !important; }
 .btn--full { width: 100%; }
-.btn--primary { background: linear-gradient(180deg, #fffa65, #f1c40f); color: #b87333; box-shadow: 0 4px 0 #d49a00, inset 0 3px 0 rgba(255,255,255,0.6); border: 2px solid #f39c12; }
+.btn--primary { background: linear-gradient(180deg, #fffa65, #f1c40f); color: #8c5b35; box-shadow: 0 4px 0 #d49a00, inset 0 3px 0 rgba(255,255,255,0.6); border: 3px solid #b87333; }
 .btn--primary:hover { background: linear-gradient(180deg, #fffb8f, #f1c40f); }
-.btn--ghost { background: var(--white); color: var(--ink); box-shadow: 0 4px 0 #e2e8f0; border: 2px solid #cbd5e1; }
+.btn--ghost { background: var(--white); color: var(--ink); box-shadow: 0 4px 0 #cbd5e1; border: 3px solid #94a3b8; }
 .btn--ghost:hover { background: #f8fafc; }
 .btn--sm { padding: 8px 16px; font-size: 12px; border-radius: 16px; }
 
@@ -269,7 +269,7 @@ body {
 .user-hero-card {
   background: linear-gradient(180deg, #ff9800, #e65100);
   border-radius: var(--radius);
-  border: 3px solid #ffcc80;
+  border: 4px solid #fff;
   padding: 16px;
   color: var(--white);
   box-shadow: 0 6px 0 #b33900;
@@ -307,8 +307,8 @@ body {
 }
 
 .user-hero-card__avatar {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #fff;
   border: 3px solid #ffcc80;
@@ -317,7 +317,7 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 20px;
+  font-size: 22px;
   box-shadow: 0 3px 0 rgba(0,0,0,0.1);
 }
 
@@ -332,26 +332,27 @@ body {
   font-weight: 800;
   margin: 0;
   line-height: 1.2;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
 }
 
 .user-hero-card__badge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
-  background: rgba(0, 0, 0, 0.2);
-  color: var(--white);
+  background: #fff;
+  color: #e65100;
   padding: 3px 10px;
   border-radius: 16px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   width: fit-content;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 2px solid #ffcc80;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
 
 .user-hero-card__action-btn {
   background: linear-gradient(180deg, #fffa65, #f1c40f);
-  color: #b87333;
+  color: #8c5b35;
   text-decoration: none;
   padding: 8px 16px;
   border-radius: 20px;
@@ -362,7 +363,7 @@ body {
   gap: 5px;
   transition: all 0.1s;
   box-shadow: 0 4px 0 #d49a00, inset 0 2px 0 rgba(255,255,255,0.6);
-  border: 2px solid #f39c12;
+  border: 3px solid #b87333;
 }
 
 .user-hero-card__action-btn:active {
@@ -453,10 +454,10 @@ body {
 
 /* Balance Card Layout - Game Style */
 .balance-card {
-  background: #fffcf2;
-  border: 2px solid #f0e0c9;
+  background: #ffffff;
+  border: 3px solid #d4a373;
   border-radius: var(--radius);
-  box-shadow: 0 6px 0 #e6a760;
+  box-shadow: 0 6px 0 #d4a373;
   overflow: hidden;
   margin-bottom: 20px;
 }
@@ -601,22 +602,22 @@ body {
 }
 
 .quick-actions__icon-wrapper {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-  background: linear-gradient(180deg, #fff, #f1f5f9) !important;
-  border: 2px solid #cbd5e1;
+  font-size: 26px;
+  box-shadow: 0 5px 0 #d4a373;
+  background: #fff !important;
+  border: 3px solid #d4a373;
   color: var(--brand) !important;
   transition: all 0.1s;
 }
 
 .quick-actions__item:active .quick-actions__icon-wrapper {
-  transform: translateY(4px);
+  transform: translateY(5px);
   box-shadow: none;
 }
 
@@ -625,8 +626,8 @@ body {
   font-weight: 800;
   text-align: center;
   line-height: 1.2;
-  color: #fff;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  color: var(--ink);
+  margin-top: 4px;
 }
 
 /* Modern Banners Layout */
@@ -658,11 +659,11 @@ body {
 }
 
 .promo-banner--invest {
-  background: linear-gradient(135deg, #be123c, #e11d48);
+  background: linear-gradient(135deg, #f39c12, #d35400);
 }
 
 .promo-banner--plinko {
-  background: linear-gradient(135deg, #f43f5e, #fb7185);
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
 
 .promo-banner__content {
