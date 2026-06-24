@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 2) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/bootstrap.php';
 $user = require_auth($pdo);
 
 $vid_id = (int)($_GET['id'] ?? 0);
@@ -139,18 +139,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
 .yt-wrapper {
   position:relative;
   background:#000;
+  aspect-ratio:16/9;
   width:100%;
-  min-height:500px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
 }
-.tt-overlay {
-  position:absolute;inset:0;z-index:10;
-  background:rgba(0,0,0,0.8);
-  display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:12px;
+.yt-wrapper iframe {
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  border:none;
 }
 /* Timer bar — below the video, not ON it */
 .watch-progress-bar {
@@ -224,20 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
   </div>
 
   <!-- Player -->
-  <div class="yt-wrapper" style="position:relative">
-    <div class="tt-overlay" id="tt-overlay">
-      <i class="ph-fill ph-tiktok-logo" style="font-size:48px;color:#fff"></i>
-      <button class="btn btn--primary" onclick="playTikTok()">Mulai Menonton</button>
-      <div style="font-size:11px;color:#aaa">Klik untuk mulai hitung mundur</div>
-    </div>
-    <div id="tt-player" style="opacity:0;pointer-events:none;transition:opacity 0.3s;width:100%;height:100%;position:absolute;inset:0">
-      <!-- Black bar covering top profile UI -->
-      <div style="position:absolute;top:0;left:0;right:0;height:70px;background:#000;z-index:5"></div>
-      <!-- Black bar covering bottom app banner -->
-      <div style="position:absolute;bottom:0;left:0;right:0;height:90px;background:#000;z-index:5"></div>
-      
-      <iframe id="tiktok-iframe" src="" allow="autoplay;" style="position:absolute;inset:0;width:100%;height:100%;border:none;"></iframe>
-    </div>
+  <div class="yt-wrapper">
+    <div id="yt-player"></div>
   </div>
 
   <!-- Progress bar di bawah video -->
@@ -309,11 +292,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
     <?php foreach ($other_videos as $ov):
       $ov_done    = (bool)$ov['watched_today'];
       $ov_blocked = !$ov_done && ($watch_today >= $watch_limit);
-      $ov_href    = ($ov_done || $ov_blocked) ? '#' : '/' . ($ov['video_type'] ?? 'youtube') . '/watch?id=' . $ov['id'];
+      $ov_href    = ($ov_done || $ov_blocked) ? '#' : '/watch?id=' . $ov['id'];
     ?>
     <a href="<?= $ov_href ?>" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1.5px solid #eee;text-decoration:none;color:inherit;<?= ($ov_done || $ov_blocked) ? 'opacity:.6;pointer-events:none' : '' ?>">
       <div style="position:relative;flex-shrink:0;width:96px;height:54px;border-radius:8px;overflow:hidden;border:2px solid #1A1A1A">
-        <img src="<?= video_thumb($ov['youtube_id'], $ov['video_type'] ?? 'youtube') ?>" alt="" style="width:100%;height:100%;object-fit:cover">
+        <img src="<?= yt_thumb($ov['youtube_id']) ?>" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.src='https://img.youtube.com/vi/<?= $ov['youtube_id'] ?>/hqdefault.jpg'">
         <?php if ($ov_done): ?>
         <div style="position:absolute;inset:0;background:rgba(34,197,94,.7);display:flex;align-items:center;justify-content:center">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -356,35 +339,74 @@ let claimReady  = false;
 let playerReady = false;
 let ytPlayer    = null;
 
-// ── TikTok Logic ───────────────────────────────
+// ── YouTube IFrame API ───────────────────────────────
+window.onYouTubeIframeAPIReady = function() {
+  console.log('[DEBUG] onYouTubeIframeAPIReady fired. Init player with videoId: <?= htmlspecialchars($video['youtube_id']) ?>');
+  ytPlayer = new YT.Player('yt-player', {
+    videoId: '<?= htmlspecialchars($video['youtube_id']) ?>',
+    playerVars: {
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+      autoplay: 1,
+      origin: window.location.origin
+    },
+    events: {
+      onReady: function(e) {
+          console.log('[DEBUG] Player onReady');
+          onPlayerReady(e);
+      },
+      onStateChange: function(e) {
+          console.log('[DEBUG] Player onStateChange, state:', e.data);
+          onPlayerStateChange(e);
+      },
+      onError: function(e) {
+          console.log('[DEBUG] Player onError, error code:', e.data);
+          setStatus('⚠️ YouTube Error: ' + e.data, 'Video tidak dapat diputar. ID: <?= htmlspecialchars($video['youtube_id']) ?>');
+      }
+    }
+  });
+};
 
-document.addEventListener('DOMContentLoaded', () => {
+// Load API script
+console.log('[DEBUG] Injecting YouTube iframe_api script');
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+function onPlayerReady(e) {
   playerReady = true;
+  // Hide the page loader once the player is ready
   const loader = document.getElementById('page-loader');
   if (loader) {
     loader.classList.add('hidden');
     setTimeout(() => loader.remove(), 400);
   }
-});
+  console.log('[DEBUG] Player is actually ready now.');
+}
 
-function playTikTok() {
-  if (!CAN_WATCH) return;
-  document.getElementById('tt-overlay').style.display = 'none';
-  const player = document.getElementById('tt-player');
-  player.style.opacity = '1';
-  player.style.pointerEvents = 'auto'; // allow clicking the center
-  
-  // Load iframe
-  const iframe = document.getElementById('tiktok-iframe');
-  iframe.src = "https://www.tiktok.com/embed/v2/<?= htmlspecialchars($video['youtube_id']) ?>?lang=id-ID";
-  
-  // Notice to user
-  nToast('Silakan klik logo Play di tengah video untuk memutar', 'info');
-  
-  if (!watchStarted) {
-    startWatchSession();
-  } else if (timerHandle === null && !claimReady) {
-    resumeCountdown();
+function onPlayerStateChange(e) {
+  console.log('[DEBUG] onPlayerStateChange logic triggered. State=', e.data, 'CAN_WATCH=', CAN_WATCH);
+  if (!CAN_WATCH) {
+      console.log('[DEBUG] CAN_WATCH is false, ignoring state change.');
+      return;
+  }
+
+  if (e.data === YT.PlayerState.PLAYING) {
+    console.log('[DEBUG] Video is PLAYING.');
+    if (!watchStarted) {
+      console.log('[DEBUG] First time playing, calling startWatchSession().');
+      startWatchSession();
+    } else if (timerHandle === null && !claimReady) {
+      console.log('[DEBUG] Resuming countdown.');
+      resumeCountdown();
+    }
+  } else if (e.data === YT.PlayerState.PAUSED ||
+             e.data === YT.PlayerState.BUFFERING) {
+    console.log('[DEBUG] Video paused or buffering. Calling pauseCountdown().');
+    pauseCountdown();
+  } else if (e.data === YT.PlayerState.ENDED) {
+    console.log('[DEBUG] Video ended.');
   }
 }
 

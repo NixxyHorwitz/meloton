@@ -40,11 +40,11 @@ if (isset($_GET['ajax'])) {
     foreach ($videos as $v) {
         $done    = (bool)$v['watched_today'];
         $blocked = !$done && ($watch_today >= $watch_limit);
-        $href    = ($done || $blocked) ? 'javascript:void(0)' : '/' . ($v['video_type'] ?? 'youtube') . '/watch?id='.$v['id'];
+        $href    = ($done || $blocked) ? 'javascript:void(0)' : '/watch?id='.$v['id'];
         ?>
         <a href="<?= $href ?>" class="vcard <?= $done ? 'vcard--done' : '' ?>" <?= ($done||$blocked) ? 'style="pointer-events:none"' : '' ?>>
           <div class="vcard__thumb">
-            <img src="<?= video_thumb($v['youtube_id'], $v['video_type'] ?? 'youtube') ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy">
+            <img src="<?= yt_thumb($v['youtube_id']) ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy" onerror="this.src='https://img.youtube.com/vi/<?= $v['youtube_id'] ?>/hqdefault.jpg'">
             <div class="vcard__play">
               <?php if ($done): ?>
                 <i class="ph-fill ph-check-circle" style="color:var(--green)"></i>
@@ -133,11 +133,11 @@ require dirname(__DIR__) . '/partials/header.php';
 <?php foreach ($videos as $v):
   $done    = (bool)$v['watched_today'];
   $blocked = !$done && ($watch_today >= $watch_limit);
-  $href    = ($done || $blocked) ? 'javascript:void(0)' : '/' . ($v['video_type'] ?? 'youtube') . '/watch?id='.$v['id'];
+  $href    = ($done || $blocked) ? 'javascript:void(0)' : '/watch?id='.$v['id'];
 ?>
 <a href="<?= $href ?>" class="vcard <?= $done ? 'vcard--done' : '' ?>" <?= ($done||$blocked) ? 'style="pointer-events:none"' : '' ?>>
   <div class="vcard__thumb">
-    <img src="<?= video_thumb($v['youtube_id'], $v['video_type'] ?? 'youtube') ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy">
+    <img src="<?= yt_thumb($v['youtube_id']) ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy" onerror="this.src='https://img.youtube.com/vi/<?= $v['youtube_id'] ?>/hqdefault.jpg'">
     <div class="vcard__play">
       <?php if ($done): ?>
         <i class="ph-fill ph-check-circle" style="color:var(--green)"></i>
