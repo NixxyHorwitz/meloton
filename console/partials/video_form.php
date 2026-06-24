@@ -1,11 +1,20 @@
-<div class="c-form-group mb-3">
-  <label class="c-label">Judul Video</label>
-  <input type="text" name="title" class="c-form-control" placeholder="Judul video yang menarik" required>
+<div class="row g-2 mb-3">
+  <div class="col-4">
+    <label class="c-label">Tipe Video</label>
+    <select name="video_type" class="c-form-control" required>
+      <option value="youtube">YouTube</option>
+      <option value="tiktok">TikTok</option>
+    </select>
+  </div>
+  <div class="col-8">
+    <label class="c-label">Judul Video</label>
+    <input type="text" name="title" class="c-form-control" placeholder="Judul video yang menarik" required>
+  </div>
 </div>
 <div class="c-form-group mb-3">
-  <label class="c-label">YouTube URL / ID</label>
-  <input type="text" name="youtube_url" class="c-form-control" placeholder="https://youtube.com/watch?v=xxx atau ID saja" required>
-  <div style="font-size:11px;color:#666;margin-top:4px">Support: youtube.com/watch?v=, youtu.be/, atau ID langsung</div>
+  <label class="c-label">Video URL / ID</label>
+  <input type="text" name="youtube_url" class="c-form-control" placeholder="URL Video atau ID" required>
+  <div style="font-size:11px;color:#666;margin-top:4px">Support: YouTube URL/ID atau TikTok URL/Video ID</div>
 </div>
 <div class="row g-2 mb-3">
   <div class="col-6">

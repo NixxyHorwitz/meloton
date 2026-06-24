@@ -229,9 +229,24 @@ function extract_youtube_id(string $url): string {
     return '';
 }
 
-/** Get YouTube thumbnail URL */
+/** Extract TikTok video ID from URL */
+function extract_tiktok_id(string $url): string {
+    if (preg_match('/(?:video\/)([0-9]{18,21})/', $url, $m)) return $m[1];
+    if (preg_match('/^([0-9]{18,21})$/', $url, $m)) return $m[1];
+    return $url; // Fallback
+}
+
+/** Get YouTube thumbnail URL (Legacy) */
 function yt_thumb(string $youtube_id): string {
     return "https://img.youtube.com/vi/{$youtube_id}/maxresdefault.jpg";
+}
+
+/** Get Video thumbnail URL */
+function video_thumb(string $id, string $type = 'youtube'): string {
+    if ($type === 'tiktok') {
+        return 'https://ui-avatars.com/api/?name=TikTok&background=1a1a1a&color=fff&font-size=0.33&size=400';
+    }
+    return "https://img.youtube.com/vi/{$id}/maxresdefault.jpg";
 }
 
 /** Get logged-in user or null */

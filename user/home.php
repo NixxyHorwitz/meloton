@@ -378,9 +378,9 @@ if ($is_newcomer):
 <?php else: ?>
 <div class="video-scroll" style="margin-bottom:16px">
   <?php foreach ($videos as $v): ?>
-  <a href="/watch?id=<?= $v['id'] ?>" class="v-card">
+  <a href="/<?= $v['video_type'] ?? 'youtube' ?>/watch?id=<?= $v['id'] ?>" class="v-card">
     <div class="v-card__thumb">
-      <img src="<?= yt_thumb($v['youtube_id']) ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy" onerror="this.src='https://img.youtube.com/vi/<?= $v['youtube_id'] ?>/hqdefault.jpg'">
+      <img src="<?= video_thumb($v['youtube_id'], $v['video_type'] ?? 'youtube') ?>" alt="<?= htmlspecialchars($v['title']) ?>" loading="lazy">
       <div class="v-card__play"><i class="ph-fill ph-play-circle"></i></div>
       <div class="v-card__badge">+<?= format_rp((float)$v['reward_amount']) ?></div>
     </div>

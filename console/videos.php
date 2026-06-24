@@ -13,24 +13,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add' || $action === 'edit') {
         $id       = (int)($_POST['id'] ?? 0);
         $title    = trim($_POST['title'] ?? '');
+        $v_type   = in_array($_POST['video_type'] ?? '', ['youtube','tiktok']) ? $_POST['video_type'] : 'youtube';
         $yt_raw   = trim($_POST['youtube_url'] ?? '');
-        $yt_id    = extract_youtube_id($yt_raw);
+        $yt_id    = $v_type === 'tiktok' ? extract_tiktok_id($yt_raw) : extract_youtube_id($yt_raw);
         $reward   = (float)preg_replace('/[^\d.]/', '', $_POST['reward_amount'] ?? '0');
         $duration = (int)($_POST['watch_duration'] ?? 30);
         $active   = isset($_POST['is_active']) ? 1 : 0;
         $sort     = (int)($_POST['sort_order'] ?? 0);
 
-        if (!$title || !$yt_id) { $flash = 'Judul dan URL YouTube wajib diisi & valid.'; $flashType = 'error'; }
+        if (!$title || !$yt_id) { $flash = 'Judul dan URL/ID Video wajib diisi & valid.'; $flashType = 'error'; }
         elseif ($reward < 1) { $flash = 'Reward harus lebih dari 0.'; $flashType = 'error'; }
         elseif ($duration < 5) { $flash = 'Durasi minimal 5 detik.'; $flashType = 'error'; }
         else {
             if ($action === 'add') {
-                $pdo->prepare("INSERT INTO videos (title,youtube_id,reward_amount,watch_duration,is_active,sort_order) VALUES (?,?,?,?,?,?)")
-                    ->execute([$title, $yt_id, $reward, $duration, $active, $sort]);
+                $pdo->prepare("INSERT INTO videos (video_type,title,youtube_id,reward_amount,watch_duration,is_active,sort_order) VALUES (?,?,?,?,?,?,?)")
+                    ->execute([$v_type, $title, $yt_id, $reward, $duration, $active, $sort]);
                 $flash = "Video '{$title}' berhasil ditambahkan.";
             } else {
-                $pdo->prepare("UPDATE videos SET title=?,youtube_id=?,reward_amount=?,watch_duration=?,is_active=?,sort_order=? WHERE id=?")
-                    ->execute([$title, $yt_id, $reward, $duration, $active, $sort, $id]);
+                $pdo->prepare("UPDATE videos SET video_type=?,title=?,youtube_id=?,reward_amount=?,watch_duration=?,is_active=?,sort_order=? WHERE id=?")
+                    ->execute([$v_type, $title, $yt_id, $reward, $duration, $active, $sort, $id]);
                 $flash = "Video berhasil diperbarui.";
             }
         }
@@ -101,10 +102,13 @@ require __DIR__ . '/partials/header.php';
         <td>
           <span class="badge bg-secondary" style="font-size:11px"><?= $v['sort_order'] ?></span>
         </td>
-        <td><img src="https://img.youtube.com/vi/<?= $v['youtube_id'] ?>/default.jpg" style="width:80px;height:45px;object-fit:cover;border-radius:6px"></td>
+        <td><img src="<?= video_thumb($v['youtube_id'], $v['video_type']) ?>" style="width:80px;height:45px;object-fit:cover;border-radius:6px"></td>
         <td style="max-width:200px">
           <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= htmlspecialchars($v['title']) ?></div>
-          <div style="font-size:11px;color:#666"><?= $v['youtube_id'] ?></div>
+          <div style="font-size:11px;color:#666">
+            <span class="badge bg-<?= $v['video_type'] === 'tiktok' ? 'dark' : 'danger' ?>" style="font-size:9px;padding:2px 4px"><?= strtoupper($v['video_type']) ?></span> 
+            <?= htmlspecialchars($v['youtube_id']) ?>
+          </div>
         </td>
         <td style="color:#4CAF82;font-weight:700"><?= format_rp((float)$v['reward_amount']) ?></td>
         <td style="color:#888"><?= $v['watch_duration'] ?>s</td>
@@ -171,11 +175,22 @@ require __DIR__ . '/partials/header.php';
 function editVideo(v) {
   document.getElementById('edit-id').value = v.id;
   document.getElementById('edit-body').innerHTML = `
-    <div class="c-form-group mb-3"><label class="c-label">Judul Video</label>
-      <input type="text" name="title" class="c-form-control" value="${escH(v.title)}" required></div>
-    <div class="c-form-group mb-3"><label class="c-label">YouTube URL / ID</label>
+    <div class="row g-2 mb-3">
+      <div class="col-4">
+        <label class="c-label">Tipe Video</label>
+        <select name="video_type" class="c-form-control" required>
+          <option value="youtube" ${v.video_type==='youtube'?'selected':''}>YouTube</option>
+          <option value="tiktok" ${v.video_type==='tiktok'?'selected':''}>TikTok</option>
+        </select>
+      </div>
+      <div class="col-8">
+        <label class="c-label">Judul Video</label>
+        <input type="text" name="title" class="c-form-control" value="${escH(v.title)}" required>
+      </div>
+    </div>
+    <div class="c-form-group mb-3"><label class="c-label">Video URL / ID</label>
       <input type="text" name="youtube_url" class="c-form-control" value="${escH(v.youtube_id)}" required>
-      <div style="font-size:11px;color:#666;margin-top:4px">Masukkan URL atau ID YouTube</div></div>
+      <div style="font-size:11px;color:#666;margin-top:4px">Masukkan URL atau ID YouTube/TikTok</div></div>
     <div class="row g-2 mb-3">
       <div class="col-6"><label class="c-label">Reward (Rp)</label>
         <input type="number" name="reward_amount" class="c-form-control" value="${v.reward_amount}" min="1" step="any" required></div>
