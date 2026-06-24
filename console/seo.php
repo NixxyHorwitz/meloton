@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = substr($b64, strpos($b64, ',') + 1);
             $type = strtolower($type[1]);
             $data = base64_decode($data);
-            if ($data === false || strlen($data) > 5 * 1024 * 1024) {
-                $flash = '❌ File terlalu besar atau corrupt. Maksimal 5MB.'; $flashType = 'error';
+            if ($data === false || strlen($data) > 15 * 1024 * 1024) {
+                $flash = '❌ File terlalu besar atau corrupt. Maksimal 15MB.'; $flashType = 'error';
             } else {
                 $tmpFile = tempnam(sys_get_temp_dir(), 'fav');
                 file_put_contents($tmpFile, $data);
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // ── Favicon upload (legacy) ──────────────────────────────
     if ($action === 'upload_favicon' && !empty($_FILES['favicon']['tmp_name'])) {
-        $maxBytes = 5 * 1024 * 1024; // 5MB
+        $maxBytes = 15 * 1024 * 1024; // 15MB
         $tmpFile  = $_FILES['favicon']['tmp_name'];
         $origName = $_FILES['favicon']['name'];
         $fileSize = $_FILES['favicon']['size'];
@@ -156,8 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = substr($b64, strpos($b64, ',') + 1);
             $type = strtolower($type[1]);
             $data = base64_decode($data);
-            if ($data === false || strlen($data) > 5 * 1024 * 1024) {
-                $flash = '❌ File terlalu besar atau corrupt. Maksimal 5MB.'; $flashType = 'error';
+            if ($data === false || strlen($data) > 15 * 1024 * 1024) {
+                $flash = '❌ File terlalu besar atau corrupt. Maksimal 15MB.'; $flashType = 'error';
             } else {
                 $tmpFile = tempnam(sys_get_temp_dir(), 'og_');
                 file_put_contents($tmpFile, $data);
@@ -220,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ── OG Image Upload (legacy) ──────────────────────────────
     if ($action === 'upload_og_image' && !empty($_FILES['og_image']['tmp_name'])) {
-        $maxBytes = 5 * 1024 * 1024;
+        $maxBytes = 15 * 1024 * 1024;
         $tmpFile  = $_FILES['og_image']['tmp_name'];
         $origName = $_FILES['og_image']['name'];
         $fileSize = $_FILES['og_image']['size'];
@@ -404,7 +404,7 @@ require __DIR__ . '/partials/header.php';
     <div class="c-card">
       <div class="c-card-header">
         <span class="c-card-title">🖼 Upload OG Image</span>
-        <span style="font-size:11px;color:#666">Disimpan ke /uploads/ · Maks 5MB · Ideal 1200×630px</span>
+        <span style="font-size:11px;color:#666">Disimpan ke /uploads/ · Maks 15MB · Ideal 1200×630px</span>
       </div>
       <div class="c-card-body">
         <div class="row align-items-center g-3">
@@ -440,7 +440,7 @@ require __DIR__ . '/partials/header.php';
     <div class="c-card">
       <div class="c-card-header">
         <span class="c-card-title">🖼️ Favicon Website</span>
-        <span style="font-size:11px;color:#666">Akan dikompres otomatis ke 64×64px · Maks 5MB</span>
+        <span style="font-size:11px;color:#666">Akan dikompres otomatis ke 64×64px · Maks 15MB</span>
       </div>
       <div class="c-card-body">
         <div class="row align-items-center g-3">
@@ -485,8 +485,8 @@ function uploadBase64(fileId, dataId, formId, btn) {
         return;
     }
     const file = fileInput.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-        alert("Ukuran file maksimal 5MB!");
+    if (file.size > 15 * 1024 * 1024) {
+        alert("Ukuran file maksimal 15MB!");
         return;
     }
     btn.disabled = true;
