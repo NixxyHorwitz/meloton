@@ -11,11 +11,14 @@ $ip_key  = 'reg_' . md5($_SERVER['REMOTE_ADDR'] ?? 'x');
 $attempts = (int)($_SESSION[$ip_key . '_attempts'] ?? 0);
 $lock_until = (int)($_SESSION[$ip_key . '_lock'] ?? 0);
 
-// Generate math CAPTCHA
-$cap_a = random_int(2, 9);
-$cap_b = random_int(1, 9);
-$cap_answer = $cap_a + $cap_b;
-$cap_hash = hash_hmac('sha256', (string)$cap_answer, 'MELOTON_MATH_' . session_id());
+// Generate Emoji CAPTCHA
+$emojis = ['🍎'=>'Apel', '🍓'=>'Stroberi', '🍇'=>'Anggur', '🍉'=>'Semangka', '🍌'=>'Pisang', '🍕'=>'Pizza', '🍔'=>'Burger', '🍩'=>'Donat'];
+$emoji_keys = array_keys($emojis);
+shuffle($emoji_keys);
+$cap_options = array_slice($emoji_keys, 0, 4);
+$cap_target = $cap_options[array_rand($cap_options)];
+$cap_target_name = $emojis[$cap_target];
+$cap_hash = hash_hmac('sha256', $cap_target, 'MELOTON_EMOJI_' . session_id());
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (time() < $lock_until) {
@@ -24,13 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         goto end_reg;
     }
 
-    // Math CAPTCHA validation
+    // Emoji CAPTCHA validation
     $user_answer = trim($_POST['captcha_answer'] ?? '');
     $expected_hash = $_POST['captcha_hash'] ?? '';
-    $check_hash = hash_hmac('sha256', $user_answer, 'MELOTON_MATH_' . session_id());
+    $check_hash = hash_hmac('sha256', $user_answer, 'MELOTON_EMOJI_' . session_id());
 
     if (!$user_answer || !hash_equals($expected_hash, $check_hash)) {
-        $error = 'Jawaban verifikasi salah. Coba hitung lagi!';
+        $error = 'Pilihan gambar salah, coba lagi!';
         goto end_reg;
     }
 
@@ -189,16 +192,14 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
 .fs{display:none;width:100%}
 .fs.active{display:block}
 
-/* Math CAPTCHA */
-.math-captcha{background:#fff;border:2.5px solid #d4a64a;border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
-.math-captcha-q{font-size:14px;font-weight:800;color:#6d3a0a;margin-bottom:10px}
-.math-captcha-q .math-nums{display:inline-flex;align-items:center;gap:6px}
-.math-captcha-q .math-box{background:linear-gradient(180deg,#ffe082,#ffca28);border:2px solid #c47f17;border-radius:10px;padding:6px 14px;font-size:20px;font-weight:900;color:#6d3a0a;box-shadow:0 2px 0 #c47f17}
-.math-captcha-q .math-op{font-size:20px;font-weight:900;color:#c47f17}
-.math-captcha-input{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
-.math-captcha-input input{width:80px;text-align:center;border:2.5px solid #d4a64a;border-radius:12px;padding:10px;font-size:18px;font-weight:900;font-family:inherit;color:#6d3a0a;outline:none;background:#fef8e8}
-.math-captcha-input input:focus{border-color:#c47f17;box-shadow:0 0 0 3px rgba(196,127,23,.15)}
-.math-captcha-input .math-eq{font-size:20px;font-weight:900;color:#c47f17}
+/* Emoji CAPTCHA */
+.emoji-captcha{background:#fff;border:2.5px solid #d4a64a;border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+.emoji-captcha-q{font-size:14px;font-weight:800;color:#6d3a0a;margin-bottom:12px}
+.emoji-captcha-q span{color:#d35400;font-weight:900;background:#fef8e8;padding:2px 8px;border-radius:8px;border:1.5px solid #e8d5a3}
+.emoji-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.emoji-btn{background:linear-gradient(180deg,#fff,#f8f9fa);border:2.5px solid #d4a64a;border-radius:12px;padding:8px;font-size:24px;cursor:pointer;transition:transform .1s,box-shadow .1s;box-shadow:0 2px 0 #d4a64a}
+.emoji-btn:active{transform:translateY(2px);box-shadow:0 0 0 #d4a64a}
+.emoji-btn.selected{background:linear-gradient(180deg,#d1fae5,#a7f3d0);border-color:#10b981;box-shadow:0 2px 0 #059669}
 
 /* Summary */
 .gc-sum{background:#fff;border:2px solid #e8d5a3;border-radius:12px;padding:12px;margin-bottom:14px}
@@ -323,20 +324,17 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
 
       <!-- STEP 4: Verifikasi -->
       <div class="fs <?= $error ? 'active' : '' ?>" id="step4">
-        <!-- Math CAPTCHA -->
-        <div class="math-captcha">
-          <div class="math-captcha-q">
-            Berapa hasil dari
-            <div class="math-nums" style="margin-top:8px">
-              <span class="math-box"><?= $cap_a ?></span>
-              <span class="math-op">+</span>
-              <span class="math-box"><?= $cap_b ?></span>
-            </div>
+        <!-- Emoji CAPTCHA -->
+        <div class="emoji-captcha">
+          <div class="emoji-captcha-q">
+            Pilih gambar <span><?= htmlspecialchars($cap_target_name) ?></span>
           </div>
-          <div class="math-captcha-input">
-            <span class="math-eq">=</span>
-            <input type="number" name="captcha_answer" id="captcha_answer" placeholder="?" autocomplete="off">
+          <div class="emoji-grid">
+            <?php foreach($cap_options as $opt): ?>
+            <button type="button" class="emoji-btn" onclick="selectEmoji(this, '<?= $opt ?>')"><?= $opt ?></button>
+            <?php endforeach; ?>
           </div>
+          <input type="hidden" name="captcha_answer" id="captcha_answer" value="">
         </div>
 
         <!-- Summary -->
@@ -362,6 +360,11 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
 </div>
 
 <script>
+function selectEmoji(btn, val) {
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('captcha_answer').value = val;
+}
 let cur = <?= ($error ? 4 : 1) ?>;
 function goStep(n){
   document.getElementById('step'+cur).classList.remove('active');
