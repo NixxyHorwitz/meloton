@@ -176,9 +176,15 @@ function csrf_verify(): bool {
 
 /** Enforce CSRF on POST — aborts with 403 if invalid */
 function csrf_enforce(): void {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
-        http_response_code(403);
-        die('<h1>403 Invalid CSRF Token</h1>');
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            http_response_code(413);
+            die('<h1 style="font-family:sans-serif">413 Payload Too Large</h1><p>File yang diupload terlalu besar (melebihi limit PHP post_max_size/upload_max_filesize).</p><button onclick="history.back()">Kembali</button>');
+        }
+        if (!csrf_verify()) {
+            http_response_code(403);
+            die('<h1>403 Invalid CSRF Token</h1>');
+        }
     }
 }
 

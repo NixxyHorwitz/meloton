@@ -30,18 +30,29 @@ $fav_url = $_favicon ? (preg_match('~^https?://~', $_favicon) ? $_favicon : '/' 
 $current_url = base_url(ltrim($_SERVER['REQUEST_URI'] ?? '', '/'));
 $final_og_desc = $_seo_og_desc ?: $_seo_desc;
 ?>
+<link rel="canonical" href="<?= htmlspecialchars($current_url) ?>">
+<meta property="og:locale" content="id_ID">
+<meta property="og:site_name" content="<?= htmlspecialchars($_seo_title) ?>">
 <meta property="og:url" content="<?= htmlspecialchars($current_url) ?>">
 <meta property="og:type" content="<?= htmlspecialchars($_seo_og_type) ?>">
+<meta property="og:title" content="<?= htmlspecialchars($_seo_og_title ?: (($pageTitle ?? '') ? $pageTitle . ' — ' . $_seo_title : $_seo_title)) ?>">
+<?php if ($final_og_desc): ?>
+<meta property="og:description" content="<?= htmlspecialchars($final_og_desc) ?>">
+<?php endif; ?>
 <?php if ($absolute_og): ?>
 <meta property="og:image" content="<?= htmlspecialchars($absolute_og) ?>">
 <meta property="og:image:secure_url" content="<?= htmlspecialchars($absolute_og) ?>">
 <meta property="og:image:alt" content="<?= htmlspecialchars($_seo_title) ?>">
 <?php endif; ?>
-<meta property="og:title" content="<?= htmlspecialchars($_seo_og_title ?: (($pageTitle ?? '') ? $pageTitle . ' — ' . $_seo_title : $_seo_title)) ?>">
-<?php if ($final_og_desc): ?>
-<meta property="og:description" content="<?= htmlspecialchars($final_og_desc) ?>">
-<?php endif; ?>
+
 <meta name="twitter:card" content="<?= htmlspecialchars($_seo_twcard) ?>">
+<meta name="twitter:title" content="<?= htmlspecialchars($_seo_og_title ?: (($pageTitle ?? '') ? $pageTitle . ' — ' . $_seo_title : $_seo_title)) ?>">
+<?php if ($final_og_desc): ?>
+<meta name="twitter:description" content="<?= htmlspecialchars($final_og_desc) ?>">
+<?php endif; ?>
+<?php if ($absolute_og): ?>
+<meta name="twitter:image" content="<?= htmlspecialchars($absolute_og) ?>">
+<?php endif; ?>
 <?php if ($fav_url): ?>
 <link rel="icon" href="<?= htmlspecialchars($fav_url) ?>?v=<?= @filemtime(dirname(__DIR__) . '/' . ltrim($_favicon, '/')) ?: time() ?>">
 <link rel="apple-touch-icon" href="<?= htmlspecialchars($fav_url) ?>?v=<?= @filemtime(dirname(__DIR__) . '/' . ltrim($_favicon, '/')) ?: time() ?>">
