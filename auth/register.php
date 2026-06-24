@@ -185,160 +185,135 @@ $final_og_desc = $_seo_desc;
 <?php endif; ?>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
 <style>
-/* Game UI Login/Register Styles */
+/* Bubble Game UI Login/Register Styles */
 .auth-page {
-  background-color: #faebd7;
-}
-.auth-card {
-  border: 4px solid var(--ink);
-  border-radius: 20px;
-  box-shadow: 0 8px 0 var(--ink);
-  padding: 32px 24px;
-  background: #ffffff;
-  overflow: hidden;
-  position: relative;
-  max-width: 440px;
-  width: 100%;
-}
-.deco-bar {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 6px;
-  background: repeating-linear-gradient(90deg, #f1c40f 0, #f1c40f 30px, #d1fae5 30px, #d1fae5 60px, #ede9fe 60px, #ede9fe 90px);
-}
-.auth-logo-img {
-  width: 42px; height: 42px;
-  object-fit: contain;
-  border-radius: 10px;
-  border: 2px solid var(--ink);
-  padding: 2px;
-  background: #fff;
-  flex-shrink: 0;
-}
-.auth-title {
-  font-weight: 900;
-  font-size: 18px;
-  color: var(--ink);
-  line-height: 1.2;
-}
-.auth-subtitle {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 700;
-  margin-top: 2px;
-}
-.form-label {
-  font-weight: 800;
-  font-size: 12px;
-  color: #a16238;
-  margin-bottom: 6px;
-  display: block;
-}
-.input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 3px solid var(--ink);
-  border-radius: 16px;
-  padding: 12px 14px;
-  background: #ffffff;
-  margin-bottom: 16px;
-  transition: all 0.2s;
-}
-.input-wrap:focus-within {
-  border-color: #d97706;
-}
-.input-icon {
-  color: #9ca3af;
-  flex-shrink: 0;
-}
-.form-control {
-  border: none;
-  outline: none;
-  background: transparent;
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-}
-.form-control::placeholder {
-  color: #9ca3af;
-  font-weight: 500;
-}
-.input-toggle {
-  background: none;
-  border: 1px solid var(--ink);
-  border-radius: 4px;
-  padding: 2px 4px;
-  cursor: pointer;
-  font-size: 10px;
-  color: var(--ink);
+  background-color: #1a2a3a; /* Dark background to make the modal pop */
+  padding: 16px;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.auth-switch {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 13px;
-  color: #8c5b35;
-  font-weight: 600;
+.auth-card {
+  background: #ffcc00;
+  border: 4px solid #d35400;
+  border-radius: 32px;
+  box-shadow: 0 8px 0 #d35400;
+  padding: 56px 16px 16px 16px;
+  position: relative;
+  width: 100%;
+  max-width: 440px;
 }
-.auth-switch a {
-  color: #ff8c00;
-  font-weight: 800;
+.auth-card-header {
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 20px;
+  text-shadow: 1px 2px 0 #d35400;
+  letter-spacing: 0.5px;
+}
+.auth-card-close {
+  position: absolute;
+  right: 16px; top: 16px;
+  width: 28px; height: 28px;
+  background: #d35400;
+  color: #ffcc00;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 16px;
+  cursor: pointer;
   text-decoration: none;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+.auth-card-inner {
+  background: #fef3d7;
+  border-radius: 24px;
+  padding: 32px 24px 24px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.auth-title-inner {
+  font-weight: 900; font-size: 18px; color: #8b4513;
+  text-align: center; margin-bottom: 24px; line-height: 1.3;
 }
 
+.form-label {
+  font-weight: 800; font-size: 12px; color: #a16238;
+  margin-bottom: 6px; display: block; width: 100%; text-align: left;
+}
+.input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border: 3px solid #cc8e00; border-radius: 20px;
+  padding: 14px 16px; background: #ffffff;
+  margin-bottom: 12px; width: 100%;
+}
+.input-wrap:focus-within { border-color: #d35400; }
+.form-control {
+  border: none; outline: none; background: transparent; flex: 1;
+  font-size: 14px; font-weight: 700; color: #8b4513;
+}
+.form-control::placeholder { color: #d4a373; font-weight: 600; }
+.input-icon { color: #cc8e00; }
+.input-toggle { background: none; border: none; font-size: 16px; cursor: pointer; }
+
 /* Steps specific */
-.step-tabs { display: flex; gap: 6px; margin-bottom: 20px; margin-top: 8px; }
+.step-tabs { display: flex; gap: 6px; margin-bottom: 20px; margin-top: 8px; width: 100%; }
 .step-tab {
-  flex: 1; height: 6px; border-radius: 4px;
-  background: #f1f5f9;
-  border: 2px solid var(--ink);
+  flex: 1; height: 8px; border-radius: 4px;
+  background: #ffe066;
+  border: 2px solid #cc8e00;
   transition: background .3s;
 }
-.step-tab.done { background: #d1fae5; }
-.step-tab.active { background: #f1c40f; }
-.form-step { display: none; }
+.step-tab.done { background: #3498db; border-color: #2980b9; }
+.step-tab.active { background: #d35400; border-color: #a84300; }
+.form-step { display: none; width: 100%; }
 .form-step.active { display: block; }
-.btn-nav {
-  background: #f1f5f9;
-  color: #000;
-  font-weight: 900;
-  font-size: 14px;
-  border: none;
-  border-radius: 24px;
-  padding: 14px;
-  cursor: pointer;
+
+.btn-glossy {
+  width: 100%; border: none; border-radius: 30px; padding: 14px;
+  font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; overflow: hidden; cursor: pointer; text-decoration: none;
   transition: transform 0.1s;
 }
-.btn-nav:active { transform: scale(0.98); }
-.btn-nav-primary {
-  background: #ffffff;
-  color: #0000ff;
-  border: 3px solid var(--ink);
-  box-shadow: 0 4px 0 var(--ink);
+.btn-glossy::before {
+  content: ''; position: absolute; top: 4px; left: 10%; right: 10%; height: 35%;
+  background: rgba(255,255,255,0.4); border-radius: 20px; pointer-events: none;
 }
-.btn-nav-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--ink); }
+.btn-glossy:active { transform: translateY(4px); }
+.btn-blue {
+  background: #3498db; color: #fff;
+  box-shadow: 0 6px 0 #2980b9;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  border: 2px solid #5dade2;
+}
+.btn-blue:active { box-shadow: 0 2px 0 #2980b9; }
+.btn-yellow {
+  background: #ffdb4d; color: #d35400;
+  box-shadow: 0 6px 0 #d35400;
+  border: 2px solid #fff3a1;
+}
+.btn-yellow:active { box-shadow: 0 2px 0 #d35400; }
+.btn-ghost-casual {
+  background: transparent; color: #d35400; font-weight: 900;
+  border: 2px solid #d35400; border-radius: 30px; padding: 14px;
+  text-align: center; cursor: pointer;
+}
+.btn-ghost-casual:active { background: rgba(211,84,0,0.1); }
+
+.auth-footer {
+  text-align: center; font-size: 11px; color: #8b4513; font-weight: 600; margin-top: 16px; width: 100%;
+}
+.auth-footer a { color: #8b4513; text-decoration: underline; }
+.slider-captcha { width: 100%; }
 </style>
 </head>
 <body>
 <div class="auth-page">
   <div class="auth-card">
-    <div class="deco-bar"></div>
-
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:12px;">
-      <?php if ($_favicon): ?>
-      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" class="auth-logo-img">
-      <?php else: ?>
-      <div class="auth-logo-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎬</div>
-      <?php endif; ?>
-      <div>
-        <div class="auth-title"><?= htmlspecialchars($_seo_title) ?></div>
-        <div class="auth-subtitle">Daftar gratis &amp; langsung tonton!</div>
-      </div>
-    </div>
+    <div class="auth-card-header">Buat Akun</div>
+    <a href="/" class="auth-card-close">×</a>
+    
+    <div class="auth-card-inner">
+      <div class="auth-title-inner">Daftar gratis &amp;<br>langsung tonton!</div>
 
     <?php if ($error): ?>
     <div class="alert alert--error" style="margin-bottom:16px;">⚠️ <?= htmlspecialchars($error) ?></div>
@@ -382,7 +357,7 @@ $final_og_desc = $_seo_desc;
               placeholder="email@kamu.com" autocomplete="email">
           </div>
         </div>
-        <button type="button" class="btn-nav btn-nav-primary" style="width:100%;margin-top:8px" onclick="goStep2()">Lanjut →</button>
+        <button type="button" class="btn-glossy btn-blue" style="margin-top:12px" onclick="goStep2()">Lanjut →</button>
       </div>
 
       <!-- STEP 2: Contact & Password -->
@@ -426,9 +401,9 @@ $final_og_desc = $_seo_desc;
           <input type="hidden" name="referral" value="<?= htmlspecialchars($ref_from_url) ?>">
           <?php endif; ?>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button type="button" class="btn-nav" onclick="goStep(1)" style="flex:0 0 auto">← Kembali</button>
-          <button type="button" class="btn-nav btn-nav-primary" onclick="goStep3()" style="flex:1">Lanjut →</button>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="button" class="btn-ghost-casual" onclick="goStep(1)" style="flex:0 0 auto">← Kembali</button>
+          <button type="button" class="btn-glossy btn-blue" onclick="goStep3()" style="flex:1;margin-bottom:0">Lanjut →</button>
         </div>
       </div>
 
@@ -482,9 +457,9 @@ $final_og_desc = $_seo_desc;
             <input type="hidden" id="f_acc_name_record" name="acc_name_record" value="<?= htmlspecialchars($_POST['acc_name_record'] ?? '[]') ?>">
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button type="button" class="btn-nav" onclick="goStep(2)" style="flex:0 0 auto">← Kembali</button>
-          <button type="button" class="btn-nav btn-nav-primary" onclick="goStep4()" style="flex:1">Lanjut →</button>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="button" class="btn-ghost-casual" onclick="goStep(2)" style="flex:0 0 auto">← Kembali</button>
+          <button type="button" class="btn-glossy btn-blue" onclick="goStep4()" style="flex:1;margin-bottom:0">Lanjut →</button>
         </div>
       </div>
 
@@ -517,16 +492,16 @@ $final_og_desc = $_seo_desc;
         </div>
 
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button type="button" class="btn-nav" onclick="goStep(3)" style="flex:0 0 auto">← Kembali</button>
-          <button type="submit" id="submit-btn" class="btn-nav btn-nav-primary no-dbl-submit" disabled
-            style="opacity:.5;cursor:not-allowed;flex:1;">
+          <button type="button" class="btn-ghost-casual" onclick="goStep(3)" style="flex:0 0 auto">← Kembali</button>
+          <button type="submit" id="submit-btn" class="btn-glossy btn-blue no-dbl-submit" disabled
+            style="opacity:.5;cursor:not-allowed;flex:1;margin-bottom:0">
             🎉 DAFTAR SEKARANG
           </button>
         </div>
       </div>
     </form>
 
-    <div class="auth-switch">Sudah punya akun? <a href="/login">Masuk di sini</a></div>
+    <div class="auth-footer">Sudah punya akun? <a href="/login">Masuk di sini</a></div>
   </div>
 </div>
 

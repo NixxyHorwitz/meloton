@@ -87,191 +87,153 @@ $final_og_desc = $_seo_desc;
 <?php endif; ?>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
 <style>
-/* Game UI Login Styles */
+/* Bubble Game UI Login Styles */
 .auth-page {
-  background-color: #faebd7;
+  background-color: #1a2a3a; /* Dark background to make the modal pop */
+  padding: 16px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .auth-card {
-  border: 4px solid var(--ink);
-  border-radius: 20px;
-  box-shadow: 0 8px 0 var(--ink);
-  padding: 32px 24px;
-  background: #ffffff;
-  overflow: hidden;
+  background: #ffcc00;
+  border: 4px solid #d35400;
+  border-radius: 32px;
+  box-shadow: 0 8px 0 #d35400;
+  padding: 56px 16px 16px 16px;
   position: relative;
-}
-.deco-bar {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 6px;
-  background: repeating-linear-gradient(90deg, #f1c40f 0, #f1c40f 30px, #d1fae5 30px, #d1fae5 60px, #ede9fe 60px, #ede9fe 90px);
-}
-.auth-logo-img {
-  width: 42px; height: 42px;
-  object-fit: contain;
-  border-radius: 10px;
-  border: 2px solid var(--ink);
-  padding: 2px;
-  background: #fff;
-  flex-shrink: 0;
-}
-.auth-title {
-  font-weight: 900;
-  font-size: 18px;
-  color: var(--ink);
-  line-height: 1.2;
-}
-.auth-subtitle {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 700;
-  margin-top: 2px;
-}
-.form-label {
-  font-weight: 800;
-  font-size: 12px;
-  color: #a16238;
-  margin-bottom: 6px;
-  display: block;
-}
-.input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 3px solid var(--ink);
-  border-radius: 16px;
-  padding: 12px 14px;
-  background: #ffffff;
-  margin-bottom: 16px;
-  transition: all 0.2s;
-}
-.input-wrap:focus-within {
-  border-color: #d97706;
-}
-.input-icon {
-  color: #9ca3af;
-  flex-shrink: 0;
-}
-.form-control {
-  border: none;
-  outline: none;
-  background: transparent;
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-}
-.form-control::placeholder {
-  color: #9ca3af;
-  font-weight: 500;
-}
-.input-toggle {
-  background: none;
-  border: 1px solid var(--ink);
-  border-radius: 4px;
-  padding: 2px 4px;
-  cursor: pointer;
-  font-size: 10px;
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-masuk {
-  background: #f1f5f9;
-  color: #000;
-  font-weight: 900;
-  font-size: 14px;
-  border: none;
-  border-radius: 24px;
-  padding: 14px;
   width: 100%;
+  max-width: 400px;
+}
+.auth-card-header {
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 20px;
+  text-shadow: 1px 2px 0 #d35400;
+  letter-spacing: 0.5px;
+}
+.auth-card-close {
+  position: absolute;
+  right: 16px; top: 16px;
+  width: 28px; height: 28px;
+  background: #d35400;
+  color: #ffcc00;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 16px;
   cursor: pointer;
+  text-decoration: none;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+.auth-card-inner {
+  background: #fef3d7;
+  border-radius: 24px;
+  padding: 32px 24px 24px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.auth-title-inner {
+  font-weight: 900; font-size: 18px; color: #8b4513;
+  text-align: center; margin-bottom: 24px; line-height: 1.3;
+}
+.auth-icon-money {
+  font-size: 56px; line-height: 1; margin-bottom: 8px;
+  filter: drop-shadow(0 4px 0 rgba(0,0,0,0.1));
+}
+.auth-reward-text {
+  font-weight: 900; font-size: 24px; color: #8b4513; margin-bottom: 24px;
+}
+
+.input-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border: 3px solid #cc8e00; border-radius: 20px;
+  padding: 14px 16px; background: #ffffff;
+  margin-bottom: 12px; width: 100%;
+}
+.input-wrap:focus-within { border-color: #d35400; }
+.form-control {
+  border: none; outline: none; background: transparent; flex: 1;
+  font-size: 14px; font-weight: 700; color: #8b4513;
+}
+.form-control::placeholder { color: #d4a373; font-weight: 600; }
+
+.btn-glossy {
+  width: 100%; border: none; border-radius: 30px; padding: 14px;
+  font-weight: 900; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; overflow: hidden; cursor: pointer; text-decoration: none; margin-bottom: 16px;
   transition: transform 0.1s;
 }
-.btn-masuk:active { transform: scale(0.98); }
-.btn-daftar {
-  background: #ffffff;
-  color: #0000ff;
-  font-weight: 900;
-  font-size: 14px;
-  border: 3px solid var(--ink);
-  border-radius: 24px;
-  padding: 14px;
-  width: 100%;
-  cursor: pointer;
-  box-shadow: 0 4px 0 var(--ink);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: transform 0.1s, box-shadow 0.1s;
+.btn-glossy::before {
+  content: ''; position: absolute; top: 4px; left: 10%; right: 10%; height: 35%;
+  background: rgba(255,255,255,0.4); border-radius: 20px; pointer-events: none;
 }
-.btn-daftar:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 var(--ink);
+.btn-glossy:active { transform: translateY(4px); }
+.btn-blue {
+  background: #3498db; color: #fff;
+  box-shadow: 0 6px 0 #2980b9;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  border: 2px solid #5dade2;
 }
-.auth-switch {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 13px;
-  color: #8c5b35;
-  font-weight: 600;
+.btn-blue:active { box-shadow: 0 2px 0 #2980b9; }
+.btn-yellow {
+  background: #ffdb4d; color: #d35400;
+  box-shadow: 0 6px 0 #d35400;
+  border: 2px solid #fff3a1;
 }
-.auth-switch a {
-  color: #ff8c00;
-  font-weight: 800;
-  text-decoration: none;
+.btn-yellow:active { box-shadow: 0 2px 0 #d35400; }
+
+.auth-footer {
+  text-align: center; font-size: 11px; color: #8b4513; font-weight: 600; margin-top: 8px;
 }
+.auth-footer a { color: #8b4513; text-decoration: underline; }
+
+.input-icon { color: #cc8e00; }
+.input-toggle { background: none; border: none; font-size: 16px; cursor: pointer; }
 </style>
 </head>
+<body>
 <div class="auth-page">
   <div class="auth-card">
-    <div class="deco-bar"></div>
-
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;margin-top:12px;">
-      <?php if ($_favicon): ?>
-      <img src="<?= htmlspecialchars($_favicon) ?>" alt="" class="auth-logo-img">
-      <?php else: ?>
-      <div class="auth-logo-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">🎬</div>
+    <div class="auth-card-header">Selamat Datang</div>
+    <a href="/" class="auth-card-close">×</a>
+    
+    <div class="auth-card-inner">
+      <div class="auth-title-inner">Login untuk menarik<br>uang.</div>
+      
+      <?php if ($error): ?>
+      <div class="alert alert--error" style="margin-bottom:16px;width:100%;border-radius:12px;">⚠️ <?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
-      <div>
-        <div class="auth-title"><?= htmlspecialchars($_seo_title) ?></div>
-        <div class="auth-subtitle">Tonton video &amp; kumpulkan reward</div>
+
+      <form method="POST" style="width: 100%;">
+        <?= csrf_field() ?>
+        
+        <div class="input-wrap">
+          <svg class="input-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input class="form-control" type="text" name="login"
+            value="<?= htmlspecialchars($_POST['login'] ?? '') ?>"
+            placeholder="Username atau Email" autofocus autocomplete="username">
+        </div>
+        
+        <div class="input-wrap">
+          <svg class="input-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <input class="form-control" type="password" id="pwd" name="password"
+            placeholder="Password Kamu" autocomplete="current-password">
+          <button type="button" class="input-toggle" onclick="document.getElementById('pwd').type=document.getElementById('pwd').type==='password'?'text':'password'" title="Tampilkan/Sembunyikan">👁</button>
+        </div>
+
+        <button type="submit" class="btn-glossy btn-blue" style="margin-top:12px;">
+          🚀 MASUK
+        </button>
+        <a href="/register" class="btn-glossy btn-yellow">
+          ✨ DAFTAR GRATIS
+        </a>
+      </form>
+
+      <div class="auth-footer">
+        Belum punya akun? <a href="/register">Daftar sekarang</a>
       </div>
     </div>
-
-    <?php if ($error): ?>
-    <div class="alert alert--error" style="margin-bottom:16px;">⚠️ <?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-
-    <form method="POST">
-      <?= csrf_field() ?>
-      
-      <label class="form-label">Username / Email</label>
-      <div class="input-wrap">
-        <svg class="input-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <input class="form-control" type="text" name="login"
-          value="<?= htmlspecialchars($_POST['login'] ?? '') ?>"
-          placeholder="username atau email" autofocus autocomplete="username">
-      </div>
-      
-      <label class="form-label">Password</label>
-      <div class="input-wrap">
-        <svg class="input-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        <input class="form-control" type="password" id="pwd" name="password"
-          placeholder="Password kamu" autocomplete="current-password">
-        <button type="button" class="input-toggle" onclick="document.getElementById('pwd').type=document.getElementById('pwd').type==='password'?'text':'password'" title="Tampilkan/Sembunyikan">👁</button>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:12px; margin-top:24px;">
-        <button type="submit" class="btn-masuk">🚀 MASUK</button>
-        <a href="/register" class="btn-daftar">✨ DAFTAR GRATIS</a>
-      </div>
-    </form>
-
-    <div class="auth-switch">Belum punya akun? <a href="/register">Daftar gratis →</a></div>
   </div>
 </div>
 </body>
