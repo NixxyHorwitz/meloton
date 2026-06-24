@@ -270,13 +270,6 @@ $_psvg = [
   <div style="flex:1;font-weight:800;font-size:13px">Buku Panduan</div>
   <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:.35"><polyline points="9 18 15 12 9 6"/></svg>
 </a>
-<?php if (setting($pdo, 'plinko_enabled', '1') === '1'): ?>
-<a href="/events" class="contact-item">
-  <div class="contact-icon" style="background:var(--yellow);color:var(--ink);font-size:18px"><i class="ph-fill ph-trophy"></i></div>
-  <div style="flex:1;font-weight:800;font-size:13px">Event Plinko & Lapak</div>
-  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:.35"><polyline points="9 18 15 12 9 6"/></svg>
-</a>
-<?php endif; ?>
 
 <?php foreach ($_contact_btns as $_cb): ?>
 <a href="<?= htmlspecialchars($_cb['url']) ?>" target="_blank" rel="noopener" class="contact-item">

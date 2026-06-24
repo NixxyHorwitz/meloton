@@ -7,7 +7,7 @@ Welcome to the **Meloton** project! This document is created for future AI agent
 - **Stack:** Vanilla PHP 8+, MySQL, Vanilla CSS/JS.
 - **Routing:** Handled via `.htaccess` (rewriting URLs like `/home` to `user/home.php`, `/console` to `console/index.php`).
 - **Directories:**
-  - `user/`: All user-facing pages (dashboard, watch videos, deposit, withdraw, plinko, etc.).
+  - `user/`: All user-facing pages (dashboard, watch videos, deposit, withdraw, etc.).
   - `console/`: Admin dashboard pages.
   - `auth/`: Login, register, logout logic and views.
   - `api/`: AJAX endpoints returning JSON.

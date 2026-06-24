@@ -20,7 +20,7 @@ $params = [];
 
 if ($filter_cat) {
     $cat_slugs = match($filter_cat) {
-        'daily'    => ['daily_watch_3','daily_watch_5','daily_plinko','daily_checkin'],
+        'daily'    => ['daily_watch_3','daily_watch_5','daily_checkin'],
         'weekly'   => ['weekly_streak_7','weekly_watch_20','weekly_watch_7days'],
         'lifetime' => ['lifetime_first_ref','lifetime_5_refs','lifetime_first_wd','lifetime_100_videos','lifetime_upgrade'],
         default    => []
@@ -81,7 +81,7 @@ $rows = $stmt->fetchAll();
 $REWARD_MAP = [
     'daily_watch_3'       => ['label'=>'Tonton 3 Video',          'cat'=>'Harian',    'reward'=>1000],
     'daily_watch_5'       => ['label'=>'Tonton 5 Video',          'cat'=>'Harian',    'reward'=>2500],
-    'daily_plinko'        => ['label'=>'Main Plinko 3x',          'cat'=>'Harian',    'reward'=>1500],
+
     'daily_checkin'       => ['label'=>'Check-in Harian',         'cat'=>'Harian',    'reward'=>100],
     'weekly_streak_7'     => ['label'=>'Streak 7 Hari',           'cat'=>'Mingguan',  'reward'=>10000],
     'weekly_watch_20'     => ['label'=>'Tonton 20 Video',         'cat'=>'Mingguan',  'reward'=>8000],

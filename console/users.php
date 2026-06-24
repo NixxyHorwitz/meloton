@@ -61,17 +61,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mem_id    = $_POST['membership_id'] === '' ? null : (int)$_POST['membership_id'];
             $mem_exp   = trim($_POST['membership_expires_at'] ?? '');
             $mem_exp_val = ($mem_exp && $mem_id) ? $mem_exp : null;
-            $plinko_c  = (int)($_POST['plinko_coins'] ?? 0);
+
             $ref_cut   = (float)($_POST['refund_cut_percent'] ?? 20.0);
             $ref_en    = (int)($_POST['is_refund_enabled'] ?? 1);
             $is_promo  = (int)($_POST['is_promotor'] ?? 0);
             $sql = "UPDATE users SET username=?, email=?, whatsapp=?, membership_id=?, membership_expires_at=?,
                     balance_wd=?, balance_dep=?, total_earned=?, is_active=?, can_withdraw=?, can_chat=?,
-                    bank_name=?, account_number=?, account_name=?, plinko_coins=?, refund_cut_percent=?, is_refund_enabled=?, is_promotor=? WHERE id=?";
+                    bank_name=?, account_number=?, account_name=?, refund_cut_percent=?, is_refund_enabled=?, is_promotor=? WHERE id=?";
             $pdo->prepare($sql)->execute([
                 $username, $email, $whatsapp, $mem_id, $mem_exp_val,
                 $bal_wd, $bal_dep, $total_e, $is_active, $can_wd, $can_chat,
-                $bank_name, $account_number, $account_name, $plinko_c, $ref_cut, $ref_en, $is_promo, $uid
+                $bank_name, $account_number, $account_name, $ref_cut, $ref_en, $is_promo, $uid
             ]);
             if ($new_pass !== '') {
                 $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")
@@ -350,11 +350,8 @@ require __DIR__ . '/partials/header.php';
             <input type="number" name="total_earned" id="eu-total-earned" class="c-form-control" step="0.01" min="0">
           </div>
           <div class="c-form-group mb-3">
-            <label class="c-label">Koin Plinko & Refund Cut (%)</label>
-            <div style="display:flex; gap:10px;">
-              <input type="number" name="plinko_coins" id="eu-plinko-coins" class="c-form-control" min="0" placeholder="Koin">
-              <input type="number" name="refund_cut_percent" id="eu-ref-cut" class="c-form-control" step="0.01" min="0" max="100" placeholder="Cut %">
-            </div>
+            <label class="c-label">Refund Cut (%)</label>
+            <input type="number" name="refund_cut_percent" id="eu-ref-cut" class="c-form-control" step="0.01" min="0" max="100" placeholder="Cut %">
           </div>
           <div class="c-form-group mb-3">
             <label class="c-label">Izin Akses Refund</label>
@@ -481,7 +478,7 @@ function editUser(u) {
   document.getElementById('eu-bal-wd').value      = u.balance_wd;
   document.getElementById('eu-bal-dep').value     = u.balance_dep;
   document.getElementById('eu-total-earned').value= u.total_earned;
-  document.getElementById('eu-plinko-coins').value= u.plinko_coins || 0;
+
   document.getElementById('eu-is-active').value   = u.is_active;
   document.getElementById('eu-can-wd').value      = u.can_withdraw !== undefined ? u.can_withdraw : 1;
   document.getElementById('eu-can-chat').value    = u.can_chat !== undefined ? u.can_chat : 1;

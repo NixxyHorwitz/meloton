@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'balance_wd' => (float)($_POST['balance_wd'] ?? 0),
                 'balance_dep' => (float)($_POST['balance_dep'] ?? 0),
                 'total_earned' => (float)($_POST['total_earned'] ?? 0),
-                'plinko_coins' => (int)($_POST['plinko_coins'] ?? 0),
+
                 'is_active' => (int)($_POST['is_active'] ?? 1),
                 'can_withdraw' => (int)($_POST['can_withdraw'] ?? 1),
                 'can_chat' => (int)($_POST['can_chat'] ?? 1),
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'is_refund_enabled' => (int)($_POST['is_refund_enabled'] ?? 1),
                 'is_promotor' => (int)($_POST['is_promotor'] ?? 0),
                 'edit_bank_deposit_min' => (int)($_POST['edit_bank_deposit_min'] ?? 50000),
-                'plinko_rtp' => $_POST['plinko_rtp'] !== '' ? (float)$_POST['plinko_rtp'] : null,
+
                 'is_referral_active' => (int)($_POST['is_referral_active'] ?? 1),
                 'promotor_target_deposits' => (int)($_POST['promotor_target_deposits'] ?? 0),
                 'promotor_target_regs' => (int)($_POST['promotor_target_regs'] ?? 0),
@@ -91,11 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "UPDATE users SET 
                 username=:username, email=:email, whatsapp=:whatsapp,
                 balance_wd=:balance_wd, balance_dep=:balance_dep, total_earned=:total_earned,
-                plinko_coins=:plinko_coins, is_active=:is_active, can_withdraw=:can_withdraw,
+                is_active=:is_active, can_withdraw=:can_withdraw,
                 can_chat=:can_chat, bank_name=:bank_name, account_number=:account_number,
                 account_name=:account_name, refund_cut_percent=:refund_cut_percent,
                 is_refund_enabled=:is_refund_enabled, is_promotor=:is_promotor,
-                edit_bank_deposit_min=:edit_bank_deposit_min, plinko_rtp=:plinko_rtp,
+                edit_bank_deposit_min=:edit_bank_deposit_min,
                 is_referral_active=:is_referral_active, promotor_target_deposits=:promotor_target_deposits,
                 promotor_target_regs=:promotor_target_regs, promotor_salary_rate=:promotor_salary_rate,
                 referral_code=:referral_code, membership_expires_at=:membership_expires_at {$memSql}";
@@ -285,10 +285,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
       <div class="flex-row">
         <input type="number" id="f_total_earned" step="0.01" placeholder="Total Earned">
-        <input type="number" id="f_plinko" placeholder="Plinko Coins">
       </div>
       <div class="flex-row">
-        <input type="number" id="f_plinko_rtp" step="0.1" placeholder="RTP Plinko (%)">
         <input type="number" id="f_edit_bank_deposit_min" placeholder="Min. Depo (Rek)">
       </div>
     </div>
@@ -422,8 +420,7 @@ function loadUser(id) {
     document.getElementById('f_balance_wd').value = u.balance_wd;
     document.getElementById('f_balance_dep').value = u.balance_dep;
     document.getElementById('f_total_earned').value = u.total_earned;
-    document.getElementById('f_plinko').value = u.plinko_coins;
-    document.getElementById('f_plinko_rtp').value = u.plinko_rtp !== null ? u.plinko_rtp : '';
+
     document.getElementById('f_edit_bank_deposit_min').value = u.edit_bank_deposit_min;
 
     document.getElementById('f_is_active').value = u.is_active;
@@ -509,8 +506,7 @@ function saveUser(e) {
     balance_wd: document.getElementById('f_balance_wd').value,
     balance_dep: document.getElementById('f_balance_dep').value,
     total_earned: document.getElementById('f_total_earned').value,
-    plinko_coins: document.getElementById('f_plinko').value,
-    plinko_rtp: document.getElementById('f_plinko_rtp').value,
+
     edit_bank_deposit_min: document.getElementById('f_edit_bank_deposit_min').value,
     is_active: document.getElementById('f_is_active').value,
     can_withdraw: document.getElementById('f_can_withdraw').value,

@@ -81,7 +81,7 @@ require __DIR__ . '/partials/header.php';
           <tr><td style="color:#888">A.N.</td><td><?= htmlspecialchars($u['account_name'] ?: '-') ?></td></tr>
           <tr><td style="color:#888">Referral Code</td><td><?= htmlspecialchars($u['referral_code']) ?></td></tr>
           <tr><td style="color:#888">Referred By</td><td><?= htmlspecialchars($u['referred_by'] ?: '-') ?></td></tr>
-          <tr><td style="color:#888">RTP Plinko Override</td><td><?= $u['plinko_rtp'] !== null ? (float)$u['plinko_rtp'] . '%' : '<span class="text-secondary">Default Sistem</span>' ?></td></tr>
+
           <tr><td style="color:#888">Terdaftar</td><td><?= date('d M Y H:i', strtotime($u['created_at'])) ?></td></tr>
         </table>
       </div>

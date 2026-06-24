@@ -15,7 +15,7 @@ if (!$user) {
         'membership_expires_at' => null,
         'referral_code' => '-',
         'is_promotor' => 0,
-        'plinko_coins' => 0,
+
     ];
 }
 
@@ -228,20 +228,6 @@ if ($is_newcomer):
       <a href="/deposit" class="balance-card__btn balance-card__btn--deposit">Isi Saldo</a>
     </div>
   </div>
-  
-  <?php if (setting($pdo, 'plinko_enabled', '1') === '1'): ?>
-  <div class="balance-card__footer">
-    <span class="balance-card__footer-lbl">
-      <i class="ph-fill ph-coins" style="color:#d97706; font-size:14px"></i> Koin Plinko
-    </span>
-    <span class="balance-card__footer-val" id="user-coins">
-      <?= number_format((int)$user['plinko_coins']) ?>
-    </span>
-    <a href="/plinko-shop" class="balance-card__footer-btn">
-      Lapak Koin <i class="ph-bold ph-arrow-right"></i>
-    </a>
-  </div>
-  <?php endif; ?>
 </div>
 
 <!-- 3. QUICK ACTIONS GRID -->
@@ -292,17 +278,6 @@ if ($is_newcomer):
       <p class="promo-banner__desc">Kembangkan saldo kamu</p>
     </div>
     <div class="promo-banner__icon"><i class="ph-fill ph-trend-up"></i></div>
-  </a>
-  <?php endif; ?>
-  
-  <?php if (setting($pdo, 'plinko_enabled', '1') === '1'): ?>
-  <a href="/events" class="promo-banner promo-banner--plinko">
-    <div class="promo-banner__content">
-      <div class="promo-banner__tag">EVENT</div>
-      <h3 class="promo-banner__title">Plinko Arcade</h3>
-      <p class="promo-banner__desc">Main game & koin gratis</p>
-    </div>
-    <div class="promo-banner__icon"><i class="ph-fill ph-game-controller"></i></div>
   </a>
   <?php endif; ?>
 </div>

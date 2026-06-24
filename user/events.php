@@ -2,12 +2,7 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
 
-// Guard: Check if Plinko feature is enabled globally
-$plinko_enabled = setting($pdo, 'plinko_enabled', '1') === '1';
-if (!$plinko_enabled) {
-    $_SESSION['flash_home_err'] = '⚠️ Event Mini Game Plinko sedang dinonaktifkan oleh Administrator.';
-    redirect('/home');
-}
+
 
 $pageTitle  = 'Event Khusus — Meloton';
 $activePage = 'events';
@@ -26,53 +21,17 @@ require dirname(__DIR__) . '/partials/header.php';
   overflow: hidden;
 ">
   <div style="font-size: 26px; position: absolute; right: 10px; top: 10px; opacity: 0.15;">🎉</div>
-  <h1 style="font-weight:900; font-size:22px; display:flex; align-items:center; gap:6px; color: var(--ink);">🎉 Event Plinko & Lapak</h1>
+  <h1 style="font-weight:900; font-size:22px; display:flex; align-items:center; gap:6px; color: var(--ink);">🎉 Event Khusus</h1>
   <p style="color:#444; font-weight:700; margin-top:2px; font-size:12px;">Selamat datang di arena event! Pilih arena bermain atau kunjungi toko koin untuk bertransaksi.</p>
 </div>
 
 <!-- Event Options Panel Grid -->
 <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
-
-  <!-- Plinko Game Card -->
-  <a href="/plinko" class="card card--sky" style="
-    display: block; 
-    text-decoration: none; 
-    color: var(--ink); 
-    box-shadow: 5px 5px 0 var(--ink); 
-    border: 3.5px solid var(--ink);
-    transition: transform 0.15s, box-shadow 0.15s;
-  " onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='6px 6px 0 var(--ink)';" onmouseout="this.style.transform='none'; this.style.boxShadow='5px 5px 0 var(--ink)';">
-    <div class="card__body" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 16px;">
-      <div style="flex: 1; padding-right: 12px;">
-        <div style="font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 6px;">🎮 Main Plinko Neon Arcade</div>
-        <div style="font-size: 11px; font-weight: 700; color: #333; margin-top: 5px; line-height: 1.4;">
-          Jatuhkan bola neon di papan pin besi Galton Board untuk melipatgandakan koin Anda hingga 10x lipat!
-        </div>
-      </div>
-      <div style="font-size: 26px; background: #fff; border: 2.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🎮</div>
-    </div>
-  </a>
-
-  <!-- Plinko Shop Card -->
-  <a href="/plinko-shop" class="card card--mint" style="
-    display: block; 
-    text-decoration: none; 
-    color: var(--ink); 
-    box-shadow: 5px 5px 0 var(--ink); 
-    border: 3.5px solid var(--ink);
-    transition: transform 0.15s, box-shadow 0.15s;
-  " onmouseover="this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='6px 6px 0 var(--ink)';" onmouseout="this.style.transform='none'; this.style.boxShadow='5px 5px 0 var(--ink)';">
-    <div class="card__body" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 16px;">
-      <div style="flex: 1; padding-right: 12px;">
-        <div style="font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 6px;">🛒 Lapak Jual-Beli Koin</div>
-        <div style="font-size: 11px; font-weight: 700; color: #333; margin-top: 5px; line-height: 1.4;">
-          Klaim koin gratis harian, beli koin dengan Saldo Beli, atau jual koin kemenangan Anda langsung menjadi Saldo Penarikan!
-        </div>
-      </div>
-      <div style="font-size: 26px; background: #fff; border: 2.5px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🪙</div>
-    </div>
-  </a>
-
+  <div class="card" style="padding: 32px 16px; text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+    <div style="font-weight: 800; font-size: 16px; margin-bottom: 8px;">Belum Ada Event</div>
+    <div style="font-size: 13px; color: var(--text-muted); font-weight: 700;">Nantikan event menarik selanjutnya!</div>
+  </div>
 </div>
 
 <!-- Return Button to Home -->

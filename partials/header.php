@@ -95,13 +95,6 @@ i[class^="ph-"] {
             <span class="bal-dropdown__lbl" style="display:flex;align-items:center;gap:4px;"><i class="ph-bold ph-bank" style="font-size:16px;color:var(--blue)"></i> Saldo Beli</span>
             <span class="bal-dropdown__val"><?= format_rp((float)$user['balance_dep']) ?></span>
           </div>
-          <?php if (setting($pdo, 'plinko_enabled', '1') === '1'): ?>
-          <div class="bal-dropdown__row bal-dropdown__row--coin">
-            <span class="bal-dropdown__lbl" style="display:flex;align-items:center;gap:4px;"><i class="ph-bold ph-coin" style="font-size:16px;color:#d97706"></i> Koin Plinko</span>
-            <span class="bal-dropdown__val" id="user-coins"><?= number_format((int)$user['plinko_coins']) ?></span>
-          </div>
-          <?php endif; ?>
-          <a href="/plinko-shop" class="bal-dropdown__link">🛒 Lapak Koin →</a>
         </div>
       </div>
 

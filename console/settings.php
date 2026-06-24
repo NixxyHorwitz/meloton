@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_general') {
         $keys = ['site_name','site_tagline','free_watch_limit','referral_bonus',
                  'referral_commission_percent','checkin_reward','min_deposit','min_withdraw','wd_min_level',
-                 'depo_unique_code_min','depo_unique_code_max','plinko_buy_rate','plinko_sell_rate',
+                 'depo_unique_code_min','depo_unique_code_max',
                  'target_deposit_daily','target_member_daily'];
         foreach ($keys as $k) {
             if (isset($_POST[$k])) setting_set($pdo, $k, clean_input($_POST[$k]));
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setting_set($pdo, 'wd_require_level', isset($_POST['wd_require_level']) ? '1' : '0');
         setting_set($pdo, 'depo_unique_code_enabled', isset($_POST['depo_unique_code_enabled']) ? '1' : '0');
         setting_set($pdo, 'investment_enabled', isset($_POST['investment_enabled']) ? '1' : '0');
-        setting_set($pdo, 'plinko_enabled', isset($_POST['plinko_enabled']) ? '1' : '0');
+
         $flash = 'Pengaturan umum berhasil disimpan!';
     }
 
@@ -137,10 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if ($action === 'save_rtp') {
-        if (isset($_POST['plinko_default_rtp'])) {
-            setting_set($pdo, 'plinko_default_rtp', clean_input($_POST['plinko_default_rtp']));
-        }
-        $flash = 'Pengaturan RTP Plinko berhasil disimpan!';
+
     }
 }
 
@@ -191,7 +188,7 @@ $tabs = [
     'bank'    => ['icon' => '🏦', 'label' => 'Rekening'],
     'wd'      => ['icon' => '🔒', 'label' => 'Jam Lock WD'],
     'system'  => ['icon' => '🔧', 'label' => 'Sistem & TG'],
-    'rtp'     => ['icon' => '🎯', 'label' => 'RTP Plinko'],
+
 ];
 ?>
 
@@ -278,34 +275,6 @@ $tabs = [
               <small style="color:#888;font-size:11px">Jika dimatikan, seluruh menu dan halaman investasi tidak akan dapat diakses oleh user.</small>
             </div>
 
-            <div class="c-form-group">
-              <label class="c-label">Fitur Mini Game Plinko</label>
-              <div class="form-check ms-1">
-                <input class="form-check-input" type="checkbox" name="plinko_enabled" id="plinko_enabled_chk" value="1" <?= $s('plinko_enabled','1')==='1'?'checked':'' ?>>
-                <label class="form-check-label text-secondary" for="plinko_enabled_chk" style="font-size:13px;font-weight:700">
-                  Aktifkan Fitur Mini Game Plinko untuk Pengguna
-                </label>
-              </div>
-              <small style="color:#888;font-size:11px">Jika dimatikan, seluruh menu dan halaman Plinko tidak akan dapat diakses oleh user.</small>
-            </div>
-
-            <div class="row g-2 mb-3">
-              <div class="col-md-6">
-                <div class="c-form-group mb-0">
-                  <label class="c-label">Harga Beli Koin Plinko (Rp / 1 Koin)</label>
-                  <input type="number" name="plinko_buy_rate" class="c-form-control" value="<?= htmlspecialchars($s('plinko_buy_rate','100')) ?>" min="1" required>
-                  <small style="color:#888;font-size:11px">Harga beli koin menggunakan saldo beli.</small>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="c-form-group mb-0">
-                  <label class="c-label">Harga Jual Koin Plinko (Rp / 1 Koin)</label>
-                  <input type="number" name="plinko_sell_rate" class="c-form-control" value="<?= htmlspecialchars($s('plinko_sell_rate','100')) ?>" min="1" required>
-                  <small style="color:#888;font-size:11px">Harga jual koin yang ditukarkan ke saldo Penarikan.</small>
-                </div>
-              </div>
-            </div>
-            
             <div class="c-form-group"><label class="c-label">Bonus Referral Registrasi (Rp) <small style="color:#888">(opsional)</small></label>
               <input type="number" name="referral_bonus" class="c-form-control" value="<?= $s('referral_bonus','1000') ?>" min="0"></div>
             
@@ -472,27 +441,6 @@ $tabs = [
     </div>
   </div><!-- end tab-system -->
 
-  <!-- TAB RTP -->
-  <div class="stab-pane <?= $active_tab==='rtp'?'active':'' ?>" id="tab-rtp">
-    <div class="row g-3"><div class="col-md-6">
-      <div class="c-card mb-3">
-        <div class="c-card-header"><span class="c-card-title">🎯 Pengaturan RTP Default Plinko</span></div>
-        <div class="c-card-body">
-          <form method="POST">
-            <?= csrf_field() ?><input type="hidden" name="action" value="save_rtp">
-            <div class="c-form-group">
-              <label class="c-label">RTP Default Plinko (%)</label>
-              <input type="number" name="plinko_default_rtp" class="c-form-control" 
-                     value="<?= htmlspecialchars($s('plinko_default_rtp','99.8')) ?>" 
-                     step="0.1" min="1" max="500" required>
-              <small class="text-secondary" style="font-size:11px">Mengatur rata-rata persentase kemenangan default game Plinko di sistem secara global. Bisa diatur di atas 100% (contoh: 120.0%).</small>
-            </div>
-            <button type="submit" class="btn btn-sm text-white mt-2" style="background:var(--brand)">Simpan Pengaturan RTP</button>
-          </form>
-        </div>
-      </div>
-    </div></div>
-  </div>
 </div>
 
 <!-- System info -->

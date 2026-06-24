@@ -662,10 +662,6 @@ body {
   background: linear-gradient(135deg, #f39c12, #d35400);
 }
 
-.promo-banner--plinko {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-}
-
 .promo-banner__content {
   display: flex;
   flex-direction: column;

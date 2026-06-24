@@ -18,7 +18,7 @@ $panduan_step4    = setting($pdo, 'panduan_step4',      'Minimal withdraw ' . fo
 $panduan_faq      = setting($pdo, 'panduan_faq_custom', '');
 $panduan_cta_text = setting($pdo, 'panduan_cta_text',   '🎬 Mulai Tonton Sekarang →');
 $panduan_cta_url  = setting($pdo, 'panduan_cta_url',    '/videos');
-$plinko_on        = setting($pdo, 'plinko_enabled',     '1') === '1';
+
 
 // ── Fetch memberships from DB ───────────────────────────────
 try {
@@ -191,7 +191,7 @@ require dirname(__DIR__) . '/partials/header.php';
     </div>
     <div class="tip-box" style="background:#cffafe">
       <div class="tip-box__icon">🎯</div>
-      <div><strong>Misi</strong> — Selesaikan misi harian, mingguan, &amp; pencapaian untuk klaim reward tambahan ke Saldo Tarik. Ada misi tonton video, main plinko<?= $plinko_on ? '' : ' (jika aktif)' ?>, referral, dan banyak lagi!</div>
+      <div><strong>Misi</strong> — Selesaikan misi harian, mingguan, &amp; pencapaian untuk klaim reward tambahan ke Saldo Tarik. Ada misi tonton video, referral, dan banyak lagi!</div>
     </div>
     <div style="font-size:11px;color:#555;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
       <a href="/checkin" style="font-weight:800">Check-in →</a>
@@ -200,23 +200,7 @@ require dirname(__DIR__) . '/partials/header.php';
   </div>
 </div>
 
-<?php if ($plinko_on): ?>
-<!-- Plinko -->
-<div class="guide-card">
-  <div class="guide-card__hd">🎰 Plinko Game</div>
-  <div class="guide-card__bd">
-    <div class="tip-box" style="background:#fce7f3">
-      <div class="tip-box__icon">🪙</div>
-      <div><strong>Plinko</strong> — Gunakan Koin Plinko untuk bermain dan menangkan reward saldo tarik! Koin Plinko bisa dibeli di Lapak Koin atau didapat dari misi.</div>
-    </div>
-    <div style="font-size:11px;color:#555;margin-top:6px">
-      <a href="/plinko" style="font-weight:800">Main Plinko →</a>
-      &nbsp;·&nbsp;
-      <a href="/plinko-shop" style="font-weight:800">Lapak Koin →</a>
-    </div>
-  </div>
-</div>
-<?php endif; ?>
+
 
 <!-- FAQ -->
 <div class="guide-card">
