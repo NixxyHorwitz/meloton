@@ -191,8 +191,8 @@ require dirname(__DIR__) . '/partials/header.php';
 $is_newcomer = !$is_guest && (empty($history) || (isset($user['created_at']) && strtotime($user['created_at']) > time() - 3 * 86400) || ($user['balance_wd'] == 0 && $user['balance_dep'] == 0));
 if ($is_newcomer): 
 ?>
-<div style="background:var(--brand-light); border:1px solid #ffe4e6; border-radius:12px; padding:12px; margin-bottom:16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-sm);">
-  <div style="background:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
+<div style="background:var(--brand-light); border:var(--border-light); border-radius:12px; padding:12px; margin-bottom:16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-sm);">
+  <div style="background:var(--white); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 2px 4px rgba(0,0,0,0.05)">
     <i class="ph-bold ph-book-open-text" style="font-size:18px; color:var(--brand)"></i>
   </div>
   <div style="flex:1">
@@ -234,19 +234,19 @@ if ($is_newcomer):
 <div class="quick-actions">
   <div class="quick-actions__grid">
     <a href="/deposit" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-download-simple"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-download-simple"></i></div>
       <span class="quick-actions__label">Top Up</span>
     </a>
     <a href="/withdraw" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-upload-simple"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-upload-simple"></i></div>
       <span class="quick-actions__label">Tarik</span>
     </a>
     <a href="/history" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-receipt"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-receipt"></i></div>
       <span class="quick-actions__label">Riwayat</span>
     </a>
     <a href="/missions" class="quick-actions__item">
-      <div class="quick-actions__icon-wrapper" style="background:#fff1f2; color:var(--brand);"><i class="ph-fill ph-target"></i></div>
+      <div class="quick-actions__icon-wrapper" style="background:var(--brand-light); color:var(--brand);"><i class="ph-fill ph-target"></i></div>
       <span class="quick-actions__label">Misi</span>
     </a>
     <a href="/checkin" class="quick-actions__item">
@@ -390,8 +390,8 @@ if ($is_newcomer):
 <div class="card" style="margin-bottom:16px; overflow:hidden;">
   <div class="card__body" style="padding:0">
     <?php foreach ($history as $h): ?>
-    <div class="list-item" style="padding:10px 14px; border-bottom:1px solid #f1f5f9">
-      <div class="list-item__icon" style="background:#ecfdf5; width:28px; height:28px; font-size:14px; border-radius:6px; color:var(--green)">
+    <div class="list-item" style="padding:10px 14px; border-bottom:var(--border-light)">
+      <div class="list-item__icon" style="background:var(--brand-light); width:28px; height:28px; font-size:14px; border-radius:6px; color:var(--green)">
         <i class="ph-bold ph-monitor-play"></i>
       </div>
       <div class="list-item__body">
@@ -424,8 +424,8 @@ $popup_reset_hours  = max(0, (int) setting($pdo, 'popup_reset_hours', '0'));
 <?php if ($popup_enabled): ?>
 <!-- Popup Panduan -->
 <div id="guide-popup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; align-items:flex-end; justify-content:center; padding-bottom:0">
-  <div style="background:var(--white); border-radius:20px 20px 0 0; padding:20px; max-width:480px; width:100%; transform:translateY(100%); transition:transform .3s ease; position:relative; box-shadow: 0 -8px 24px rgba(0,0,0,0.15)">
-    <button onclick="closePopup()" style="position:absolute; top:16px; right:16px; background:#f1f5f9; color:var(--ink); border:none; width:28px; height:28px; border-radius:50%; font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer"><i class="ph-bold ph-x"></i></button>
+  <div style="background:var(--white); border-radius:20px 20px 0 0; padding:20px; max-width:480px; width:100%; transform:translateY(100%); transition:transform .3s ease; position:relative; box-shadow: 0 -8px 24px rgba(0,0,0,0.5)">
+    <button onclick="closePopup()" style="position:absolute; top:16px; right:16px; background:var(--bg); color:var(--ink); border:none; width:28px; height:28px; border-radius:50%; font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer"><i class="ph-bold ph-x"></i></button>
     
     <div style="width:48px; height:48px; background:var(--brand-light); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 12px; color:var(--brand)">
       <i class="ph-fill ph-book-open"></i>
