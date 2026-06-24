@@ -360,6 +360,37 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
 </div>
 
 <script>
+// UI Notification (Toast)
+function showToast(msg, type = 'error') {
+  const t = document.createElement('div');
+  t.style.position = 'fixed';
+  t.style.top = '20px';
+  t.style.left = '50%';
+  t.style.transform = 'translate(-50%, -20px)';
+  t.style.background = type === 'error' ? '#EF4444' : '#10B981';
+  t.style.color = '#fff';
+  t.style.padding = '12px 24px';
+  t.style.borderRadius = '8px';
+  t.style.fontWeight = '600';
+  t.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+  t.style.zIndex = '9999';
+  t.style.transition = 'all 0.3s ease';
+  t.style.opacity = '0';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  
+  setTimeout(() => {
+    t.style.opacity = '1';
+    t.style.transform = 'translate(-50%, 0)';
+  }, 10);
+  
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translate(-50%, -20px)';
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+}
+
 function selectEmoji(btn, val) {
   document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
@@ -391,15 +422,15 @@ async function goStep2() {
   const u = document.getElementById('f_username').value.trim();
   const e = document.getElementById('f_email').value.trim();
   
-  if (!u || u.length < 3 || !/^[a-zA-Z0-9_]+$/.test(u)) { alert('Username minimal 3 karakter (huruf/angka/underscore)!'); return; }
-  if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { alert('Format email tidak valid!'); return; }
+  if (!u || u.length < 3 || !/^[a-zA-Z0-9_]+$/.test(u)) { showToast('Username minimal 3 karakter (huruf/angka/underscore)!'); return; }
+  if (!e || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { showToast('Format email tidak valid!'); return; }
   
   btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
   const r1 = await checkApi('username', u);
-  if (r1.status === 'error') { alert(r1.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  if (r1.status === 'error') { showToast(r1.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
   
   const r2 = await checkApi('email', e);
-  if (r2.status === 'error') { alert(r2.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  if (r2.status === 'error') { showToast(r2.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
   
   btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
   goStep(2);
@@ -410,12 +441,12 @@ async function goStep3() {
   const wa = document.getElementById('f_wa').value.replace(/\D/g,'');
   const pwd = document.getElementById('f_pwd').value;
   
-  if (wa.length < 9) { alert('Nomor WhatsApp tidak valid!'); return; }
-  if (pwd.length < 6) { alert('Password minimal 6 karakter!'); return; }
+  if (wa.length < 9) { showToast('Nomor WhatsApp tidak valid!'); return; }
+  if (pwd.length < 6) { showToast('Password minimal 6 karakter!'); return; }
   
   btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
   const r = await checkApi('phone', wa);
-  if (r.status === 'error') { alert(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  if (r.status === 'error') { showToast(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
   
   btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
   goStep(3);
@@ -427,13 +458,13 @@ async function goStep4() {
   const acc = document.getElementById('f_account_number').value.trim();
   const name = document.getElementById('f_account_name').value.trim();
   
-  if (!b) { alert('Bank/E-Wallet wajib diisi!'); return; }
-  if (!acc) { alert('Nomor Rekening wajib diisi!'); return; }
-  if (!name) { alert('Nama Pemilik wajib diisi!'); return; }
+  if (!b) { showToast('Bank/E-Wallet wajib diisi!'); return; }
+  if (!acc) { showToast('Nomor Rekening wajib diisi!'); return; }
+  if (!name) { showToast('Nama Pemilik wajib diisi!'); return; }
   
   btn.style.opacity = '0.5'; btn.textContent = 'Memeriksa...';
   const r = await checkApi('bank', acc, b);
-  if (r.status === 'error') { alert(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
+  if (r.status === 'error') { showToast(r.msg); btn.style.opacity = '1'; btn.textContent = 'Lanjut →'; return; }
   
   btn.style.opacity = '1'; btn.textContent = 'Lanjut →';
   goStep(4);
