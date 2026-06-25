@@ -27,7 +27,7 @@ error_log('[LiveChat] page loaded, user=' . ($user['username'] ?? 'null')
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
-<meta name="theme-color" content="#FFE566">
+<meta name="theme-color" content="#0ea5e9">
 <title>Live Chat — <?= htmlspecialchars($_seo_title) ?></title>
 <?php
 $_abs_fav = $_favicon ? (preg_match('~^https?://~', $_favicon) ? $_favicon : '/' . ltrim($_favicon, '/')) : '';
@@ -40,27 +40,26 @@ if ($_abs_fav): ?>
 <style>
 /* ── LiveChat: position:fixed layout (keyboard-safe, app.css-proof) ── */
 * { box-sizing: border-box; }
-body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
+body { margin: 0; padding: 0; overflow: hidden; background: #f0f9ff; }
 
 /* Topbar: fixed to top */
 .chat-topbar {
   position: fixed !important;
   top: 0; left: 0; right: 0;
-  height: 54px;
+  height: 60px;
   z-index: 100;
 }
 
 /* Chat root: fills everything below topbar */
 #chat-root {
   position: fixed;
-  top: 54px;
+  top: 60px;
   left: 0; right: 0;
   bottom: 0;
-  /* bottom diupdate JS saat keyboard muncul */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--bg);
+  background: #f0f9ff;
 }
 </style>
 </head>
@@ -68,32 +67,32 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
 
 <?php if (!$_lc_enabled): ?>
 <!-- Live Chat Disabled -->
-<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;">
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f0f9ff;padding:24px;">
   <div style="text-align:center;max-width:320px;">
-    <div style="font-size:52px;color:var(--ink);margin-bottom:12px;"><i class="ph-fill ph-clock"></i></div>
-    <h2 style="font-weight:900;font-size:20px;margin-bottom:8px;color:var(--ink);">Live Chat Sedang Ditutup</h2>
-    <p style="color:#64748b;font-size:13px;font-weight:700;margin-bottom:20px;"><?= nl2br(htmlspecialchars(setting($pdo, 'lc_offline_msg', 'Layanan live chat saat ini tidak tersedia. Silakan coba lagi nanti pada jam operasional.'))) ?></p>
-    <a href="/home" style="background:var(--yellow);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:12px;font-weight:900;padding:12px 24px;font-size:13px;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px;"><i class="ph-bold ph-arrow-left"></i> Kembali ke Beranda</a>
+    <div style="font-size:64px;color:#cbd5e1;margin-bottom:12px;animation:bounce 2s infinite;"><i class="ph-fill ph-clock-countdown"></i></div>
+    <h2 style="font-weight:900;font-size:20px;margin-bottom:8px;color:#0f172a;">Live Chat Sedang Ditutup</h2>
+    <p style="color:#64748b;font-size:13px;font-weight:800;margin-bottom:24px;line-height:1.5;"><?= nl2br(htmlspecialchars(setting($pdo, 'lc_offline_msg', 'Layanan live chat saat ini tidak tersedia. Silakan coba lagi nanti pada jam operasional.'))) ?></p>
+    <a href="/home" style="background:linear-gradient(135deg, #0ea5e9, #0284c7);border:3px solid #fff;box-shadow:0 6px 0 #0369a1;border-radius:16px;font-weight:900;padding:12px 24px;font-size:13px;text-decoration:none;color:#fff;display:inline-flex;align-items:center;gap:6px;transition:transform 0.1s, box-shadow 0.1s;"><i class="ph-bold ph-house"></i> Kembali ke Beranda</a>
   </div>
 </div>
 <?php else: ?>
 <!-- Live Chat Active -->
-<!-- ── Custom Topbar (no navbar) ── -->
+<!-- ── Custom Topbar ── -->
 <header class="chat-topbar" id="chat-topbar">
   <a href="/home" class="chat-back-btn" title="Kembali ke Beranda">
-    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    <i class="ph-bold ph-caret-left" style="font-size:20px;"></i>
   </a>
   <div class="chat-topbar__info">
-    <span class="chat-topbar__title">💬 Live Support</span>
+    <span class="chat-topbar__title"><i class="ph-fill ph-chat-circle-dots" style="color:#fde047;"></i> Live Support</span>
     <span class="chat-topbar__sub" id="topbar-username"><?= htmlspecialchars($user['username']) ?></span>
   </div>
   <div class="chat-topbar__actions">
-    <div class="chat-status-badge online" id="chat-status-badge" style="border:1.5px solid var(--ink);">Online</div>
+    <div class="chat-status-badge online" id="chat-status-badge">Online</div>
   </div>
 </header>
 
 <?php if ($_debug_on): ?>
-<!-- ── DEBUG PANEL (aktif via Console → Livechat → Pengaturan) ── -->
+<!-- ── DEBUG PANEL ── -->
 <div id="lc-debug-wrapper" style="
   position:fixed; bottom:0; left:0; right:0; z-index:9999;
   background:rgba(0,0,10,0.92); color:#e0e0e0;
@@ -112,42 +111,64 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
 
 <style>
 /* ═══════════════════════════════════════
-   LIVECHAT — Neobrutalism
+   LIVECHAT — Casual Game Style
 ═══════════════════════════════════════ */
 /* ── Custom topbar ──────────────────── */
 .chat-topbar {
-  height: 54px;
-  background: var(--white);
-  border-bottom: var(--border);
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border-bottom: 4px solid #0369a1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 12px;
+  gap: 12px;
+  padding: 0 16px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 .chat-back-btn {
   width: 36px; height: 36px;
-  border: var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-sm);
-  background: var(--white);
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--ink);
+  color: #fff;
   text-decoration: none;
-  transition: transform .12s, box-shadow .12s;
+  transition: all .12s;
+  backdrop-filter: blur(4px);
 }
-.chat-back-btn:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--ink); }
-.chat-back-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+.chat-back-btn:hover { background: rgba(255,255,255,0.25); border-color: #fff; transform: translateY(-1px); }
+.chat-back-btn:active { transform: translateY(1px); }
+
 .chat-topbar__info { flex: 1; min-width: 0; }
-.chat-topbar__title { font-size: 14px; font-weight: 900; display: block; line-height: 1.2; }
-.chat-topbar__sub   { font-size: 11px; color: #888; font-weight: 600; }
-.chat-topbar__actions { flex-shrink: 0; }
+.chat-topbar__title { font-size: 16px; font-weight: 900; display: flex; align-items: center; gap: 6px; letter-spacing: -0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.chat-topbar__sub   { font-size: 11px; color: #e0f2fe; font-weight: 800; display: block; margin-top: -2px; }
+
+.chat-status-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  text-transform: uppercase;
+}
+.chat-status-badge.online { background: linear-gradient(135deg, #34d399, #10b981); color: #fff; }
+.chat-status-badge.busy   { background: linear-gradient(135deg, #f87171, #ef4444); color: #fff; }
+.chat-status-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  display: inline-block;
+  box-shadow: 0 0 4px rgba(255,255,255,0.8);
+}
 
 .chat-page {
   display: flex;
@@ -165,32 +186,30 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: var(--white);
-  border-bottom: var(--border);
+  background: #fff;
+  border-bottom: 2px solid #e2e8f0;
   flex-shrink: 0;
 }
 .chat-modebar__label {
   font-size: 11px;
   font-weight: 900;
-  color: #888;
+  color: #64748b;
   text-transform: uppercase;
-  letter-spacing: .5px;
   flex-shrink: 0;
 }
 .mode-pill {
   display: flex;
-  background: #f0f0f0;
-  border: var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow-sm);
+  background: #f1f5f9;
+  border: 2.5px solid #cbd5e1;
+  border-radius: 12px;
   overflow: hidden;
   flex: 1;
+  padding: 2px;
 }
 .mode-btn {
   flex: 1;
   border: none;
   background: transparent;
-  font-family: inherit;
   font-size: 12px;
   font-weight: 800;
   padding: 8px 6px;
@@ -199,318 +218,333 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  color: #888;
+  gap: 6px;
+  color: #64748b;
   border-radius: 8px;
 }
 .mode-btn.active {
-  background: var(--ink);
   color: #fff;
-  box-shadow: 2px 2px 0 #555;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.mode-btn.active.mode-ai  { background: var(--lavender); color: var(--ink); }
-.mode-btn.active.mode-adm { background: var(--mint);     color: var(--ink); }
-
-/* Status badge */
-.chat-status-badge {
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 900;
-  padding: 4px 10px;
-  border: 1.5px solid var(--ink);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.chat-status-badge.online { background: var(--lime); }
-.chat-status-badge.busy   { background: var(--peach); }
-.chat-status-badge::before {
-  content: '';
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  display: inline-block;
-}
-.chat-status-badge.busy::before { background: var(--orange); }
+.mode-btn.active.mode-ai  { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.mode-btn.active.mode-adm { background: linear-gradient(135deg, #10b981, #059669); }
 
 /* ── Messages area ───────────────────── */
 .chat-messages {
   flex: 1 1 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: var(--bg);
+  gap: 12px;
+  background: #f0f9ff;
   scroll-behavior: smooth;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
 }
-.chat-messages::-webkit-scrollbar { width: 4px; }
-.chat-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.chat-messages::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
 
 /* ── Bubble ──────────────────────────── */
 .bubble-wrap {
   display: flex;
   flex-direction: column;
-  max-width: 82%;
-  animation: bubbleIn .2s ease;
+  max-width: 85%;
+  animation: bubblePop .3s cubic-bezier(.175,.885,.32,1.275);
 }
-@keyframes bubbleIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes bubblePop {
+  0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 .bubble-wrap.user  { align-self: flex-end; align-items: flex-end; }
 .bubble-wrap.other { align-self: flex-start; align-items: flex-start; }
-.bubble-wrap.system{ align-self: center; align-items: center; }
+.bubble-wrap.system{ align-self: center; align-items: center; max-width: 90%; }
 
 .bubble {
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 2px solid var(--ink);
+  padding: 12px 16px;
+  border-radius: 18px;
   font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.55;
+  font-weight: 700;
+  line-height: 1.5;
   word-break: break-word;
+  position: relative;
 }
-.bubble-wrap.user  .bubble { background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); border-radius: 14px 14px 4px 14px; }
-.bubble-wrap.ai    .bubble { background: var(--lavender); box-shadow: 3px 3px 0 var(--ink); border-radius: 14px 14px 14px 4px; }
-.bubble-wrap.admin .bubble { background: var(--mint); box-shadow: 3px 3px 0 var(--ink); border-radius: 14px 14px 14px 4px; }
+
+.bubble-wrap.user .bubble {
+  background: #fef08a;
+  border: 2.5px solid #d97706;
+  box-shadow: 0 4px 0 #b45309;
+  border-radius: 20px 20px 4px 20px;
+  color: #78350f;
+}
+.bubble-wrap.ai .bubble {
+  background: #e0e7ff;
+  border: 2.5px solid #4f46e5;
+  box-shadow: 0 4px 0 #3730a3;
+  border-radius: 20px 20px 20px 4px;
+  color: #312e81;
+}
+.bubble-wrap.admin .bubble {
+  background: #d1fae5;
+  border: 2.5px solid #059669;
+  box-shadow: 0 4px 0 #047857;
+  border-radius: 20px 20px 20px 4px;
+  color: #064e3b;
+}
 .bubble-wrap.system .bubble {
-  background: #f5f5f5; color: #777;
-  font-size: 11px; border-style: dashed;
-  box-shadow: none; padding: 6px 14px;
-  border-radius: 20px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 11px;
+  border: 2px dashed #94a3b8;
+  box-shadow: none;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-weight: 800;
 }
+
 .bubble-meta {
   font-size: 10px;
-  color: #aaa;
-  font-weight: 700;
-  margin-top: 3px;
-  padding: 0 4px;
+  color: #94a3b8;
+  font-weight: 800;
+  margin-top: 6px;
+  padding: 0 6px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
+.bubble-wrap.user .bubble-meta { flex-direction: row-reverse; }
+
 .bubble-sender-tag {
   font-size: 10px;
   font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 10px;
-  border: 1.5px solid var(--ink);
-  margin-bottom: 4px;
-  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 2px solid #fff;
+  margin-bottom: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.sender-ai    { background: var(--lavender); }
-.sender-admin { background: var(--mint); }
-.sender-user  { background: var(--yellow); }
+.sender-ai    { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.sender-admin { background: linear-gradient(135deg, #10b981, #059669); }
+.sender-user  { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
 /* ── Typing indicator ────────────────── */
 .typing-bubble {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  background: var(--lavender);
-  border: 2px solid var(--ink);
-  border-radius: 14px 14px 14px 4px;
-  box-shadow: 3px 3px 0 var(--ink);
-  max-width: 80px;
+  gap: 6px;
+  padding: 12px 18px;
+  background: #e0e7ff;
+  border: 2.5px solid #4f46e5;
+  border-radius: 20px 20px 20px 4px;
+  box-shadow: 0 4px 0 #3730a3;
+  width: fit-content;
 }
 .typing-dot {
   width: 8px; height: 8px;
-  background: var(--ink);
+  background: #4f46e5;
   border-radius: 50%;
-  animation: typingBounce 1.2s infinite;
+  animation: typingBounce 1.4s infinite ease-in-out both;
 }
-.typing-dot:nth-child(2) { animation-delay: .2s; }
-.typing-dot:nth-child(3) { animation-delay: .4s; }
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
 @keyframes typingBounce {
-  0%,60%,100% { transform: translateY(0); }
-  30%          { transform: translateY(-6px); }
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
 }
 
 /* ── Input area ──────────────────────── */
 .chat-inputbar {
-  padding: 10px 12px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  background: var(--white);
-  border-top: var(--border);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 3px solid #e0f2fe;
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: flex-end;
   flex-shrink: 0;
   z-index: 10;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.02);
 }
 .chat-textarea {
   flex: 1;
-  min-height: 42px;
+  min-height: 48px;
   max-height: 120px;
   resize: none;
-  border: var(--border);
-  border-radius: 12px;
-  box-shadow: 3px 3px 0 var(--ink);
-  padding: 10px 13px;
-  /* iOS Safari: font-size HARUS >= 16px untuk mencegah auto-zoom */
-  font-size: 16px;
-  /* Secara visual dikecilkan dengan transform agar tetap pas */
-  transform-origin: top left;
+  border: 2.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 16px; /* Prevent iOS zoom */
   font-family: inherit;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--white);
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
   outline: none;
-  transition: box-shadow .15s;
+  transition: all .2s;
   overflow-y: auto;
-  line-height: 1.45;
-  touch-action: manipulation; /* cegah double-tap zoom */
-  -webkit-text-size-adjust: 100%;
+  line-height: 1.4;
 }
-.chat-textarea:focus { box-shadow: 5px 5px 0 var(--ink); }
-.chat-textarea::placeholder { color: #bbb; font-size: 15px; }
+.chat-textarea:focus { border-color: #38bdf8; background: #fff; box-shadow: 0 0 0 4px #e0f2fe; }
+.chat-textarea::placeholder { color: #94a3b8; font-weight: 600; }
+
 .chat-attach-btn {
-  width: 44px; height: 44px;
+  width: 48px; height: 48px;
   flex-shrink: 0;
-  background: var(--white);
-  border: var(--border);
-  border-radius: 12px;
-  box-shadow: 2px 2px 0 var(--ink);
+  background: #f1f5f9;
+  border: 2.5px solid #e2e8f0;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform .12s, box-shadow .12s;
-  font-size: 20px;
+  transition: all .15s;
+  color: #64748b;
+  font-size: 22px;
 }
-.chat-attach-btn:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--ink); }
-.chat-attach-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+.chat-attach-btn:hover { background: #e2e8f0; transform: translateY(-2px); }
+.chat-attach-btn:active { transform: translateY(0); }
 
 .chat-send-btn {
-  width: 44px; height: 44px;
+  width: 48px; height: 48px;
   flex-shrink: 0;
-  background: var(--brand);
-  border: var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border: none;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform .12s, box-shadow .12s;
+  transition: all .15s;
   color: #fff;
+  box-shadow: 0 4px 0 #0369a1;
 }
-.chat-send-btn:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--ink); }
-.chat-send-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
-.chat-send-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: var(--shadow-sm); }
+.chat-send-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #0369a1; }
+.chat-send-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0369a1; }
+.chat-send-btn:disabled { background: #cbd5e1; box-shadow: 0 4px 0 #94a3b8; cursor: not-allowed; transform: none; }
 
 /* ── Mode info banner ────────────────── */
 .mode-info-banner {
-  margin: 0 14px;
-  padding: 9px 13px;
-  border-radius: 10px;
-  border: 2px dashed var(--ink);
+  margin: 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2.5px solid;
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   flex-shrink: 0;
+  animation: fadeIn 0.3s ease;
 }
-.mode-info-banner.ai-mode  { background: var(--lavender); }
-.mode-info-banner.adm-mode { background: var(--mint); }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+.mode-info-banner.ai-mode  { background: #ede9fe; border-color: #c4b5fd; color: #5b21b6; }
+.mode-info-banner.adm-mode { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
 
 /* ── Session start overlay ───────────── */
 .chat-start-overlay {
   position: absolute;
   inset: 0;
-  background: var(--bg);
+  background: rgba(240, 249, 255, 0.9);
+  backdrop-filter: blur(4px);
   z-index: 50;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  overflow-y: auto;
-  /* Important: don't capture touch on the container */
-  -webkit-overflow-scrolling: touch;
 }
 .chat-start-card {
   width: 100%;
-  background: var(--white);
-  border: var(--border);
-  border-radius: 20px;
-  box-shadow: var(--shadow-lg);
-  padding: 28px 22px;
+  max-width: 360px;
+  background: #fff;
+  border: 3px solid #7dd3e8;
+  border-radius: 24px;
+  box-shadow: 0 8px 0 #7dd3e8;
+  padding: 32px 24px;
   text-align: center;
+  animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .chat-start-icon {
-  width: 70px; height: 70px;
-  margin: 0 auto 14px;
-  background: var(--yellow);
-  border: var(--border);
-  box-shadow: var(--shadow);
-  border-radius: 20px;
+  width: 80px; height: 80px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #fef08a, #fde047);
+  border: 3px solid #d97706;
+  box-shadow: 0 6px 0 #b45309;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 40px;
 }
-.chat-start-title { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
-.chat-start-sub   { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 20px; }
+.chat-start-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; color: #0f172a; }
+.chat-start-sub   { font-size: 13px; color: #64748b; font-weight: 700; margin-bottom: 24px; line-height: 1.4; }
 
 /* ── Closed overlay ──────────────────── */
 .chat-closed-bar {
-  padding: 12px 14px;
-  background: var(--salmon);
-  border-top: var(--border);
+  padding: 14px;
+  background: #fef2f2;
+  border-top: 3px solid #fca5a5;
+  color: #991b1b;
   text-align: center;
   font-size: 13px;
   font-weight: 800;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 </style>
 
 <div id="chat-root">
 
-  <!-- Start Overlay (shown until session created) -->
+  <!-- Start Overlay -->
   <div class="chat-start-overlay" id="chat-start-overlay">
     <div class="chat-start-card">
       <div class="chat-start-icon">💬</div>
       <div class="chat-start-title">Live Support</div>
-      <div class="chat-start-sub">Pilih mode dan mulai percakapan dengan kami sekarang.</div>
+      <div class="chat-start-sub">Pilih mode chat dan mulai percakapan.</div>
 
       <!-- Mode selector in start screen -->
-      <div style="margin-bottom:18px;">
-        <p style="font-size:12px;font-weight:800;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Pilih Mode Chat</p>
-        <div class="mode-pill" style="max-width:100%;box-shadow:var(--shadow);">
-          <button class="mode-btn mode-ai active" id="start-mode-ai" onclick="selectStartMode('ai')">
+      <div style="margin-bottom:24px;">
+        <p style="font-size:12px;font-weight:900;color:#0ea5e9;margin-bottom:10px;text-transform:uppercase;">Pilih Mode Chat</p>
+        <div class="mode-pill" style="box-shadow: 0 4px 0 #cbd5e1; border-width: 3px; padding: 4px; background: #fff;">
+          <?php if ($_ai_enabled): ?>
+          <button class="mode-btn mode-ai active" id="start-mode-ai" onclick="selectStartMode('ai')" style="font-size:13px; padding:10px;">
             🤖 Asisten AI
           </button>
-          <button class="mode-btn mode-adm" id="start-mode-admin" onclick="selectStartMode('admin')">
+          <?php endif; ?>
+          <?php if ($_adm_enabled): ?>
+          <button class="mode-btn mode-adm" id="start-mode-admin" onclick="selectStartMode('admin')" style="font-size:13px; padding:10px;">
             👨‍💼 Admin
           </button>
+          <?php endif; ?>
         </div>
-        <p id="start-mode-desc" style="font-size:11px;color:#888;margin-top:8px;font-weight:600;">
+        <p id="start-mode-desc" style="font-size:12px;color:#64748b;margin-top:12px;font-weight:700;">
+          <?php if ($_ai_enabled): ?>
           AI akan menjawab pertanyaan Anda secara otomatis & instan.
+          <?php else: ?>
+          Admin akan membalas pesan Anda langsung.
+          <?php endif; ?>
         </p>
       </div>
 
-      <button class="btn btn--primary btn--full btn--lg" id="btn-start-chat" onclick="startChat()">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-        </svg>
-        Mulai Chat
+      <button id="btn-start-chat" onclick="startChat()" style="width:100%; background:linear-gradient(135deg, #10b981, #059669); border: 3px solid #fff; box-shadow: 0 6px 0 #047857; color: #fff; font-size: 15px; font-weight: 900; padding: 14px; border-radius: 16px; cursor: pointer; transition: transform 0.1s; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <i class="ph-bold ph-paper-plane-right" style="font-size:20px;"></i> Mulai Chat
       </button>
     </div>
   </div>
 
-  <!-- Chat UI (hidden until session created) -->
+  <!-- Chat UI -->
   <div class="chat-page" id="chat-ui" style="display:none;">
 
     <!-- Mode Bar -->
     <div class="chat-modebar">
-      <span class="chat-modebar__label">Mode:</span>
+      <span class="chat-modebar__label"><i class="ph-bold ph-swap"></i> Mode:</span>
       <div class="mode-pill" id="mode-pill-wrap">
         <?php if ($_ai_enabled): ?>
         <button class="mode-btn mode-ai" id="modebtn-ai" onclick="switchMode('ai')">
@@ -527,16 +561,16 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
     </div>
 
     <!-- Mode info banner -->
-    <div class="mode-info-banner ai-mode" id="mode-info-banner" style="margin-top:10px;">
-      <span>🤖</span>
-      <span id="mode-info-text">Mode AI aktif — Dijawab otomatis oleh Asisten AI.</span>
+    <div class="mode-info-banner ai-mode" id="mode-info-banner" style="margin-top:12px;">
+      <i class="ph-fill ph-info"></i>
+      <span id="mode-info-text">Mode AI aktif — Dijawab otomatis oleh AI.</span>
     </div>
 
     <!-- Messages -->
     <div class="chat-messages" id="chat-messages"></div>
 
-    <!-- Typing indicator (hidden) -->
-    <div id="typing-wrap" style="padding:0 14px 6px;display:none;">
+    <!-- Typing indicator -->
+    <div id="typing-wrap" style="padding:0 16px 12px;display:none;">
       <div class="typing-bubble">
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
@@ -547,31 +581,31 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
     <!-- Input bar -->
     <div class="chat-inputbar" id="chat-inputbar">
       <?php if ($_att_enabled): ?>
-      <button class="chat-attach-btn" onclick="document.getElementById('chat-attachment-input').click()">📎</button>
+      <button class="chat-attach-btn" onclick="document.getElementById('chat-attachment-input').click()"><i class="ph-bold ph-paperclip"></i></button>
       <input type="file" id="chat-attachment-input" style="display:none;" accept="image/jpeg,image/png,image/gif,application/pdf,.zip,.rar" onchange="previewAttachment(this)">
       <?php endif; ?>
-      <div style="flex:1; display:flex; flex-direction:column; gap:4px; position:relative;">
-        <div id="attachment-preview" style="display:none; font-size:11px; background:#f0f0f0; border-radius:8px; padding:4px 8px; border:1px solid #ccc;">
-            <span id="att-preview-name" style="font-weight:600;"></span>
-            <span style="color:red; cursor:pointer; float:right; padding: 0 4px;" onclick="clearAttachment()">&times; Hapus</span>
+      
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px; position:relative;">
+        <div id="attachment-preview" style="display:none; font-size:11px; background:#e0f2fe; border-radius:10px; padding:6px 10px; border:2px solid #bae6fd; font-weight:800; color:#0369a1;">
+            <i class="ph-bold ph-file"></i> <span id="att-preview-name"></span>
+            <span style="color:#ef4444; cursor:pointer; float:right; padding: 0 4px;" onclick="clearAttachment()"><i class="ph-bold ph-x"></i> Hapus</span>
         </div>
         <textarea class="chat-textarea" id="chat-input"
-          placeholder="Ketik pesan..." rows="1" style="width:100%"
+          placeholder="Ketik pesan..." rows="1"
           onkeydown="handleKey(event)"
           oninput="autoResize(this)"
         ></textarea>
       </div>
+      
       <button class="chat-send-btn" id="chat-send-btn" onclick="sendMessage()">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
+        <i class="ph-bold ph-paper-plane-right" style="font-size:22px;"></i>
       </button>
     </div>
 
-    <!-- Closed bar (hidden until closed) -->
+    <!-- Closed bar -->
     <div class="chat-closed-bar" id="chat-closed-bar" style="display:none;">
-      🔒 Sesi chat telah ditutup.
-      <button onclick="resetChat()" style="background:var(--ink);color:#fff;border:none;border-radius:8px;padding:5px 14px;font-weight:800;font-size:12px;font-family:inherit;cursor:pointer;margin-left:10px;">Chat Baru</button>
+      <i class="ph-fill ph-lock-key"></i> Sesi ditutup.
+      <button onclick="resetChat()" style="background:#ef4444;color:#fff;border:2px solid #fff;border-radius:10px;padding:6px 16px;font-weight:900;font-size:12px;cursor:pointer;box-shadow:0 3px 0 #b91c1c;">Chat Baru</button>
     </div>
   </div>
 
@@ -582,12 +616,23 @@ body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); }
    LIVECHAT CLIENT
 ═══════════════════════════════════════ */
 let sessionKey   = null;
-let currentMode  = 'ai';
-let startMode    = 'ai';
+
+// Initial mode priority
+const LC_AI_ENABLED  = <?= $_ai_enabled ? 'true' : 'false' ?>;
+const LC_ADM_ENABLED = <?= $_adm_enabled ? 'true' : 'false' ?>;
+let startMode = LC_AI_ENABLED ? 'ai' : (LC_ADM_ENABLED ? 'admin' : 'ai');
+let currentMode = startMode;
+
 let lastMsgId    = 0;
 let pollTimer    = null;
 let sessionStatus = 'open';
 let isPolling    = false;
+
+// Initialize starting button states if both are available
+if (LC_AI_ENABLED && LC_ADM_ENABLED) {
+    document.getElementById('start-mode-ai').classList.add('active');
+    document.getElementById('start-mode-admin').classList.remove('active');
+}
 
 // ── DEBUG PANEL ──────────────────────────────────────────
 const _debugEl = document.getElementById('lc-debug');
@@ -609,25 +654,20 @@ window.onerror = (msg, src, line, col, err) => {
 };
 window.addEventListener('unhandledrejection', e => dbg('❌ Promise rejected', String(e.reason)));
 
-// log viewport info on load
-dbg('init', {
-  innerH: window.innerHeight,
-  innerW: window.innerWidth,
-  vvH: window.visualViewport?.height,
-  dvh: CSS.supports('height','100dvh'),
-  cookie: document.cookie.includes('chat_session')
-});
-
 // ── Mode selector on start screen ────────────────────────
 function selectStartMode(mode) {
   startMode = mode;
-  document.getElementById('start-mode-ai').classList.toggle('active', mode === 'ai');
-  document.getElementById('start-mode-admin').classList.toggle('active', mode === 'admin');
+  const btnAi = document.getElementById('start-mode-ai');
+  const btnAdm = document.getElementById('start-mode-admin');
+  
+  if (btnAi) btnAi.classList.toggle('active', mode === 'ai');
+  if (btnAdm) btnAdm.classList.toggle('active', mode === 'admin');
+  
   const desc = document.getElementById('start-mode-desc');
   if (mode === 'ai') {
     desc.textContent = 'AI akan menjawab pertanyaan Anda secara otomatis & instan.';
   } else {
-    desc.textContent = 'Admin akan membalas pesan Anda langsung dari Telegram.';
+    desc.textContent = 'Admin akan membalas pesan Anda langsung.';
   }
 }
 
@@ -635,39 +675,27 @@ function selectStartMode(mode) {
 async function startChat() {
   const btn = document.getElementById('btn-start-chat');
   btn.disabled = true;
-  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg> Menghubungkan...';
-
-  dbg('startChat()', { startMode });
+  btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin" style="font-size:20px;"></i> Menghubungkan...';
 
   try {
     const fd = new FormData();
     fd.append('mode', startMode);
     const res = await fetch('/chat_action?action=start', { method: 'POST', body: fd, credentials: 'include' });
-    dbg('start HTTP', { status: res.status, ok: res.ok });
     const data = await res.json();
-    dbg('start response', data);
     if (!data.ok) throw new Error(data.error || 'Gagal memulai sesi.');
 
     sessionKey    = data.session_key;
     currentMode   = data.mode;
     sessionStatus = data.status;
 
-    dbg('session created', { sessionKey, currentMode, sessionStatus, msgs: (data.messages||[]).length });
-
-    // Show chat UI
     document.getElementById('chat-start-overlay').style.display = 'none';
     document.getElementById('chat-ui').style.display = 'flex';
-    dbg('UI shown');
 
-    // Render existing messages
     const msgs = document.getElementById('chat-messages');
     msgs.innerHTML = '';
     (data.messages || []).forEach(m => appendBubble(m.sender, m.message, m.created_at, false, m.attachment, m.id));
 
-    // Mode sudah di-set di server, langsung update UI
     updateModeUI(currentMode);
-
-    // Track lastMsgId dari DB id yg dikembalikan server (cegah double render saat poll)
     if (data.last_msg_id) lastMsgId = parseInt(data.last_msg_id);
 
     scrollBottom();
@@ -675,9 +703,8 @@ async function startChat() {
     document.getElementById('chat-input').focus();
 
   } catch(e) {
-    dbg('❌ startChat error', e.message);
     btn.disabled = false;
-    btn.innerHTML = '💬 Mulai Chat';
+    btn.innerHTML = '<i class="ph-bold ph-paper-plane-right" style="font-size:20px;"></i> Mulai Chat';
     alert('❌ ' + e.message);
   }
 }
@@ -711,16 +738,15 @@ function appendBubble(sender, text, time, animate = true, attachment = null, ser
 
   const timeStr = time ? new Date(time).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '';
   const label   = sender !== 'system' && sender !== 'user' ? `<div class="bubble-sender-tag ${senderClass[sender]||''}">${escHtml(labelName)}</div>` : '';
-  // AI dan admin pakai markdown, user dan system pakai plain text
   const bodyHtml = (sender === 'ai' || sender === 'admin') ? renderMarkdown(actualText) : (sender === 'system' ? escHtml(actualText) : escHtml(actualText) + '');
 
   let attHtml = '';
   if (attachment) {
       const ext = attachment.split('.').pop().toLowerCase();
       if (['jpg','jpeg','png','gif'].includes(ext)) {
-          attHtml = `<div style="margin-bottom:6px;"><a href="/${attachment}" target="_blank"><img src="/${attachment}" style="max-width:100%; border-radius:8px; border:1px solid rgba(0,0,0,0.1);"></a></div>`;
+          attHtml = `<div style="margin-bottom:8px;"><a href="/${attachment}" target="_blank"><img src="/${attachment}" style="max-width:100%; border-radius:12px; border:2px solid rgba(0,0,0,0.1);"></a></div>`;
       } else {
-          attHtml = `<div style="margin-bottom:6px;"><a href="/${attachment}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:6px 10px; background:rgba(0,0,0,.05); border-radius:8px; text-decoration:none; color:inherit; border:1px solid rgba(0,0,0,.1); font-size:12px; font-weight:bold;">📎 Download Lampiran</a></div>`;
+          attHtml = `<div style="margin-bottom:8px;"><a href="/${attachment}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(0,0,0,.05); border-radius:10px; text-decoration:none; color:inherit; border:2px dashed rgba(0,0,0,.2); font-size:12px; font-weight:800;"><i class="ph-bold ph-download-simple"></i> Download Lampiran</a></div>`;
       }
   }
 
@@ -735,30 +761,22 @@ function appendBubble(sender, text, time, animate = true, attachment = null, ser
 }
 
 function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Markdown renderer (untuk bubble AI & Admin) ───────────
+// ── Markdown renderer ─────────────────────────────────────
 function renderMarkdown(text) {
   let s = escHtml(text);
-  // Headings: # Title
-  s = s.replace(/^###\s+(.+)$/gm, '<strong style="font-size:13px;">$1</strong>');
-  s = s.replace(/^##\s+(.+)$/gm,  '<strong style="font-size:14px;">$1</strong>');
-  s = s.replace(/^#\s+(.+)$/gm,   '<strong style="font-size:15px;">$1</strong>');
-  // Bold: **text** or __text__
+  s = s.replace(/^###\s+(.+)$/gm, '<strong style="font-size:14px;display:block;margin-top:6px;">$1</strong>');
+  s = s.replace(/^##\s+(.+)$/gm,  '<strong style="font-size:15px;display:block;margin-top:6px;">$1</strong>');
+  s = s.replace(/^#\s+(.+)$/gm,   '<strong style="font-size:16px;display:block;margin-top:6px;">$1</strong>');
   s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/__(.+?)__/g,     '<strong>$1</strong>');
-  // Italic: *text* or _text_
   s = s.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
   s = s.replace(/_([^_\n]+?)_/g,   '<em>$1</em>');
-  // Inline code
-  s = s.replace(/`([^`]+?)`/g, '<code style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace;">$1</code>');
-  // Numbered list: 1. item
-  s = s.replace(/^(\d+)\.\s+(.+)$/gm, '<div style="display:flex;gap:6px;margin:2px 0;"><span style="font-weight:800;min-width:16px;">$1.</span><span>$2</span></div>');
-  // Bullet list: - item or * item
-  s = s.replace(/^[-*]\s+(.+)$/gm, '<div style="display:flex;gap:6px;margin:2px 0;"><span style="font-weight:900;">•</span><span>$1</span></div>');
-  // Newlines
+  s = s.replace(/`([^`]+?)`/g, '<code style="background:rgba(0,0,0,.08);padding:2px 6px;border-radius:6px;font-size:12px;font-family:monospace;color:#1e293b;">$1</code>');
+  s = s.replace(/^(\d+)\.\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0;"><span style="font-weight:900;min-width:16px;">$1.</span><span>$2</span></div>');
+  s = s.replace(/^[-*]\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0;"><span style="font-weight:900;color:inherit;">•</span><span>$1</span></div>');
   s = s.replace(/\n/g, '<br>');
   return s;
 }
@@ -807,11 +825,9 @@ async function sendMessage() {
   }
 
   let bubbleText = text;
-  if (file && !text) bubbleText = '(Mengirim file...)';
+  if (file && !text) bubbleText = '📎 Mengirim lampiran...';
 
   const tmpBubble = appendBubble('user', bubbleText, new Date().toISOString());
-
-  // Show typing if AI mode
   if (currentMode === 'ai') showTyping(true);
 
   try {
@@ -824,7 +840,6 @@ async function sendMessage() {
     showTyping(false);
     if (!data.ok) throw new Error(data.error || 'Gagal mengirim.');
     
-    // Ganti bubble sementara dengan data asli (termasuk gambar) dari server
     tmpBubble.remove();
     if (data.user_message) {
         appendBubble('user', data.user_message.message, data.user_message.created_at, false, data.user_message.attachment, data.user_message.id);
@@ -861,25 +876,22 @@ async function switchMode(mode) {
     if (!data.ok) throw new Error(data.error);
     currentMode = data.mode;
     updateModeUI(currentMode);
-    // Update lastMsgId agar poll tidak re-render divider switch
     if (data.switch_msg_id) lastMsgId = parseInt(data.switch_msg_id);
-    // Tampilkan divider visual mode switch
     if (data.switch_message) appendModeDivider(data.mode, data.switch_message);
   } catch(e) {
     alert('Gagal beralih mode: ' + e.message);
   }
 }
 
-// ── Mode divider (pemisah visual antar section) ────────
 function appendModeDivider(mode, label) {
   const msgs  = document.getElementById('chat-messages');
   const el    = document.createElement('div');
-  const color = mode === 'ai' ? 'var(--lavender)' : 'var(--mint)';
-  el.style.cssText = 'display:flex;align-items:center;gap:8px;margin:10px 0;';
+  const color = mode === 'ai' ? '#8b5cf6' : '#10b981';
+  el.style.cssText = 'display:flex;align-items:center;gap:12px;margin:16px 0;';
   el.innerHTML = `
-    <div style="flex:1;height:2px;border-radius:2px;background:${color};border:1px solid var(--ink);"></div>
-    <span style="font-size:10px;font-weight:900;background:${color};border:1.5px solid var(--ink);padding:3px 10px;border-radius:20px;white-space:nowrap;box-shadow:2px 2px 0 var(--ink);">${escHtml(label)}</span>
-    <div style="flex:1;height:2px;border-radius:2px;background:${color};border:1px solid var(--ink);"></div>
+    <div style="flex:1;height:2.5px;border-radius:2px;background:${color}; opacity:0.5;"></div>
+    <span style="font-size:10px;font-weight:900;background:#fff;color:${color};border:2px solid ${color};padding:4px 12px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,0.05);">${escHtml(label)}</span>
+    <div style="flex:1;height:2.5px;border-radius:2px;background:${color}; opacity:0.5;"></div>
   `;
   msgs.appendChild(el);
   scrollBottom();
@@ -896,25 +908,24 @@ function updateModeUI(mode) {
   if (!banner || !bannerText) return;
   if (mode === 'ai') {
     banner.className = 'mode-info-banner ai-mode';
-    bannerText.innerHTML = '🤖 Mode AI aktif &mdash; Dijawab otomatis oleh Asisten AI.';
+    bannerText.innerHTML = 'Mode AI aktif — Dijawab otomatis oleh AI.';
   } else {
     banner.className = 'mode-info-banner adm-mode';
-    bannerText.innerHTML = '👨‍💼 Mode Admin aktif &mdash; Tim kami akan segera membalas.';
+    bannerText.innerHTML = 'Mode Admin aktif — Admin akan merespons.';
   }
 }
 
-// ── Polling (near-realtime, 2s interval) ─────────────────
+// ── Polling ───────────────────────────────────────────────
 function startPolling() {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(pollMessages, 2000);
 }
 
-// Pause saat tab tidak aktif, resume saat aktif (hemat request)
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     clearInterval(pollTimer);
   } else if (sessionKey && sessionStatus !== 'closed') {
-    pollMessages();      // langsung poll saat balik ke tab
+    pollMessages();
     startPolling();
   }
 });
@@ -925,10 +936,7 @@ async function pollMessages() {
   try {
     const res  = await fetch(`/chat_action?action=poll&session_key=${sessionKey}&after_id=${lastMsgId}`, { credentials:'include' });
     const data = await res.json();
-    if (!data.ok) {
-        isPolling = false;
-        return;
-    }
+    if (!data.ok) { isPolling = false; return; }
 
     (data.messages || []).forEach(m => {
       if (parseInt(m.id) > lastMsgId) {
@@ -954,9 +962,10 @@ async function pollMessages() {
 function onSessionClosed() {
   clearInterval(pollTimer);
   document.getElementById('chat-inputbar').style.display = 'none';
-  document.getElementById('chat-closed-bar').style.display = 'block';
-  document.getElementById('chat-status-badge').className = 'chat-status-badge busy';
-  document.getElementById('chat-status-badge').textContent = 'Ditutup';
+  document.getElementById('chat-closed-bar').style.display = 'flex';
+  const badge = document.getElementById('chat-status-badge');
+  badge.className = 'chat-status-badge busy';
+  badge.innerHTML = 'Ditutup';
 }
 
 // ── Reset session ─────────────────────────────────────────
@@ -979,24 +988,20 @@ function handleKey(e) {
   }
 }
 
-// ── Init: check for existing session cookie ───────────────
+// ── Init ──────────────────────────────────────────────────
 (function() {
   const hasCookie = document.cookie.split(';').some(c => c.trim().startsWith('chat_session='));
   if (hasCookie) {
     startChat();
   }
 
-  // ── Keyboard handler: update #chat-root bottom when keyboard appears ──
-  // Dengan position:fixed, kita tinggal adjust 'bottom' = window.innerHeight - visualViewport.height
   const chatRoot = document.getElementById('chat-root');
   function onVpChange() {
     if (!chatRoot) return;
     const vvH   = window.visualViewport?.height ?? window.innerHeight;
     const vvTop = window.visualViewport?.offsetTop ?? 0;
-    // bottom = space occupied by keyboard
     const kbHeight = window.innerHeight - vvH - vvTop;
     chatRoot.style.bottom = Math.max(0, kbHeight) + 'px';
-    dbg('vpChange', { vvH, kbHeight, innerH: window.innerHeight });
     scrollBottom();
   }
 
@@ -1007,7 +1012,6 @@ function handleKey(e) {
   window.addEventListener('resize', onVpChange);
   onVpChange();
 
-  // iOS: scroll to bottom setelah keyboard animation selesai
   const chatInput = document.getElementById('chat-input');
   if (chatInput) {
     chatInput.addEventListener('focus', () => setTimeout(() => { onVpChange(); scrollBottom(); }, 350));
@@ -1021,16 +1025,6 @@ function handleKey(e) {
   to { transform: rotate(360deg); }
 }
 </style>
-
-<script>
-// PHP settings passed to JS
-const LC_AI_ENABLED  = <?= $_ai_enabled ? 'true' : 'false' ?>;
-const LC_ADM_ENABLED = <?= $_adm_enabled ? 'true' : 'false' ?>;
-// Force start mode if only one mode available
-if (!LC_AI_ENABLED)  startMode = 'admin';
-if (!LC_ADM_ENABLED) startMode = 'ai';
-</script>
-
 <script src="/assets/js/toast.js"></script>
 <?php endif; ?>
 </body>
