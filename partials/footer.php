@@ -2,23 +2,27 @@
 
   <style>
   /* ══════════════════════════════════════════════
-     CASUAL GAME BOTTOM NAVBAR OVERRIDE
+     CASUAL GAME BOTTOM NAVBAR (COMPACT & MINIMAL)
      ══════════════════════════════════════════════ */
   .bottom-nav {
       position: fixed !important;
-      bottom: 16px !important;
-      left: 16px !important;
-      right: 16px !important;
+      bottom: 24px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: max-content !important;
+      min-width: 320px !important;
       height: auto !important;
-      background: #fff !important;
-      border: 3px solid #0369a1 !important;
-      border-radius: 24px !important;
-      box-shadow: 0 6px 0 #0369a1 !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(12px) !important;
+      border: 2px solid #e2e8f0 !important;
+      border-radius: 32px !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
       display: flex !important;
-      justify-content: space-around !important;
+      justify-content: space-between !important;
       align-items: center !important;
-      padding: 8px 12px !important;
-      z-index: 999 !important;
+      padding: 8px 16px !important;
+      z-index: 9999 !important;
+      margin: 0 !important;
   }
   
   /* Space out main content so it doesn't hide behind floating nav */
@@ -32,52 +36,30 @@
       text-decoration: none !important;
       color: #94a3b8 !important;
       font-size: 10px !important;
-      font-weight: 800 !important;
+      font-weight: 700 !important;
       gap: 4px !important;
-      flex: 1 !important;
-      padding: 4px 0 !important;
-      transition: all 0.2s !important;
+      padding: 4px 8px !important;
+      transition: all 0.2s ease !important;
       border: none !important;
       background: transparent !important;
+      border-radius: 16px !important;
   }
-  .nav-item i { font-size: 24px !important; transition: transform 0.2s !important; }
-  .nav-item.active { color: #0ea5e9 !important; }
-  .nav-item.active i { color: #0ea5e9 !important; transform: translateY(-4px) !important; text-shadow: 0 2px 4px rgba(14,165,233,0.3) !important; }
+  .nav-item i { font-size: 22px !important; transition: all 0.2s ease !important; }
   
-  /* The Big Play Button (Center) */
-  .nav-item--center {
-      position: relative !important;
-      flex: 1.2 !important;
+  /* Active State */
+  .nav-item.active { color: #0ea5e9 !important; }
+  .nav-item.active i { color: #0ea5e9 !important; transform: translateY(-2px) !important; }
+  
+  /* The Play Button (Center) - Minimalist Version */
+  .nav-item--play i {
+      font-size: 28px !important;
+      color: #f59e0b !important;
+      filter: drop-shadow(0 2px 4px rgba(245,158,11,0.3)) !important;
   }
-  .nav-center-btn {
-      position: absolute !important;
-      bottom: -10px !important; /* stick out of the top */
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: 64px !important;
-      height: 64px !important;
-      background: linear-gradient(135deg, #fde047, #f59e0b) !important;
-      border: 3px solid #d97706 !important;
-      border-radius: 20px !important; /* Squircle */
-      box-shadow: 0 6px 0 #b45309 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      color: #78350f !important;
-      transition: all 0.15s !important;
-      z-index: 2 !important;
+  .nav-item--play.active i {
+      color: #d97706 !important;
+      transform: translateY(-2px) scale(1.1) !important;
   }
-  .nav-item--center.active .nav-center-btn {
-      background: linear-gradient(135deg, #a7f3d0, #10b981) !important;
-      border-color: #059669 !important;
-      box-shadow: 0 6px 0 #047857 !important;
-      color: #fff !important;
-  }
-  .nav-center-btn:active {
-      transform: translate(-50%, 4px) !important;
-      box-shadow: 0 2px 0 #b45309 !important;
-  }
-  .nav-center-btn i { font-size: 32px !important; margin: 0 !important; color: inherit !important; }
   
   /* Floating contact buttons adjustment */
   .float-contact-wrap { bottom: 106px !important; }
@@ -93,10 +75,9 @@
       Upgrade
     </a>
     
-    <a href="/videos" class="nav-item nav-item--center <?= ($activePage??'')==='videos'?'active':'' ?>">
-      <div class="nav-center-btn">
-        <i class="ph-fill ph-play"></i>
-      </div>
+    <a href="/videos" class="nav-item nav-item--play <?= ($activePage??'')==='videos'?'active':'' ?>">
+      <i class="<?= ($activePage??'')==='videos'?'ph-fill':'ph-bold' ?> ph-play-circle"></i>
+      Tonton
     </a>
     
     <a href="/referral" class="nav-item <?= ($activePage??'')==='referral'?'active':'' ?>">
