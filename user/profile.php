@@ -3,12 +3,11 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
 
 $flash = $flashType = '';
-$active_tab = 'profil'; // default — always open profil tab
+$active_section = 'main'; // default
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'update_profile') {
-        $active_tab = 'edit';
         $username = trim($_POST['username'] ?? '');
         if (strlen($username) < 3) { $flash = 'Username minimal 3 karakter.'; $flashType = 'error'; }
         elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) { $flash = 'Username hanya boleh huruf, angka, underscore.'; $flashType = 'error'; }
@@ -18,32 +17,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ex->fetch()) { $flash = 'Username sudah digunakan.'; $flashType = 'error'; }
             else {
                 $pdo->prepare("UPDATE users SET username=? WHERE id=?")->execute([$username, $user['id']]);
-                $flash = '✅ Username berhasil diperbarui.';
-                $active_tab = 'profil';
+                $flash = '✅ Username berhasil diperbarui!';
             }
         }
+        $active_section = 'edit';
     }
     if ($action === 'change_password') {
-        $active_tab = 'password';
         $old = $_POST['old_password'] ?? '';
         $new = $_POST['new_password'] ?? '';
         if (!password_verify($old, $user['password_hash'])) { $flash = 'Password lama salah.'; $flashType = 'error'; }
         elseif (strlen($new) < 6) { $flash = 'Password baru minimal 6 karakter.'; $flashType = 'error'; }
         else {
             $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")->execute([password_hash($new, PASSWORD_BCRYPT), $user['id']]);
-            $flash = '✅ Password berhasil diubah.';
-            $active_tab = 'profil';
+            $flash = '✅ Password berhasil diubah!';
         }
+        $active_section = 'password';
     }
-    
     $ru = $pdo->prepare("SELECT * FROM users WHERE id=?"); $ru->execute([$user['id']]); $user = $ru->fetch();
 }
 
 // Stats
-$total_watches = (int)$pdo->prepare("SELECT COUNT(*) FROM watch_history WHERE user_id=?")->execute([$user['id']]) ? $pdo->query("SELECT COUNT(*) FROM watch_history WHERE user_id={$user['id']}")->fetchColumn() : 0;
 $st = $pdo->prepare("SELECT COUNT(*) FROM watch_history WHERE user_id=?"); $st->execute([$user['id']]); $total_watches = (int)$st->fetchColumn();
 $refs = $pdo->prepare("SELECT COUNT(*) FROM users WHERE referred_by=?"); $refs->execute([$user['referral_code']]); $refs = (int)$refs->fetchColumn();
 
+// Membership
 $membership_name = 'Free';
 $membership_allow_edit_bank = false;
 if ($user['membership_id'] && $user['membership_expires_at'] && strtotime($user['membership_expires_at']) > time()) {
@@ -52,18 +49,18 @@ if ($user['membership_id'] && $user['membership_expires_at'] && strtotime($user[
     $membership_name = $ms['name'] ?? 'Free';
     $membership_allow_edit_bank = (bool)($ms['allow_edit_bank'] ?? false);
 }
-
 $edit_bank_min_dep = (int)($user['edit_bank_deposit_min'] ?? 50000);
 $dep_ok_for_edit   = (float)$user['balance_dep'] >= $edit_bank_min_dep;
 $is_promotor_prof  = ((int)($user['is_promotor'] ?? 0) === 1);
 $show_edit_rek_btn = $membership_allow_edit_bank || $is_promotor_prof;
+$is_premium        = $membership_name !== 'Free';
 
 // Contact buttons
 try {
     $_contact_btns = $pdo->query("SELECT * FROM contact_buttons WHERE is_active=1 ORDER BY sort_order ASC, id ASC")->fetchAll();
 } catch (\Throwable) { $_contact_btns = []; }
 
-$pageTitle  = 'Profil — Meloton';
+$pageTitle  = 'Profil';
 $activePage = 'profile';
 require dirname(__DIR__) . '/partials/header.php';
 
@@ -77,244 +74,496 @@ $_psvg = [
 ?>
 
 <style>
-/* ── Profile compact styles ── */
-.prof-hero{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--yellow);border:2.5px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);margin-bottom:12px}
-.prof-avatar{width:52px;height:52px;flex-shrink:0;background:var(--brand);color:#fff;border:2.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900}
-.prof-name{font-size:16px;font-weight:900;line-height:1.2}
-.prof-email{font-size:11px;color:#555;margin-top:1px;word-break:break-all}
-.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.prof-stat{background:var(--white);border:2px solid var(--ink);border-radius:10px;box-shadow:2px 2px 0 var(--ink);padding:8px 6px;text-align:center}
-.prof-stat__val{font-size:15px;font-weight:900;line-height:1}
-.prof-stat__lbl{font-size:9px;font-weight:700;color:#888;margin-top:3px}
-/* Ref code */
-.ref-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:2px solid var(--ink);border-radius:10px;margin-bottom:12px}
-.ref-code{flex:1;font-size:16px;font-weight:900;letter-spacing:3px;text-align:center}
-/* Tabs */
-.prof-tabs{display:flex;gap:0;margin-bottom:12px;border:2px solid var(--ink);border-radius:10px;overflow:hidden;box-shadow:3px 3px 0 var(--ink)}
-.prof-tab{flex:1;padding:9px 6px;font-size:12px;font-weight:800;text-align:center;cursor:pointer;background:var(--white);border:none;outline:none;transition:background .15s;color:var(--ink)}
-.prof-tab:not(:last-child){border-right:2px solid var(--ink)}
-.prof-tab.active{background:var(--yellow)}
-.prof-tab-panel{display:none}.prof-tab-panel.active{display:block}
-/* Contact list */
-.contact-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--ink);border-radius:10px;box-shadow:2px 2px 0 var(--ink);text-decoration:none;color:var(--ink);background:var(--white);margin-bottom:8px;transition:transform .1s}
-.contact-item:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
-.contact-icon{width:34px;height:34px;flex-shrink:0;border-radius:9px;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden}
-/* Logout */
-.logout-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#FF4D4D;color:#fff;border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);padding:12px 16px;font-weight:900;font-size:14px;text-decoration:none;transition:transform .1s}
-.logout-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+/* ══════════════════════════════════════════════
+   PROFILE PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+
+.prof-page { padding: 0 0 20px; }
+
+/* ── Flash ── */
+.prof-flash { padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; margin-bottom: 12px; border: 2px solid; display: flex; align-items: center; gap: 8px; }
+.prof-flash--success { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.prof-flash--error   { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+
+/* ── Hero Card ── */
+.prof-hero {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 55%, #06b6d4 100%);
+  border: 3px solid #075985;
+  border-radius: 22px;
+  box-shadow: 0 8px 0 #0c4a6e;
+  padding: 20px 16px 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.prof-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -30px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.prof-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -20px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+/* Avatar circle */
+.prof-avatar-ring {
+  position: relative;
+  width: 76px; height: 76px;
+  margin: 0 auto 10px;
+}
+.prof-avatar {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  border: 3.5px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 32px; color: #0c4a6e;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+}
+.prof-tier-badge {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2.5px solid #fff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 9px; font-weight: 900;
+  color: #0c4a6e;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  white-space: nowrap;
+}
+.prof-tier-badge--premium { background: linear-gradient(135deg, #a78bfa, #7c3aed); color: #fff; }
+
+.prof-hero__name {
+  font-size: 18px; font-weight: 900; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  margin-bottom: 2px;
+}
+.prof-hero__email {
+  font-size: 10px; color: rgba(255,255,255,0.6);
+  font-weight: 700; margin-bottom: 12px;
+}
+
+/* Stats row inside hero */
+.prof-hero-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.prof-hero-stat {
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 8px 4px;
+  backdrop-filter: blur(4px);
+}
+.prof-hero-stat__val { font-size: 15px; font-weight: 900; color: #fde68a; line-height: 1; }
+.prof-hero-stat__lbl { font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.65); margin-top: 3px; }
+
+/* ── Referral Strip ── */
+.prof-ref {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff;
+  border: 2.5px solid #7dd3e8;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 0 #7dd3e8;
+  margin-bottom: 12px;
+}
+.prof-ref__icon { font-size: 20px; color: #0891b2; flex-shrink: 0; }
+.prof-ref__body { flex: 1; min-width: 0; }
+.prof-ref__label { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.prof-ref__code  { font-size: 15px; font-weight: 900; color: #0c4a6e; letter-spacing: 2px; }
+.prof-ref__btn {
+  background: #e0f9ff; border: 1.5px solid #7dd3e8; border-radius: 10px;
+  padding: 6px 12px; font-size: 11px; font-weight: 900; color: #0891b2;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+  transition: background 0.1s;
+}
+.prof-ref__btn:active { background: #bae6fd; }
+
+/* ── Section Card ── */
+.prof-section {
+  background: #fff;
+  border: 2.5px solid #7dd3e8;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #7dd3e8;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.prof-section-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e0f9ff;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.prof-section-hdr__icon {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.prof-section-hdr__title { flex: 1; font-size: 13px; font-weight: 900; color: #0c4a6e; }
+.prof-section-hdr__caret { font-size: 14px; color: #94a3b8; transition: transform 0.2s; }
+.prof-section-hdr__caret.open { transform: rotate(180deg); }
+.prof-section-body { padding: 12px; display: none; }
+.prof-section-body.open { display: block; }
+
+/* ── Info Row (label: value) ── */
+.info-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1.5px solid #f0fdff;
+  font-size: 12px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row__label { color: #64748b; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.info-row__val   { font-weight: 900; color: #0c4a6e; }
+
+/* ── Bank card ── */
+.bank-display {
+  background: linear-gradient(135deg, #0c4a6e, #0e7490);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.bank-display::before {
+  content: '';
+  position: absolute; top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.bank-display__name   { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
+.bank-display__bank   { font-size: 14px; font-weight: 900; color: #fde68a; margin: 4px 0 2px; }
+.bank-display__number { font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 2px; }
+.bank-display__holder { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; font-weight: 700; }
+
+/* ── Form ── */
+.pf-label { font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 4px; display: block; }
+.pf-input {
+  width: 100%; background: #f8fafc;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  font-weight: 700; color: #0c4a6e; outline: none;
+  transition: border-color 0.2s;
+}
+.pf-input:focus { border-color: #7dd3e8; background: #fff; }
+.pf-input:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+.pf-group { margin-bottom: 10px; }
+.pf-hint { font-size: 10px; color: #94a3b8; font-weight: 700; margin-top: 3px; }
+
+/* ── Action buttons (save/ganti password) ── */
+.pf-btn-primary {
+  width: 100%; padding: 11px;
+  background: linear-gradient(135deg, #22d3ee, #0891b2);
+  border: 2px solid #a5f3fc; border-radius: 12px;
+  box-shadow: 0 4px 0 #0e7490;
+  color: #fff; font-size: 13px; font-weight: 900;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: transform 0.1s;
+}
+.pf-btn-primary:active { transform: translateY(3px); box-shadow: none; }
+.pf-btn-danger {
+  width: 100%; padding: 11px;
+  background: linear-gradient(135deg, #fb923c, #dc2626);
+  border: 2px solid #fed7aa; border-radius: 12px;
+  box-shadow: 0 4px 0 #991b1b;
+  color: #fff; font-size: 13px; font-weight: 900;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: transform 0.1s;
+}
+.pf-btn-danger:active { transform: translateY(3px); box-shadow: none; }
+
+/* ── Menu link list ── */
+.prof-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid #f0fdff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.prof-menu-item:last-child { border-bottom: none; }
+.prof-menu-item:active { background: #f0fdff; }
+.prof-menu-icon {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.prof-menu-label { flex: 1; font-size: 13px; font-weight: 800; color: #0c4a6e; }
+.prof-menu-arrow { font-size: 14px; color: #94a3b8; }
+
+/* ── Logout ── */
+.prof-logout {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, #f87171, #dc2626);
+  border: 2.5px solid #fca5a5;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #991b1b;
+  padding: 13px; font-weight: 900; font-size: 14px;
+  color: #fff; text-decoration: none;
+  transition: transform 0.1s;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.prof-logout:active { transform: translateY(4px); box-shadow: none; }
+
+/* ── Ref copy toast ── */
+#prof-ref-toast {
+  text-align: center; font-size: 11px; font-weight: 700;
+  color: #15803d; background: #f0fdf4; border-radius: 8px;
+  padding: 5px; margin-bottom: 8px; display: none;
+}
 </style>
 
+<div class="prof-page">
+
 <?php if ($flash): ?>
-<div class="alert alert--<?= $flashType === 'error' ? 'error' : 'success' ?>" style="margin-bottom:10px;font-size:13px"><?= htmlspecialchars($flash) ?></div>
+<div class="prof-flash prof-flash--<?= $flashType === 'error' ? 'error' : 'success' ?>">
+  <i class="ph-bold ph-<?= $flashType === 'error' ? 'warning-circle' : 'check-circle' ?>" style="font-size:16px;flex-shrink:0"></i>
+  <?= htmlspecialchars($flash) ?>
+</div>
 <?php endif; ?>
 
-<!-- Hero -->
+<!-- ── HERO CARD ── -->
 <div class="prof-hero">
-  <div class="prof-avatar"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
-  <div style="flex:1;min-width:0">
-    <div class="prof-name"><?= htmlspecialchars($user['username']) ?></div>
-    <div class="prof-email"><?= htmlspecialchars($user['email']) ?></div>
-    <div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">
-      <span class="badge badge--brand" style="font-size:10px;display:inline-flex;align-items:center;gap:3px"><i class="ph-fill ph-star"></i> <?= $membership_name ?></span>
-      <?php if ($user['membership_expires_at'] && strtotime($user['membership_expires_at']) > time()): ?>
-      <span class="badge badge--neutral" style="font-size:10px">s/d <?= date('d M Y', strtotime($user['membership_expires_at'])) ?></span>
-      <?php endif; ?>
+  <div class="prof-avatar-ring">
+    <div class="prof-avatar"><?= strtoupper(substr($user['username'], 0, 1)) ?></div>
+    <div class="prof-tier-badge <?= $is_premium ? 'prof-tier-badge--premium' : '' ?>">
+      <?= $is_premium ? '⭐ '.$membership_name : 'Free' ?>
+    </div>
+  </div>
+  <div class="prof-hero__name"><?= htmlspecialchars($user['username']) ?></div>
+  <div class="prof-hero__email"><?= htmlspecialchars($user['email']) ?></div>
+  <?php if ($user['membership_expires_at'] && strtotime($user['membership_expires_at']) > time()): ?>
+  <div style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:700;margin-bottom:8px">
+    s/d <?= date('d M Y', strtotime($user['membership_expires_at'])) ?>
+  </div>
+  <?php else: ?>
+  <div style="margin-bottom:8px"></div>
+  <?php endif; ?>
+  <div class="prof-hero-stats">
+    <div class="prof-hero-stat">
+      <div class="prof-hero-stat__val" style="font-size:12px"><?= format_rp((float)$user['total_earned']) ?></div>
+      <div class="prof-hero-stat__lbl">Total Earned</div>
+    </div>
+    <div class="prof-hero-stat">
+      <div class="prof-hero-stat__val"><?= number_format($total_watches) ?></div>
+      <div class="prof-hero-stat__lbl">Ditonton</div>
+    </div>
+    <div class="prof-hero-stat">
+      <div class="prof-hero-stat__val"><?= $refs ?></div>
+      <div class="prof-hero-stat__lbl">Referral</div>
     </div>
   </div>
 </div>
 
-<!-- Stats -->
-<div class="prof-stats">
-  <div class="prof-stat">
-    <div class="prof-stat__val" style="font-size:13px"><?= format_rp((float)$user['total_earned']) ?></div>
-    <div class="prof-stat__lbl">Total Earned</div>
+<!-- ── REFERRAL STRIP ── -->
+<div class="prof-ref">
+  <i class="ph-fill ph-share-network prof-ref__icon"></i>
+  <div class="prof-ref__body">
+    <div class="prof-ref__label">Kode Referral</div>
+    <div class="prof-ref__code" id="ref-code"><?= htmlspecialchars($user['referral_code']) ?></div>
   </div>
-  <div class="prof-stat">
-    <div class="prof-stat__val"><?= number_format((int)$total_watches) ?></div>
-    <div class="prof-stat__lbl">Video Ditonton</div>
+  <button type="button" class="prof-ref__btn" onclick="copyRef()">
+    <i class="ph-bold ph-copy"></i> Salin
+  </button>
+</div>
+<div id="prof-ref-toast">✓ Kode referral disalin!</div>
+
+<!-- ── INFO AKUN ── -->
+<div class="prof-section">
+  <div class="prof-section-hdr" onclick="toggleSection('info')" id="hdr-info">
+    <div class="prof-section-hdr__icon" style="background:#e0f9ff"><i class="ph-fill ph-user-circle" style="color:#0891b2"></i></div>
+    <div class="prof-section-hdr__title">Info Akun</div>
+    <i class="ph-bold ph-caret-down prof-section-hdr__caret open" id="caret-info"></i>
   </div>
-  <div class="prof-stat">
-    <div class="prof-stat__val"><?= (int)$refs ?></div>
-    <div class="prof-stat__lbl">Referral</div>
-  </div>
-</div>
-
-<!-- Referral code -->
-<div class="ref-row">
-  <div style="font-size:10px;font-weight:700;color:#888;flex-shrink:0"><i class="ph-bold ph-link" style="color:var(--sky);font-size:14px"></i> Referral</div>
-  <div class="ref-code" id="ref-code"><?= $user['referral_code'] ?></div>
-  <button onclick="copyRef()" class="btn btn--secondary btn--sm" style="flex-shrink:0;font-size:11px;padding:4px 10px">Salin</button>
-</div>
-
-<!-- Tabs: Profil | Edit Profil | Ganti Password -->
-<div class="prof-tabs" role="tablist">
-  <button class="prof-tab <?= $active_tab === 'profil' ? 'active' : '' ?>" onclick="switchTab('profil')" id="tab-profil"><i class="ph-bold ph-user-circle" style="color:var(--blue);font-size:14px;vertical-align:middle"></i> Profil</button>
-  <button class="prof-tab <?= $active_tab === 'edit' ? 'active' : '' ?>" onclick="switchTab('edit')" id="tab-edit"><i class="ph-bold ph-pencil-simple" style="color:var(--orange);font-size:14px;vertical-align:middle"></i> Edit</button>
-  <button class="prof-tab <?= $active_tab === 'password' ? 'active' : '' ?>" onclick="switchTab('password')" id="tab-password"><i class="ph-bold ph-lock-key" style="color:var(--green);font-size:14px;vertical-align:middle"></i> Password</button>
-</div>
-
-<!-- Tab: Profil (default) -->
-<div class="prof-tab-panel <?= $active_tab === 'profil' ? 'active' : '' ?>" id="panel-profil">
-  <div class="card" style="margin-bottom:12px">
-    <div class="card__body">
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:#888;font-weight:600;display:flex;align-items:center;gap:4px"><i class="ph-bold ph-identification-card" style="color:var(--brand)"></i> Username</span>
-          <span style="font-weight:800"><?= htmlspecialchars($user['username']) ?></span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:#888;font-weight:600;display:flex;align-items:center;gap:4px"><i class="ph-bold ph-envelope-simple" style="color:var(--sky)"></i> Email</span>
-          <span style="font-weight:700;font-size:12px"><?= htmlspecialchars($user['email']) ?></span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px">
-          <span style="color:#888;font-weight:600;display:flex;align-items:center;gap:4px"><i class="ph-bold ph-whatsapp-logo" style="color:var(--green)"></i> WhatsApp</span>
-          <span style="font-weight:700"><?= htmlspecialchars(mask_account($user['whatsapp'] ?? '')) ?></span>
-        </div>
-      </div>
+  <div class="prof-section-body open" id="body-info">
+    <div class="info-row">
+      <span class="info-row__label"><i class="ph-bold ph-identification-card" style="color:#0891b2"></i> Username</span>
+      <span class="info-row__val"><?= htmlspecialchars($user['username']) ?></span>
     </div>
-  </div>
-  <!-- Bank info -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="card__header">
-      <div class="card__title" style="font-size:13px"><i class="ph-bold ph-bank" style="color:var(--blue);font-size:16px;vertical-align:middle"></i> Rekening Bank</div>
+    <div class="info-row">
+      <span class="info-row__label"><i class="ph-bold ph-envelope-simple" style="color:#a78bfa"></i> Email</span>
+      <span class="info-row__val" style="font-size:11px"><?= htmlspecialchars($user['email']) ?></span>
     </div>
-    <div class="card__body">
-      <?php if (!empty($user['bank_name'])): ?>
-      <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-        <div style="display:flex;justify-content:space-between">
-          <span style="color:#888;font-weight:600">Bank</span><span style="font-weight:800"><?= htmlspecialchars($user['bank_name']) ?></span>
-        </div>
-        <div style="display:flex;justify-content:space-between">
-          <span style="color:#888;font-weight:600">Nomor</span><span style="font-weight:800"><?= htmlspecialchars(mask_account($user['account_number'] ?? '')) ?></span>
-        </div>
-        <div style="display:flex;justify-content:space-between">
-          <span style="color:#888;font-weight:600">A/N</span><span style="font-weight:800"><?= htmlspecialchars($user['account_name']) ?></span>
-        </div>
-      </div>
-      <?php else: ?>
-      <div style="color:#aaa;font-size:12px;text-align:center;padding:8px">Belum ada rekening tersimpan.</div>
-      <?php endif; ?>
-      <?php if ($show_edit_rek_btn): ?>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #ddd">
-        <a href="/edit-rekening" class="btn btn--ghost btn--full" style="font-size:12px;display:flex;align-items:center;justify-content:center;gap:4px">
-          <i class="ph-bold ph-pencil-simple" style="color:var(--orange)"></i> Edit Rekening Bank
-          <?php if (!$dep_ok_for_edit): ?>
-          <span style="font-size:10px;color:#f59e0b;margin-left:4px"><i class="ph-bold ph-lock-key"></i> Butuh deposit Rp <?= number_format($edit_bank_min_dep,0,'','') ?></span>
-          <?php endif; ?>
-        </a>
-      </div>
-      <?php endif; ?>
+    <div class="info-row">
+      <span class="info-row__label"><i class="ph-bold ph-whatsapp-logo" style="color:#10b981"></i> WhatsApp</span>
+      <span class="info-row__val"><?= htmlspecialchars(mask_account($user['whatsapp'] ?? '')) ?></span>
+    </div>
+    <div class="info-row">
+      <span class="info-row__label"><i class="ph-bold ph-crown" style="color:#f59e0b"></i> Paket</span>
+      <span class="info-row__val"><?= $membership_name ?></span>
+    </div>
+    <div class="info-row" style="border:none;padding-top:10px">
+      <a href="/upgrade" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:#e0f9ff;border:1.5px solid #7dd3e8;border-radius:10px;padding:8px;font-size:12px;font-weight:900;color:#0891b2;text-decoration:none">
+        <i class="ph-fill ph-rocket-launch"></i> Upgrade Membership
+      </a>
     </div>
   </div>
 </div>
 
-<!-- Tab: Edit Profil -->
-<div class="prof-tab-panel <?= $active_tab === 'edit' ? 'active' : '' ?>" id="panel-edit">
-  <div class="card" style="margin-bottom:12px">
-    <div class="card__body">
-      <form method="POST">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="update_profile">
-        <div class="form-group" style="margin-bottom:8px">
-          <label class="form-label" style="font-size:12px">Username</label>
-          <input class="form-control" type="text" name="username"
-                 value="<?= htmlspecialchars($user['username']) ?>"
-                 pattern="[a-zA-Z0-9_]+" minlength="3" required>
-          <div class="form-hint">3–30 karakter · huruf, angka, underscore</div>
-        </div>
-        <div class="form-group" style="margin-bottom:10px">
-          <label class="form-label" style="font-size:12px">WhatsApp <span style="font-weight:600;color:#aaa;font-size:10px"><i class="ph-bold ph-lock-key"></i> tidak dapat diubah</span></label>
-          <input class="form-control" type="tel" value="<?= htmlspecialchars($user['whatsapp']) ?>"
-                 disabled readonly style="background:var(--bg);color:#aaa;cursor:not-allowed">
-        </div>
-        <button type="submit" class="btn btn--primary btn--full" style="font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ph-bold ph-floppy-disk"></i> Simpan Username</button>
-      </form>
-    </div>
+<!-- ── REKENING BANK ── -->
+<div class="prof-section">
+  <div class="prof-section-hdr" onclick="toggleSection('bank')" id="hdr-bank">
+    <div class="prof-section-hdr__icon" style="background:#dbeafe"><i class="ph-fill ph-bank" style="color:#3b82f6"></i></div>
+    <div class="prof-section-hdr__title">Rekening Bank</div>
+    <i class="ph-bold ph-caret-down prof-section-hdr__caret" id="caret-bank"></i>
   </div>
-</div>
-
-<!-- Tab: Ganti Password -->
-<div class="prof-tab-panel <?= $active_tab === 'password' ? 'active' : '' ?>" id="panel-password">
-  <div class="card" style="margin-bottom:12px">
-    <div class="card__body">
-      <form method="POST">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="change_password">
-        <div class="form-group" style="margin-bottom:8px">
-          <label class="form-label" style="font-size:12px">Password Lama</label>
-          <input class="form-control" type="password" name="old_password" required>
-        </div>
-        <div class="form-group" style="margin-bottom:10px">
-          <label class="form-label" style="font-size:12px">Password Baru <span style="color:#aaa;font-size:10px">min. 6 karakter</span></label>
-          <input class="form-control" type="password" name="new_password" required>
-        </div>
-        <button type="submit" class="btn btn--ghost btn--full" style="font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ph-bold ph-lock-key"></i> Ganti Password</button>
-      </form>
+  <div class="prof-section-body" id="body-bank">
+    <?php if (!empty($user['bank_name'])): ?>
+    <div class="bank-display">
+      <div class="bank-display__name">Rekening Penarikan</div>
+      <div class="bank-display__bank"><?= htmlspecialchars($user['bank_name']) ?></div>
+      <div class="bank-display__number"><?= htmlspecialchars(mask_account($user['account_number'] ?? '')) ?></div>
+      <div class="bank-display__holder"><?= htmlspecialchars($user['account_name']) ?></div>
     </div>
-  </div>
-</div>
-
-<?php if (!empty($_contact_btns)): ?>
-<!-- Transaksi -->
-<div style="font-size:11px;font-weight:800;color:#888;margin-bottom:6px;margin-top:4px">TRANSAKSI</div>
-<a href="/history" class="contact-item">
-  <div class="contact-icon" style="background:var(--sky);color:#fff;font-size:18px"><i class="ph-fill ph-receipt"></i></div>
-  <div style="flex:1;font-weight:800;font-size:13px">Riwayat Transaksi</div>
-  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:.35"><polyline points="9 18 15 12 9 6"/></svg>
-</a>
-
-<!-- Community / Contact -->
-<div style="font-size:11px;font-weight:800;color:#888;margin-bottom:6px;margin-top:4px">BANTUAN & KOMUNITAS</div>
-<a href="/panduan" class="contact-item">
-  <div class="contact-icon" style="background:var(--brand);color:#fff;font-size:18px"><i class="ph-fill ph-book-open"></i></div>
-  <div style="flex:1;font-weight:800;font-size:13px">Buku Panduan</div>
-  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:.35"><polyline points="9 18 15 12 9 6"/></svg>
-</a>
-
-<?php foreach ($_contact_btns as $_cb): ?>
-<a href="<?= htmlspecialchars($_cb['url']) ?>" target="_blank" rel="noopener" class="contact-item">
-  <div class="contact-icon" style="background:<?= htmlspecialchars($_cb['bg_color']) ?>">
-    <?php if ($_cb['icon_type'] === 'custom'): ?>
-      <img src="<?= htmlspecialchars($_cb['icon_value']) ?>" style="width:100%;height:100%;object-fit:cover" alt="">
     <?php else: ?>
-      <span style="color:#fff;display:flex"><?= $_psvg[$_cb['icon_value']] ?? $_psvg['cs'] ?></span>
+    <div style="text-align:center;color:#94a3b8;font-size:12px;font-weight:700;padding:12px 0">
+      <i class="ph-fill ph-bank" style="font-size:28px;display:block;margin-bottom:4px;opacity:0.3"></i>
+      Belum ada rekening tersimpan
+    </div>
+    <?php endif; ?>
+    <?php if ($show_edit_rek_btn): ?>
+    <a href="/edit-rekening" style="display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,#60a5fa,#3b82f6);border:1.5px solid #93c5fd;border-radius:10px;padding:10px;font-size:12px;font-weight:900;color:#fff;text-decoration:none;box-shadow:0 3px 0 #1d4ed8">
+      <i class="ph-bold ph-pencil-simple"></i> Edit Rekening
+      <?php if (!$dep_ok_for_edit): ?>
+      <span style="font-size:9px;opacity:0.75">· Butuh Rp<?= number_format($edit_bank_min_dep,0,'','') ?></span>
+      <?php endif; ?>
+    </a>
     <?php endif; ?>
   </div>
-  <div style="flex:1;font-weight:800;font-size:13px"><?= htmlspecialchars($_cb['label']) ?></div>
-  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:.35"><polyline points="9 18 15 12 9 6"/></svg>
-</a>
-<?php endforeach; ?>
-<div style="margin-bottom:12px"></div>
-<?php endif; ?>
+</div>
 
-<!-- Logout -->
-<div style="margin-bottom:8px">
-  <a href="/logout" id="logout-btn" class="logout-btn">
-    <i class="ph-bold ph-sign-out" style="font-size:18px"></i>
-    Keluar dari Akun
+<!-- ── EDIT USERNAME ── -->
+<div class="prof-section">
+  <div class="prof-section-hdr" onclick="toggleSection('edit')" id="hdr-edit">
+    <div class="prof-section-hdr__icon" style="background:#fef3c7"><i class="ph-fill ph-pencil-simple" style="color:#d97706"></i></div>
+    <div class="prof-section-hdr__title">Edit Username</div>
+    <i class="ph-bold ph-caret-down prof-section-hdr__caret <?= $active_section === 'edit' ? 'open' : '' ?>" id="caret-edit"></i>
+  </div>
+  <div class="prof-section-body <?= $active_section === 'edit' ? 'open' : '' ?>" id="body-edit">
+    <form method="POST">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="update_profile">
+      <div class="pf-group">
+        <label class="pf-label">Username Baru</label>
+        <input class="pf-input" type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>"
+               pattern="[a-zA-Z0-9_]+" minlength="3" required>
+        <div class="pf-hint">3–30 karakter · huruf, angka, underscore</div>
+      </div>
+      <div class="pf-group">
+        <label class="pf-label">WhatsApp <span style="color:#94a3b8;font-size:9px">· tidak dapat diubah</span></label>
+        <input class="pf-input" type="tel" value="<?= htmlspecialchars($user['whatsapp'] ?? '') ?>" disabled>
+      </div>
+      <button type="submit" class="pf-btn-primary">
+        <i class="ph-bold ph-floppy-disk"></i> Simpan Username
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ── GANTI PASSWORD ── -->
+<div class="prof-section">
+  <div class="prof-section-hdr" onclick="toggleSection('password')" id="hdr-password">
+    <div class="prof-section-hdr__icon" style="background:#dcfce7"><i class="ph-fill ph-lock-key" style="color:#16a34a"></i></div>
+    <div class="prof-section-hdr__title">Ganti Password</div>
+    <i class="ph-bold ph-caret-down prof-section-hdr__caret <?= $active_section === 'password' ? 'open' : '' ?>" id="caret-password"></i>
+  </div>
+  <div class="prof-section-body <?= $active_section === 'password' ? 'open' : '' ?>" id="body-password">
+    <form method="POST">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="change_password">
+      <div class="pf-group">
+        <label class="pf-label">Password Lama</label>
+        <input class="pf-input" type="password" name="old_password" required>
+      </div>
+      <div class="pf-group">
+        <label class="pf-label">Password Baru <span style="color:#94a3b8;font-size:9px">min. 6 karakter</span></label>
+        <input class="pf-input" type="password" name="new_password" required>
+      </div>
+      <button type="submit" class="pf-btn-danger">
+        <i class="ph-bold ph-lock-key"></i> Ganti Password
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ── MENU NAVIGASI ── -->
+<div class="prof-section" style="margin-bottom:12px">
+  <a href="/history" class="prof-menu-item" style="color:inherit;text-decoration:none">
+    <div class="prof-menu-icon" style="background:#e0f9ff"><i class="ph-fill ph-receipt" style="color:#0891b2;font-size:18px"></i></div>
+    <span class="prof-menu-label">Riwayat Transaksi</span>
+    <i class="ph-bold ph-caret-right prof-menu-arrow"></i>
   </a>
+  <a href="/panduan" class="prof-menu-item" style="color:inherit;text-decoration:none">
+    <div class="prof-menu-icon" style="background:#f0fdf4"><i class="ph-fill ph-book-open" style="color:#16a34a;font-size:18px"></i></div>
+    <span class="prof-menu-label">Buku Panduan</span>
+    <i class="ph-bold ph-caret-right prof-menu-arrow"></i>
+  </a>
+  <?php foreach ($_contact_btns as $_cb): ?>
+  <a href="<?= htmlspecialchars($_cb['url']) ?>" target="_blank" rel="noopener" class="prof-menu-item" style="color:inherit;text-decoration:none">
+    <div class="prof-menu-icon" style="background:<?= htmlspecialchars($_cb['bg_color']) ?>">
+      <?php if ($_cb['icon_type'] === 'custom'): ?>
+        <img src="<?= htmlspecialchars($_cb['icon_value']) ?>" style="width:22px;height:22px;object-fit:contain" alt="">
+      <?php else: ?>
+        <span style="color:#fff;display:flex"><?= $_psvg[$_cb['icon_value']] ?? $_psvg['cs'] ?></span>
+      <?php endif; ?>
+    </div>
+    <span class="prof-menu-label"><?= htmlspecialchars($_cb['label']) ?></span>
+    <i class="ph-bold ph-caret-right prof-menu-arrow"></i>
+  </a>
+  <?php endforeach; ?>
+</div>
+
+<!-- ── LOGOUT ── -->
+<a href="/logout" id="logout-btn" class="prof-logout">
+  <i class="ph-bold ph-sign-out" style="font-size:18px"></i>
+  Keluar dari Akun
+</a>
+
 </div>
 
 <script>
-function switchTab(tab) {
-  document.querySelectorAll('.prof-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.prof-tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('panel-' + tab).classList.add('active');
+function toggleSection(id) {
+  const body  = document.getElementById('body-' + id);
+  const caret = document.getElementById('caret-' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  caret.classList.toggle('open', !isOpen);
 }
+
 function copyRef() {
-  const c = document.getElementById('ref-code').textContent.trim();
-  if (typeof nToast !== 'undefined' && nToast.copy) {
-    nToast.copy(c, 'Kode referral');
-  } else {
-    navigator.clipboard.writeText(c).then(() => nToast('Kode referral disalin!', 'success'));
-  }
+  const code = document.getElementById('ref-code').textContent.trim();
+  navigator.clipboard.writeText(code).then(() => {
+    const toast = document.getElementById('prof-ref-toast');
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 2000);
+  }).catch(() => {});
 }
+
 document.getElementById('logout-btn').addEventListener('click', function(e) {
   e.preventDefault();
   const url = this.href;
   if (!this.dataset.confirmed) {
-    nToast('Klik Keluar lagi untuk konfirmasi', 'warn', 3000);
+    if (typeof nToast !== 'undefined') nToast('Klik Keluar lagi untuk konfirmasi', 'warn', 3000);
     this.dataset.confirmed = '1';
     setTimeout(() => delete this.dataset.confirmed, 3500);
     return;
