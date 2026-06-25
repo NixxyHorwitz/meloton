@@ -337,6 +337,7 @@ if ($streak == 0 && $already) $completed_days = 1;
       <div class="ci-stat__lbl">Hari Aktif</div>
     </div>
     <div class="ci-stat">
+<div class="ci-stat">
       <div class="ci-stat__val" style="font-size:15px"><?= format_rp((float)$user['balance_dep']) ?></div>
       <div class="ci-stat__lbl">Saldo Beli</div>
     </div>
@@ -354,134 +355,191 @@ if ($streak == 0 && $already) $completed_days = 1;
 (function(){
   const canvas  = document.getElementById('scratchCanvas');
   const wrap    = document.getElementById('canvas-wrap');
-  const bg      = document.getElementById('scratch-bg');
   const hint    = document.getElementById('scratch-hint');
-  const reveal  = document.getElementById('reveal-content');
+  const reveal_el = document.getElementById('reveal-content');
   const display = document.getElementById('reward-display');
   const form    = document.getElementById('checkin-form');
 
-  // Reward range from PHP
   const MIN = <?= (int)$checkin_min ?>;
   const MAX = <?= (int)$checkin_max ?>;
-
-  // Generate reward locally for display (actual saved via PHP POST)
   const localReward = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
-  // Format as Rp
-  function formatRp(n) {
-    return 'Rp ' + n.toLocaleString('id-ID');
+
+  function formatRp(n) { return 'Rp\u00a0' + n.toLocaleString('id-ID'); }
+
+  /* ── Web Audio ─────────────────────────────── */
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx = null;
+  function ensureAudio() {
+    if (!actx && AudioCtx) { try { actx = new AudioCtx(); } catch(e){} }
+    return actx;
+  }
+  function playScratch() {
+    try {
+      const a = ensureAudio(); if (!a) return;
+      const buf = a.createBuffer(1, a.sampleRate * 0.055, a.sampleRate);
+      const d   = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1)*0.15;
+      const src = a.createBufferSource();
+      const flt = a.createBiquadFilter(); flt.type='bandpass'; flt.frequency.value=3000;
+      const g   = a.createGain();
+      src.buffer = buf;
+      src.connect(flt); flt.connect(g); g.connect(a.destination);
+      g.gain.setValueAtTime(1, a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime+0.055);
+      src.start();
+    } catch(e){}
+  }
+  function playReveal() {
+    try {
+      const a = ensureAudio(); if (!a) return;
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+        const osc = a.createOscillator(); const g = a.createGain();
+        osc.connect(g); g.connect(a.destination);
+        osc.frequency.value = f; osc.type = 'sine';
+        const t = a.currentTime + i*0.1;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.22, t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t+0.38);
+        osc.start(t); osc.stop(t+0.4);
+      });
+    } catch(e){}
   }
 
-  let submitted = false;
-  let scratchedPercent = 0;
-  let isDrawing = false;
+  /* ── Canvas State ─────────────────────────── */
+  let ctx2d, dpr, W, H;
+  let submitted    = false;
+  let active       = false;
+  let lastSfx      = 0;
+  let strokes      = 0;
 
-  // Resize canvas to match parent
-  function resize() {
+  wrap.style.touchAction     = 'none';
+  wrap.style.overscrollBehavior = 'none';
+  canvas.style.touchAction   = 'none';
+
+  function initCanvas() {
+    dpr = window.devicePixelRatio || 1;
     const rect = wrap.getBoundingClientRect();
-    canvas.width  = rect.width  * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    canvas.style.width  = rect.width  + 'px';
-    canvas.style.height = rect.height + 'px';
+    W = rect.width;
+    H = rect.height;
+    if (!W || !H) { requestAnimationFrame(initCanvas); return; }
+
+    canvas.width  = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+
+    ctx2d = canvas.getContext('2d');
+    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
     drawCover();
   }
 
   function drawCover() {
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio;
-    ctx.scale(dpr, dpr);
-    const w = canvas.width / dpr;
-    const h = canvas.height / dpr;
+    ctx2d.globalCompositeOperation = 'source-over';
+    ctx2d.globalAlpha = 1;
 
-    // Gradient silver cover
-    const grad = ctx.createLinearGradient(0, 0, w, h);
-    grad.addColorStop(0, '#94a3b8');
-    grad.addColorStop(0.4, '#cbd5e1');
-    grad.addColorStop(0.6, '#e2e8f0');
-    grad.addColorStop(1, '#94a3b8');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
+    const g = ctx2d.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,   '#607d8b');
+    g.addColorStop(0.35,'#b0bec5');
+    g.addColorStop(0.5, '#eceff1');
+    g.addColorStop(0.65,'#b0bec5');
+    g.addColorStop(1,   '#607d8b');
+    ctx2d.fillStyle = g;
+    ctx2d.fillRect(0,0,W,H);
 
-    // Subtle pattern stripes
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 1;
-    for (let i = -h; i < w + h; i += 16) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i + h, h);
-      ctx.stroke();
+    ctx2d.save();
+    ctx2d.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx2d.lineWidth = 1.5;
+    for (let i=-H; i<W+H; i+=13) {
+      ctx2d.beginPath(); ctx2d.moveTo(i,0); ctx2d.lineTo(i+H,H); ctx2d.stroke();
     }
+    ctx2d.restore();
 
-    // Center text
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.font = 'bold 13px Nunito, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('GOSOK DI SINI', w/2, h/2 - 10);
-    ctx.font = '22px serif';
-    ctx.fillText('✋', w/2, h/2 + 16);
+    ctx2d.textAlign   = 'center';
+    ctx2d.textBaseline = 'middle';
+    ctx2d.font = '18px serif';
+    for (let r=0; r<3; r++) for (let c=0; c<4; c++) {
+      ctx2d.globalAlpha = 0.22;
+      ctx2d.fillText('\uD83E\uDE99', (c+0.5)*(W/4), (r+0.5)*(H/3));
+    }
+    ctx2d.globalAlpha = 1;
+
+    ctx2d.fillStyle = 'rgba(0,0,0,0.48)';
+    ctx2d.font = 'bold 13px Nunito,sans-serif';
+    ctx2d.fillText('GOSOK DI SINI', W/2, H/2-12);
+    ctx2d.font = '24px serif';
+    ctx2d.fillText('\u270B', W/2, H/2+14);
   }
 
-  function getPos(e, canvas) {
+  function getXY(e) {
     const rect = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return {
-      x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top
-    };
+    const list = e.changedTouches || e.touches;
+    const src  = list ? list[0] : e;
+    return { x: src.clientX - rect.left, y: src.clientY - rect.top };
   }
 
-  function scratch(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio;
-    const pos  = getPos(e, canvas);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(pos.x * dpr, pos.y * dpr, 28 * dpr, 0, Math.PI * 2);
-    ctx.fill();
-    checkPercent();
+  function paint(x, y) {
+    ctx2d.globalCompositeOperation = 'destination-out';
+    ctx2d.beginPath();
+    ctx2d.arc(x, y, 32, 0, Math.PI*2);
+    ctx2d.fill();
+
+    const now = Date.now();
+    if (now - lastSfx > 80) { playScratch(); lastSfx = now; }
+
+    strokes++;
+    if (strokes % 6 === 0) checkPercent();
   }
 
   function checkPercent() {
     if (submitted) return;
-    const ctx  = canvas.getContext('2d');
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let cleared = 0;
-    for (let i = 3; i < data.length; i += 4) {
-      if (data[i] === 0) cleared++;
-    }
-    scratchedPercent = (cleared / (data.length / 4)) * 100;
-
-    if (scratchedPercent > 40 && !submitted) {
-      submitted = true;
-      // Show the amount on reveal layer BEFORE submitting
-      display.textContent = formatRp(localReward);
-      reveal.style.opacity = '1';
-      hint.style.display = 'none';
-
-      // Clear rest of canvas
-      const ctx2 = canvas.getContext('2d');
-      ctx2.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Submit form after short delay
-      setTimeout(() => { form.submit(); }, 1400);
-    }
+    const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
+    let gone=0, tot=0;
+    for (let i=3; i<px.length; i+=16) { if (px[i]<10) gone++; tot++; }
+    if ((gone/tot)*100 > 38) reveal();
   }
 
-  // Init
-  resize();
-  window.addEventListener('resize', resize);
+  function reveal() {
+    submitted = true;
+    ctx2d.globalCompositeOperation = 'destination-out';
+    ctx2d.fillRect(0,0,W,H);
+    display.textContent = formatRp(localReward);
+    reveal_el.style.opacity = '1';
+    hint.style.display = 'none';
+    playReveal();
+    setTimeout(() => form.submit(), 1700);
+  }
 
-  // Mouse
-  canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
-  canvas.addEventListener('mousemove', scratch);
-  canvas.addEventListener('mouseup', () => { isDrawing = false; });
+  canvas.addEventListener('mousedown', e => {
+    ensureAudio(); active = true; const p=getXY(e); paint(p.x,p.y);
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (!active || submitted) return; const p=getXY(e); paint(p.x,p.y);
+  });
+  window.addEventListener('mouseup', () => { active = false; });
 
-  // Touch
-  canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, { passive: false });
-  canvas.addEventListener('touchmove', scratch, { passive: false });
-  canvas.addEventListener('touchend', () => { isDrawing = false; });
+  function onTouchStart(e) {
+    ensureAudio();
+    active = true;
+    e.preventDefault();
+    const p = getXY(e); paint(p.x, p.y);
+  }
+  function onTouchMove(e) {
+    if (!active || submitted) return;
+    e.preventDefault();
+    for (let i=0; i<e.changedTouches.length; i++) {
+      const t  = e.changedTouches[i];
+      const rect = canvas.getBoundingClientRect();
+      paint(t.clientX - rect.left, t.clientY - rect.top);
+    }
+  }
+  function onTouchEnd() { active = false; }
+
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false, capture: false });
+  canvas.addEventListener('touchmove',  onTouchMove,  { passive: false, capture: false });
+  canvas.addEventListener('touchend',   onTouchEnd,   { passive: true  });
+  canvas.addEventListener('touchcancel',onTouchEnd,   { passive: true  });
+
+  requestAnimationFrame(initCanvas);
 })();
 </script>
 <?php endif; ?>
