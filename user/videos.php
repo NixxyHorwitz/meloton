@@ -78,8 +78,9 @@ if (isset($_GET['ajax'])) {
 
 $pageTitle  = 'Tonton Video — Meloton';
 $activePage = 'videos';
-require dirname(__DIR__) . '/partials/header.php';
-?<div class="section-header" style="margin-bottom:12px; background: #fff; padding: 10px 12px; border: 2.5px solid #7dd3e8; border-radius: 16px; box-shadow: 0 4px 0 #7dd3e8;">
+?>
+
+<div class="section-header" style="margin-bottom:12px; background: #fff; padding: 10px 12px; border: 2.5px solid #7dd3e8; border-radius: 16px; box-shadow: 0 4px 0 #7dd3e8;">
   <div class="section-title" style="display:flex;align-items:center;gap:6px;font-size:15px; color: #0369a1; font-weight: 900;">
     <div style="background:#e0f9ff; width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#0891b2; font-size:16px;">
         <i class="ph-fill ph-film-strip"></i>
