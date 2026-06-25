@@ -4,13 +4,12 @@ require_once dirname(__DIR__) . '/auth/guard.php';
 
 // Auto-create table on live server
 $pdo->exec("CREATE TABLE IF NOT EXISTS minigame_logs (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
     game_type VARCHAR(50) NOT NULL,
     score INT NOT NULL,
     reward DECIMAL(10,2) NOT NULL,
-    played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
 // Handle AJAX Claim
