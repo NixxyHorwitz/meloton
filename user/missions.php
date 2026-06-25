@@ -342,6 +342,19 @@ require dirname(__DIR__) . '/partials/header.php';
     <button class="ms-tab" id="tab-lifetime" onclick="switchTab('lifetime')">Pencapaian</button>
   </div>
 
+  <a href="/minigame" style="display:block; background:linear-gradient(135deg, #fef08a, #f59e0b); border:3px solid #fff; border-radius:20px; box-shadow:0 8px 0 #d97706; padding:16px; text-decoration:none; margin-bottom:20px; position:relative; overflow:hidden; transition:transform 0.2s;" onclick="this.style.transform='translateY(4px)'; this.style.boxShadow='0 4px 0 #d97706'; setTimeout(()=>this.style.transform='none',200);">
+    <div style="position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+            <h3 style="margin:0 0 4px; font-size:18px; font-weight:900; color:#78350f; text-shadow:1px 1px 0 #fde047;">TAP-TAP FRENZY 🪅</h3>
+            <p style="margin:0; font-size:12px; font-weight:800; color:#92400e;">Mainkan game harian dan menangkan Saldo instan!</p>
+        </div>
+        <div style="background:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#d97706; font-size:24px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <i class="ph-fill ph-play"></i>
+        </div>
+    </div>
+    <i class="ph-fill ph-coin" style="position:absolute; right:-10px; bottom:-20px; font-size:80px; color:rgba(255,255,255,0.3); z-index:1;"></i>
+  </a>
+
   <!-- ── PANELS ── -->
   
   <!-- DAILY -->
