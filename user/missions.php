@@ -73,7 +73,8 @@ function get_period_key(string $category): ?string {
 }
 
 // ── Helper: check if already claimed ─────────────────────────
-function is_claimed(PDO $pdo, int $user_id, string $slug, ?string $period_key): bool {
+function is_claimed(PDO $pdo, int|string $user_id, string $slug, ?string $period_key): bool {
+    $user_id = (int)$user_id;
     $s = $pdo->prepare("SELECT claimed_at FROM user_missions WHERE user_id=? AND mission_slug=? AND period_key<=>?");
     $s->execute([$user_id, $slug, $period_key]);
     $row = $s->fetch();
@@ -93,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
     if (!$mission) { echo json_encode(['ok'=>false,'msg'=>'Misi tidak ditemukan.']); exit; }
 
     $period = get_period_key($mission['category']);
-    if (is_claimed($pdo, $user['id'], $slug, $period)) {
+    if (is_claimed($pdo, (int)$user['id'], $slug, $period)) {
         echo json_encode(['ok'=>false,'msg'=>'Misi ini sudah pernah diklaim!']); exit;
     }
 
@@ -126,7 +127,7 @@ $missions_data = [];
 foreach ($ALL_MISSIONS as $m) {
     $period   = get_period_key($m['category']);
     $progress = get_progress($pdo, $user, $m);
-    $claimed  = is_claimed($pdo, $user['id'], $m['slug'], $period);
+    $claimed  = is_claimed($pdo, (int)$user['id'], $m['slug'], $period);
     $done     = $progress >= $m['target'];
 
     $missions_data[] = array_merge($m, [

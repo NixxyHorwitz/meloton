@@ -22,15 +22,24 @@ if ($last_checkin) {
 $flash = $flashType = '';
 $reward_given = 0;
 
+// Ambil reward dari session jika ada (untuk display setelah redirect)
+if (!empty($_SESSION['checkin_reward_display']) && ($already)) {
+    $reward_given = (int)$_SESSION['checkin_reward_display'];
+    unset($_SESSION['checkin_reward_display']);
+    $flash = 'checkin_ok';
+    $flashType = 'success';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'checkin') {
-    if ($already) {
+    if ($already && $flash !== 'checkin_ok') {
         $flash = 'Kamu sudah check-in hari ini. Kembali besok!';
         $flashType = 'warn';
-    } else {
-        // Generate random reward in range
+    } elseif ($flash !== 'checkin_ok') {
+        // Generate reward server-side — klien tidak bisa manipulasi
         $reward_given = rand((int)$checkin_min, (int)$checkin_max);
         try {
             $pdo->beginTransaction();
+            // Double-guard: WHERE clause pakai CURDATE() server → tanggal device klien tidak berpengaruh
             $stmt = $pdo->prepare(
                 "UPDATE users SET balance_dep=balance_dep+?, last_checkin=CURDATE()
                  WHERE id=? AND (last_checkin IS NULL OR last_checkin < CURDATE())"
@@ -38,13 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
             $stmt->execute([$reward_given, $user['id']]);
             if ($stmt->rowCount() > 0) {
                 $pdo->commit();
-                $us = $pdo->prepare("SELECT * FROM users WHERE id=?");
-                $us->execute([$user['id']]);
-                $user    = $us->fetch();
-                $already = true;
-                $streak++;
-                $flash     = 'checkin_ok'; // special marker
-                $flashType = 'success';
+                // Simpan reward ke session untuk ditampilkan setelah page load
+                $_SESSION['checkin_reward_display'] = $reward_given;
+                // PRG redirect untuk hindari double-submit
+                header('Location: /checkin');
+                exit;
             } else {
                 $pdo->rollBack();
                 $flash = 'Kamu sudah check-in hari ini!';
@@ -306,14 +313,15 @@ if ($streak == 0 && $already) $completed_days = 1;
   <?php elseif ($flash === 'checkin_ok'): ?>
   <!-- ── JUST SCRATCHED – show reward ── -->
   <div class="scratch-done-wrap">
-    <div class="done-card" style="background:linear-gradient(135deg,#0c4a6e,#0891b2);border-color:#075985;box-shadow:0 6px 0 #0c4a6e">
-      <i class="ph-fill ph-gift" style="color:#fde68a;font-size:40px;display:block;margin-bottom:8px"></i>
-      <div style="font-size:13px;font-weight:800;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px">Reward Check-in</div>
-      <div style="font-size:34px;font-weight:900;color:#fde68a;margin:6px 0;text-shadow:0 2px 0 rgba(0,0,0,0.2);letter-spacing:-1px"><?= format_rp($reward_given) ?></div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700">sudah masuk ke Saldo Beli kamu! 🎉</div>
-      <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(52,211,153,0.2);border:1.5px solid #34d399;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:900;color:#34d399;margin-top:12px">
+    <div class="done-card" style="background:#f0fdf4;border-color:#bbf7d0;box-shadow:0 5px 0 #86efac;padding:28px 20px">
+      <div style="font-size:44px;margin-bottom:6px">🎊</div>
+      <div style="font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reward Check-in Hari Ini</div>
+      <div style="font-size:36px;font-weight:900;color:#10b981;letter-spacing:-1px;margin:6px 0;animation:pop-in .4s ease"><?= format_rp($reward_given) ?></div>
+      <div style="font-size:11px;color:#64748b;font-weight:700">masuk ke Saldo Beli kamu 🎉</div>
+      <div style="display:inline-flex;align-items:center;gap:5px;background:#dcfce7;border:1.5px solid #86efac;border-radius:20px;padding:5px 16px;font-size:11px;font-weight:900;color:#15803d;margin-top:12px">
         <i class="ph-bold ph-check-circle"></i> Check-in Berhasil!
       </div>
+      <div style="margin-top:12px;font-size:12px;color:#64748b">Saldo Beli sekarang: <strong style="color:#0c4a6e"><?= format_rp((float)$user['balance_dep']) ?></strong></div>
     </div>
   </div>
 
@@ -337,7 +345,6 @@ if ($streak == 0 && $already) $completed_days = 1;
       <div class="ci-stat__lbl">Hari Aktif</div>
     </div>
     <div class="ci-stat">
-<div class="ci-stat">
       <div class="ci-stat__val" style="font-size:15px"><?= format_rp((float)$user['balance_dep']) ?></div>
       <div class="ci-stat__lbl">Saldo Beli</div>
     </div>

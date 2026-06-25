@@ -143,7 +143,7 @@ if ($show_wd_notif) {
       }
     }
     
-    setTimeout(showRandomWD, Math.floor(Math.random() * 6000) + 3000);
+    //setTimeout(showRandomWD, Math.floor(Math.random() * 6000) + 3000);
   }
 })();
 </script>

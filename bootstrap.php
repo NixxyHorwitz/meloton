@@ -504,7 +504,8 @@ if (!empty($_GET['ref'])) {
 /**
  * Dynamically computes and updates the snapshot for a promotor's daily performance.
  */
-function sync_promotor_daily_targets(PDO $pdo, int $promotor_id, string $date = null): void {
+function sync_promotor_daily_targets(PDO $pdo, int|string $promotor_id, ?string $date = null): void {
+    $promotor_id = (int)$promotor_id;
     if (!$date) $date = date('Y-m-d');
     
     try {
