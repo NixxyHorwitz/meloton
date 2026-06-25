@@ -12,7 +12,35 @@ $attempts = (int)($_SESSION[$ip_key . '_attempts'] ?? 0);
 $lock_until = (int)($_SESSION[$ip_key . '_lock'] ?? 0);
 
 // Generate Emoji CAPTCHA
-$emojis = ['🍎'=>'Apel', '🍓'=>'Stroberi', '🍇'=>'Anggur', '🍉'=>'Semangka', '🍌'=>'Pisang', '🍕'=>'Pizza', '🍔'=>'Burger', '🍩'=>'Donat'];
+$emojis = [
+    // --- BUAH & SAYUR POPULER ---
+    '🍎' => 'Apel',
+    '🍌' => 'Pisang',
+    '🍉' => 'Semangka',
+    '🍓' => 'Stroberi',
+    '🍇' => 'Anggur',
+    '🍊' => 'Jeruk',
+    '🍍' => 'Nanas',
+    '🥑' => 'Alpukat',
+    '🌶️' => 'Cabai',
+    '🌽' => 'Jagung',
+
+    // --- MAKANAN UTAMA ---
+    '🍕' => 'Pizza',
+    '🍔' => 'Burger',
+    '🍟' => 'Kentang Goreng',
+    '🍗' => 'Ayam Goreng',
+    '🥚' => 'Telur',
+    '🍞' => 'Roti',
+    '🍿' => 'Popcorn',
+
+    // --- JAJANAN MANIS ---
+    '🍩' => 'Donat',
+    '🍦' => 'Es Krim',
+    '🍰' => 'Kue',
+    '🍫' => 'Cokelat',
+    '🍬' => 'Permen'
+];
 $emoji_keys = array_keys($emojis);
 shuffle($emoji_keys);
 $cap_options = array_slice($emoji_keys, 0, 4);
