@@ -52,9 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         $pdo->commit();
         echo json_encode(['success' => true, 'reward' => $reward]);
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        echo json_encode(['success' => false, 'message' => 'Gagal memproses hadiah.']);
+    } catch (\Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        echo json_encode(['success' => false, 'message' => 'SysErr: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -109,7 +111,7 @@ require dirname(__DIR__) . '/partials/header.php';
             
             <div id="play-area" style="display:none;">
                 <div id="tap-target">
-                    <img src="/assets/dollar.png" style="width: 140px; height: 140px; object-fit: contain;">
+                    <img src="/assets/moneybag.png" style="width: 140px; height: 140px; object-fit: contain;">
                 </div>
                 <div id="floating-texts"></div>
             </div>
@@ -401,12 +403,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function spawnFloatingText(e) {
-        const text = document.createElement('div');
+        const text = document.createElement('img');
         text.className = 'floating-text';
-        text.innerText = '+1';
+        // Randomize dollar.png and dlr.png
+        text.src = Math.random() > 0.5 ? '/assets/dollar.png' : '/assets/dlr.png';
+        text.style.width = '40px';
+        text.style.height = '40px';
+        text.style.objectFit = 'contain';
         
-        // Random slight rotation and color
-        const rot = Math.floor(Math.random() * 40) - 20;
+        // Random slight rotation
+        const rot = Math.floor(Math.random() * 60) - 30;
         text.style.transform = `rotate(${rot}deg)`;
         
         // Position
@@ -455,6 +461,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('reward-loading').style.display = 'none';
             document.getElementById('reward-success').style.display = 'block';
             document.getElementById('reward-amount').innerText = 'Error';
+            
+            // Debug the raw text in case of fatal HTML error
+            alert("JS Fetch Error: " + err.toString());
         }
     }
 });
