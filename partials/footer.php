@@ -1,25 +1,110 @@
   </main>
 
+  <style>
+  /* ══════════════════════════════════════════════
+     CASUAL GAME BOTTOM NAVBAR OVERRIDE
+     ══════════════════════════════════════════════ */
+  .bottom-nav {
+      position: fixed !important;
+      bottom: 16px !important;
+      left: 16px !important;
+      right: 16px !important;
+      height: auto !important;
+      background: #fff !important;
+      border: 3px solid #0369a1 !important;
+      border-radius: 24px !important;
+      box-shadow: 0 6px 0 #0369a1 !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      align-items: center !important;
+      padding: 8px 12px !important;
+      z-index: 999 !important;
+  }
+  
+  /* Space out main content so it doesn't hide behind floating nav */
+  body { padding-bottom: 96px !important; }
+  
+  .nav-item {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-decoration: none !important;
+      color: #94a3b8 !important;
+      font-size: 10px !important;
+      font-weight: 800 !important;
+      gap: 4px !important;
+      flex: 1 !important;
+      padding: 4px 0 !important;
+      transition: all 0.2s !important;
+      border: none !important;
+      background: transparent !important;
+  }
+  .nav-item i { font-size: 24px !important; transition: transform 0.2s !important; }
+  .nav-item.active { color: #0ea5e9 !important; }
+  .nav-item.active i { color: #0ea5e9 !important; transform: translateY(-4px) !important; text-shadow: 0 2px 4px rgba(14,165,233,0.3) !important; }
+  
+  /* The Big Play Button (Center) */
+  .nav-item--center {
+      position: relative !important;
+      flex: 1.2 !important;
+  }
+  .nav-center-btn {
+      position: absolute !important;
+      bottom: -10px !important; /* stick out of the top */
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 64px !important;
+      height: 64px !important;
+      background: linear-gradient(135deg, #fde047, #f59e0b) !important;
+      border: 3px solid #d97706 !important;
+      border-radius: 20px !important; /* Squircle */
+      box-shadow: 0 6px 0 #b45309 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: #78350f !important;
+      transition: all 0.15s !important;
+      z-index: 2 !important;
+  }
+  .nav-item--center.active .nav-center-btn {
+      background: linear-gradient(135deg, #a7f3d0, #10b981) !important;
+      border-color: #059669 !important;
+      box-shadow: 0 6px 0 #047857 !important;
+      color: #fff !important;
+  }
+  .nav-center-btn:active {
+      transform: translate(-50%, 4px) !important;
+      box-shadow: 0 2px 0 #b45309 !important;
+  }
+  .nav-center-btn i { font-size: 32px !important; margin: 0 !important; color: inherit !important; }
+  
+  /* Floating contact buttons adjustment */
+  .float-contact-wrap { bottom: 106px !important; }
+  </style>
+
   <nav class="bottom-nav">
     <a href="/home" class="nav-item <?= ($activePage??'')==='home'?'active':'' ?>">
-      <i class="ph-bold ph-house" style="font-size:24px"></i>
+      <i class="<?= ($activePage??'')==='home'?'ph-fill':'ph-bold' ?> ph-house"></i>
       Beranda
     </a>
-    <a href="/missions" class="nav-item <?= ($activePage??'')==='missions'?'active':'' ?>">
-      <i class="ph-bold ph-target" style="font-size:24px"></i>
-      Misi
+    <a href="/upgrade" class="nav-item <?= ($activePage??'')==='upgrade'?'active':'' ?>">
+      <i class="<?= ($activePage??'')==='upgrade'?'ph-fill':'ph-bold' ?> ph-rocket-launch"></i>
+      Upgrade
     </a>
+    
     <a href="/videos" class="nav-item nav-item--center <?= ($activePage??'')==='videos'?'active':'' ?>">
       <div class="nav-center-btn">
-        <i class="ph-bold ph-play-circle" style="font-size:26px"></i>
+        <i class="ph-fill ph-play"></i>
       </div>
     </a>
+    
     <a href="/referral" class="nav-item <?= ($activePage??'')==='referral'?'active':'' ?>">
-      <i class="ph-bold ph-users" style="font-size:24px"></i>
-      Referral
+      <i class="<?= ($activePage??'')==='referral'?'ph-fill':'ph-bold' ?> ph-users"></i>
+      Teman
     </a>
     <a href="/profile" class="nav-item <?= ($activePage??'')==='profile'?'active':'' ?>">
-      <i class="ph-bold ph-user" style="font-size:24px"></i>
+      <i class="<?= ($activePage??'')==='profile'?'ph-fill':'ph-bold' ?> ph-user-circle"></i>
       Profil
     </a>
   </nav>
