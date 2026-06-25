@@ -554,15 +554,19 @@ require dirname(__DIR__) . '/partials/header.php';
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 <div class="dash-row">
   <div class="bal-tile bal-tile--wd">
-    <div class="bal-tile__icon"><i class="ph-fill ph-arrow-circle-up" style="color:#10b981"></i></div>
-    <div class="bal-tile__lbl">Saldo WD</div>
-    <div class="bal-tile__val"><?= format_rp((float)$user['balance_wd']) ?></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div class="bal-tile__icon" style="width:26px;height:26px;border-radius:8px"><i class="ph-fill ph-arrow-circle-up" style="color:#10b981;font-size:14px"></i></div>
+      <div class="bal-tile__lbl" style="font-size:9px">Saldo Dapat Dicairkan</div>
+    </div>
+    <div class="bal-tile__val" style="font-size:14px;margin-bottom:6px"><?= format_rp((float)$user['balance_wd']) ?></div>
     <a href="/withdraw" class="bal-tile__btn"><i class="ph-bold ph-upload-simple" style="font-size:10px"></i> Tarik</a>
   </div>
   <div class="bal-tile bal-tile--dep">
-    <div class="bal-tile__icon"><i class="ph-fill ph-bank" style="color:#3b82f6"></i></div>
-    <div class="bal-tile__lbl">Saldo Beli</div>
-    <div class="bal-tile__val"><?= format_rp((float)$user['balance_dep']) ?></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div class="bal-tile__icon" style="width:26px;height:26px;border-radius:8px"><i class="ph-fill ph-bank" style="color:#3b82f6;font-size:14px"></i></div>
+      <div class="bal-tile__lbl" style="font-size:9px">Saldo Beli</div>
+    </div>
+    <div class="bal-tile__val" style="font-size:14px;margin-bottom:6px"><?= format_rp((float)$user['balance_dep']) ?></div>
     <a href="/deposit" class="bal-tile__btn"><i class="ph-bold ph-plus-circle" style="font-size:10px"></i> Top Up</a>
   </div>
 </div>
@@ -570,47 +574,39 @@ require dirname(__DIR__) . '/partials/header.php';
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 <!-- 3. QUICK ACTIONS 4-COLUMN              -->
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="qa-grid" style="margin-bottom:12px">
+<div class="qa-grid" style="margin-bottom:10px">
   <a href="/history" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 0 #5b21b6;color:#fff">
-      <i class="ph-fill ph-receipt"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 3px 0 #5b21b6;color:#fff"><i class="ph-fill ph-receipt"></i></div>
     <span class="qa-item__label">Riwayat</span>
   </a>
   <a href="/missions" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 4px 0 #c2410c;color:#fff">
-      <i class="ph-fill ph-target"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f97316,#ea580c);box-shadow:0 3px 0 #c2410c;color:#fff"><i class="ph-fill ph-target"></i></div>
     <span class="qa-item__label">Misi</span>
   </a>
   <a href="/checkin" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#f472b6,#db2777);box-shadow:0 4px 0 #9d174d;color:#fff">
-      <i class="ph-fill ph-calendar-check"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f472b6,#db2777);box-shadow:0 3px 0 #9d174d;color:#fff"><i class="ph-fill ph-calendar-check"></i></div>
     <span class="qa-item__label">Absen</span>
   </a>
   <a href="/referral" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 4px 0 #047857;color:#fff">
-      <i class="ph-fill ph-users"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 3px 0 #047857;color:#fff"><i class="ph-fill ph-users"></i></div>
     <span class="qa-item__label">Referral</span>
   </a>
   <a href="/redeem" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);box-shadow:0 4px 0 #1e3a8a;color:#fff">
-      <i class="ph-fill ph-gift"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#60a5fa,#1d4ed8);box-shadow:0 3px 0 #1e3a8a;color:#fff"><i class="ph-fill ph-gift"></i></div>
     <span class="qa-item__label">Redeem</span>
   </a>
   <?php if (setting($pdo, 'investment_enabled', '1') === '1'): ?>
   <a href="/invest" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#fbbf24,#d97706);box-shadow:0 4px 0 #b45309;color:#fff">
-      <i class="ph-fill ph-trend-up"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#fbbf24,#d97706);box-shadow:0 3px 0 #b45309;color:#fff"><i class="ph-fill ph-trend-up"></i></div>
     <span class="qa-item__label">Investasi</span>
   </a>
   <?php endif; ?>
   <a href="/upgrade" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#fb923c,#dc2626);box-shadow:0 4px 0 #991b1b;color:#fff">
-      <i class="ph-fill ph-crown"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#fb923c,#dc2626);box-shadow:0 3px 0 #991b1b;color:#fff"><i class="ph-fill ph-crown"></i></div>
     <span class="qa-item__label">Upgrade</span>
   </a>
   <a href="/panduan" class="qa-item">
-    <div class="qa-item__icon" style="background:linear-gradient(135deg,#6ee7b7,#0891b2);box-shadow:0 4px 0 #0e7490;color:#fff">
-      <i class="ph-fill ph-book-open"></i></div>
+    <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6ee7b7,#0891b2);box-shadow:0 3px 0 #0e7490;color:#fff"><i class="ph-fill ph-book-open"></i></div>
     <span class="qa-item__label">Panduan</span>
   </a>
 </div>
@@ -672,26 +668,12 @@ $notif_dot_colors = [
 </div>
 <?php endif; ?>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<!-- 5. VIDEOS                              -->
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="sh">
-  <div class="sh__title">
-    <i class="ph-fill ph-video-camera" style="color:#7c3aed"></i>
-    Video Tersedia
-  </div>
+<!-- ━━ 5. VIDEOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<?php if (!empty($videos)): ?>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+  <div class="sh__title"><i class="ph-fill ph-video-camera" style="color:#7c3aed"></i> Video Tersedia</div>
   <a href="/videos" class="sh__link">Semua →</a>
 </div>
-
-<?php if (empty($videos)): ?>
-<div class="vid-done-card">
-  <i class="ph-fill ph-check-circle"></i>
-  <div>
-    <div style="font-size:12px;font-weight:900;color:#0c4a6e">Keren! Semua video sudah ditonton hari ini.</div>
-    <div style="font-size:10px;color:#64748b;margin-top:2px">Kembali besok untuk video baru & reward lebih.</div>
-  </div>
-</div>
-<?php else: ?>
 <div class="vid-scroll">
   <?php foreach ($videos as $v): ?>
   <a href="/watch?id=<?= $v['id'] ?>" class="vid-card">
