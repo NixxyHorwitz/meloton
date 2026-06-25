@@ -297,7 +297,7 @@ i[class^="ph-"] {
         <button type="button" class="bal-pill bal-pill--wd" onclick="toggleBal('wd', event)" aria-label="Saldo penarikan">
           <div class="bal-pill__icon"><i class="ph-bold ph-arrow-circle-up" style="color:#10b981;font-size:14px"></i></div>
           <div class="bal-pill__texts">
-            <span class="bal-pill__label">Saldo WD</span>
+            <span class="bal-pill__label">Saldo Pencairan</span>
             <span class="bal-pill__val"><?= fmt_short((float)$user['balance_wd']) ?></span>
           </div>
         </button>
