@@ -150,345 +150,313 @@ require dirname(__DIR__) . '/partials/header.php';
 ?>
 
 <style>
-/* ── Mission Page – Compact Neo-Brutalism ─── */
-.mission-header {
-  background: linear-gradient(135deg, var(--yellow) 0%, #f97316 100%);
-  color: var(--ink);
-  padding: 14px 14px 12px;
-  margin: -14px -14px 14px;
-  border-bottom: 3px solid var(--ink);
-  box-shadow: 0 3px 0 var(--ink);
+/* ══════════════════════════════════════════════
+   MISSION PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+.mission-page { padding: 0 0 20px; }
+
+/* ── Hero Card ── */
+.ms-hero {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 55%, #06b6d4 100%);
+  border: 3px solid #075985;
+  border-radius: 22px;
+  box-shadow: 0 8px 0 #0c4a6e;
+  padding: 16px;
   position: relative;
   overflow: hidden;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
 }
-.mission-header::after {
-  content: '🎯';
-  position: absolute; right: 60px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 56px; opacity: 0.12; pointer-events: none;
+.ms-hero::before {
+  content: '';
+  position: absolute; top: -30px; left: -20px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  pointer-events: none;
 }
-.mission-header__left { position: relative; z-index: 1; }
-.mission-header__title {
-  font-size: 22px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: -0.5px; line-height: 1;
+.ms-hero__title { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,0.2); line-height: 1.1; margin-bottom: 2px; }
+.ms-hero__sub { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7); }
+.ms-hero__badge {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2.5px solid #fff;
+  border-radius: 16px;
+  padding: 6px 14px;
+  text-align: center;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+  transform: rotate(3deg);
 }
-.mission-header__sub {
-  font-size: 11px; font-weight: 700; opacity: 0.75; margin-top: 2px;
-}
-.mission-header__badge {
-  background: var(--ink); color: var(--yellow);
-  border: 2.5px solid var(--ink); border-radius: 10px;
-  padding: 6px 10px; text-align: center;
-  font-weight: 900; font-size: 20px; line-height: 1;
-  flex-shrink: 0; position: relative; z-index: 1;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-}
-.mission-header__badge small { display: block; font-size: 8px; font-weight: 800; text-transform: uppercase; opacity: 0.8; margin-top: 1px; }
+.ms-hero__badge-val { font-size: 22px; font-weight: 900; color: #0c4a6e; line-height: 1; }
+.ms-hero__badge-lbl { font-size: 9px; font-weight: 900; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* ── Tabs ─────── */
-.mission-tabs {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  border: 2.5px solid var(--ink); border-radius: 8px;
-  overflow: hidden; box-shadow: 3px 3px 0 var(--ink);
-  margin-bottom: 14px;
+/* ── Tabs ── */
+.ms-tabs {
+  display: flex;
+  background: #e0f9ff;
+  border: 2.5px solid #7dd3e8;
+  border-radius: 16px;
+  padding: 4px;
+  box-shadow: 0 4px 0 #7dd3e8;
+  margin-bottom: 16px;
 }
-.mission-tab {
-  padding: 8px 4px; text-align: center;
-  font-size: 10px; font-weight: 900; text-transform: uppercase;
-  background: #fff; color: var(--ink); border: none;
-  cursor: pointer; letter-spacing: 0.3px;
-  border-right: 2.5px solid var(--ink);
-  transition: background 0.15s;
+.ms-tab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12px; font-weight: 800; color: #0c4a6e;
+  background: transparent;
+  border: none; border-radius: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.mission-tab:last-child { border-right: none; }
-.mission-tab.active { background: var(--yellow); }
-.mission-tab__icon { display: block; font-size: 17px; margin-bottom: 1px; }
-
-/* ── Mission Card ─────── */
-.mission-card {
+.ms-tab.active {
   background: #fff;
-  border: 2.5px solid var(--ink);
-  border-radius: 10px;
-  box-shadow: 3px 3px 0 var(--ink);
-  margin-bottom: 10px;
-  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(8,145,178,0.15);
+  color: #0891b2;
 }
-.mission-card--done { background: #f0fdf4; }
-.mission-card--claimed { background: #f9fafb; opacity: 0.65; }
-.mission-card__head {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 10px 6px;
-}
-.mission-card__icon-wrap {
-  width: 38px; height: 38px; border-radius: 8px;
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; font-size: 18px;
-  background: var(--yellow);
-}
-.mission-card--done .mission-card__icon-wrap { background: #bbf7d0; }
-.mission-card--claimed .mission-card__icon-wrap { background: #e5e7eb; }
-.mission-card__info { flex: 1; min-width: 0; }
-.mission-card__title {
-  font-size: 13px; font-weight: 900; color: var(--ink); line-height: 1.2;
-}
-.mission-card__desc {
-  font-size: 10px; color: #777; font-weight: 700; margin-top: 1px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.mission-card__reward {
-  font-size: 11px; font-weight: 900; color: var(--ink);
-  background: var(--yellow); border: 2px solid var(--ink);
-  padding: 2px 7px; border-radius: 6px; box-shadow: 2px 2px 0 var(--ink);
-  white-space: nowrap; flex-shrink: 0;
-}
-.mission-card--claimed .mission-card__reward { background: #e5e7eb; box-shadow: none; border-color: #bbb; color: #999; }
 
-/* ── Progress ─────── */
-.mission-progress { padding: 0 10px 10px; }
-.mission-progress__bar-wrap {
-  background: #e5e7eb; border: 1.5px solid var(--ink);
-  border-radius: 4px; height: 10px; overflow: hidden;
-  box-shadow: 1.5px 1.5px 0 var(--ink);
+/* ── Mission Card ── */
+.ms-card {
+  background: #fff;
+  border: 2.5px solid #7dd3e8;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #7dd3e8;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: opacity 0.3s;
 }
-.mission-progress__bar {
-  height: 100%; background: var(--yellow);
+.ms-card--done { background: #f0fdf4; border-color: #86efac; box-shadow: 0 5px 0 #86efac; }
+.ms-card--claimed { background: #f8fafc; border-color: #cbd5e1; box-shadow: 0 5px 0 #cbd5e1; opacity: 0.7; }
+
+.ms-card__head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 12px 8px;
+}
+.ms-card__icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: 2px solid #fff; border-radius: 14px;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,0.2);
+}
+.ms-card--done .ms-card__icon { background: linear-gradient(135deg, #34d399, #10b981); }
+.ms-card--claimed .ms-card__icon { background: linear-gradient(135deg, #94a3b8, #64748b); box-shadow: none; }
+
+.ms-card__info { flex: 1; min-width: 0; }
+.ms-card__title { font-size: 14px; font-weight: 900; color: #0c4a6e; line-height: 1.2; margin-bottom: 2px; }
+.ms-card__desc { font-size: 10px; font-weight: 700; color: #64748b; line-height: 1.3; }
+
+.ms-card__reward {
+  background: #fef3c7; border: 1.5px solid #fbbf24; border-radius: 10px;
+  padding: 4px 8px; font-size: 11px; font-weight: 900; color: #d97706;
+  flex-shrink: 0; box-shadow: 0 2px 0 rgba(245,158,11,0.2);
+}
+.ms-card--claimed .ms-card__reward { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; box-shadow: none; }
+
+/* ── Progress ── */
+.ms-prog { padding: 0 12px 12px; }
+.ms-prog-bar-wrap {
+  height: 12px; background: #e0f9ff;
+  border-radius: 6px; overflow: hidden;
+  position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+.ms-card--done .ms-prog-bar-wrap { background: #dcfce7; }
+.ms-card--claimed .ms-prog-bar-wrap { background: #f1f5f9; box-shadow: none; }
+
+.ms-prog-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  border-radius: 6px;
   transition: width 0.5s ease;
 }
-.mission-progress__bar--done { background: #22c55e; }
-.mission-progress__meta {
+.ms-card--done .ms-prog-bar { background: linear-gradient(90deg, #34d399, #10b981); }
+.ms-card--claimed .ms-prog-bar { background: #cbd5e1; }
+
+.ms-prog-meta {
   display: flex; justify-content: space-between;
-  font-size: 9px; font-weight: 900; margin-top: 4px; color: #666;
+  font-size: 10px; font-weight: 800; color: #64748b; margin-top: 4px;
 }
 
-/* ── Claim Button ─────── */
-.mission-claim-btn {
-  width: 100%; margin-top: 5px;
-  padding: 8px; font-size: 11px; font-weight: 900;
-  text-transform: uppercase; letter-spacing: 0.3px;
-  border: 2.5px solid var(--ink); border-radius: 7px;
-  box-shadow: 2.5px 2.5px 0 var(--ink);
+/* ── Buttons ── */
+.ms-btn {
+  width: 100%; margin-top: 10px; padding: 10px;
+  border-radius: 12px; font-size: 12px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
-  background: #00E5FF; color: var(--ink);
-  display: flex; align-items: center; justify-content: center; gap: 5px;
 }
-.mission-claim-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
-.mission-claim-btn:disabled {
-  background: #f3f4f6; color: #9ca3af; cursor: not-allowed;
-  box-shadow: none; border-color: #d1d5db;
+.ms-btn:active { transform: translateY(3px); box-shadow: none !important; }
+
+/* Locked */
+.ms-btn--locked {
+  background: #f1f5f9; border: 2px solid #e2e8f0; color: #94a3b8;
+  cursor: not-allowed;
 }
-.mission-claim-btn--claimed {
-  background: #dcfce7; color: #166534;
-  border-color: #166534; box-shadow: 2px 2px 0 #166534;
+/* Claim ready */
+.ms-btn--ready {
+  background: linear-gradient(135deg, #22d3ee, #0891b2);
+  border: 2px solid #a5f3fc; color: #fff;
+  box-shadow: 0 4px 0 #0e7490;
+}
+/* Claimed */
+.ms-btn--claimed {
+  background: #dcfce7; border: 2px solid #86efac; color: #16a34a;
   cursor: default;
 }
+.ms-btn--claimed:active { transform: none; }
 
-/* ── Section Header ─────── */
-.mission-section-hdr {
-  font-size: 10px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 0.5px; color: #666;
-  display: flex; align-items: center; gap: 5px;
-  margin-bottom: 10px;
-  padding-bottom: 5px; border-bottom: 2px solid var(--ink);
+/* ── Sections ── */
+.ms-panel { display: none; }
+.ms-panel.active { display: block; animation: fade-in 0.3s; }
+.ms-section-hdr {
+  font-size: 11px; font-weight: 900; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
 }
 
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-@keyframes missionIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
-}
-.mission-card { animation: missionIn 0.18s ease both; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-<!-- Page Header -->
-<div class="mission-header">
-  <div class="mission-header__left">
-    <div class="mission-header__title">🎯 Misi</div>
-    <div class="mission-header__sub">Selesaikan &amp; klaim saldo tarik!</div>
-  </div>
-  <div class="mission-header__badge">
-    <?= $claimed_today ?>
-    <small>Diklaim</small>
-  </div>
-</div>
+<div class="mission-page">
 
-<!-- Tabs -->
-<div class="mission-tabs" role="tablist">
-  <button class="mission-tab active" id="tab-daily" onclick="switchTab('daily')" role="tab">
-    <i class="ph-fill ph-sun mission-tab__icon"></i>
-    Harian
-  </button>
-  <button class="mission-tab" id="tab-weekly" onclick="switchTab('weekly')" role="tab">
-    <i class="ph-fill ph-calendar mission-tab__icon"></i>
-    Mingguan
-  </button>
-  <button class="mission-tab" id="tab-lifetime" onclick="switchTab('lifetime')" role="tab">
-    <i class="ph-fill ph-trophy mission-tab__icon"></i>
-    Pencapaian
-  </button>
-</div>
+  <!-- ── HERO ── -->
+  <div class="ms-hero">
+    <div>
+      <div class="ms-hero__title">🎯 Misi</div>
+      <div class="ms-hero__sub">Selesaikan misi, klaim reward gratis!</div>
+    </div>
+    <div class="ms-hero__badge">
+      <div class="ms-hero__badge-val"><?= $claimed_today ?></div>
+      <div class="ms-hero__badge-lbl">Diklaim</div>
+    </div>
+  </div>
 
-<!-- ── Daily Panel ──────────────────────────────────────────── -->
-<div class="tab-panel active" id="panel-daily">
-  <div class="mission-section-hdr">
-    <i class="ph-fill ph-sun" style="color:var(--yellow);font-size:16px"></i>
-    Misi Harian — Reset setiap hari
+  <!-- ── TABS ── -->
+  <div class="ms-tabs" role="tablist">
+    <button class="ms-tab active" id="tab-daily" onclick="switchTab('daily')">Harian</button>
+    <button class="ms-tab" id="tab-weekly" onclick="switchTab('weekly')">Mingguan</button>
+    <button class="ms-tab" id="tab-lifetime" onclick="switchTab('lifetime')">Pencapaian</button>
   </div>
-  <?php foreach ($daily as $m): ?>
-  <?php
-    $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
-    $cardClass = $m['claimed'] ? 'mission-card--claimed' : ($m['done'] ? 'mission-card--done' : '');
-  ?>
-  <div class="mission-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
-    <div class="mission-card__head">
-      <div class="mission-card__icon-wrap">
-        <i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i>
-      </div>
-      <div class="mission-card__info">
-        <div class="mission-card__title"><?= htmlspecialchars($m['title']) ?></div>
-        <div class="mission-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
-      </div>
-      <div class="mission-card__reward">+Rp <?= number_format($m['reward'],0,',','.') ?></div>
-    </div>
-    <div class="mission-progress">
-      <div class="mission-progress__bar-wrap">
-        <div class="mission-progress__bar <?= $m['done'] ? 'mission-progress__bar--done' : '' ?>"
-             style="width:<?= $pct ?>%"></div>
-      </div>
-      <div class="mission-progress__meta">
-        <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
-        <span><?= $pct ?>%</span>
-      </div>
-      <?php if ($m['claimed']): ?>
-        <button class="mission-claim-btn mission-claim-btn--claimed" disabled>
-          <i class="ph-bold ph-check-circle"></i> Sudah Diklaim Hari Ini
-        </button>
-      <?php elseif ($m['done']): ?>
-        <button class="mission-claim-btn" onclick="claimMission('<?= $m['slug'] ?>', this)">
-          <i class="ph-bold ph-gift"></i> Klaim Reward!
-        </button>
-      <?php else: ?>
-        <button class="mission-claim-btn" disabled>
-          <i class="ph-bold ph-lock"></i> Belum Selesai
-        </button>
-      <?php endif; ?>
-    </div>
-  </div>
-  <?php endforeach; ?>
-</div>
 
-<!-- ── Weekly Panel ──────────────────────────────────────────── -->
-<div class="tab-panel" id="panel-weekly">
-  <div class="mission-section-hdr">
-    <i class="ph-fill ph-calendar" style="color:#6366f1;font-size:16px"></i>
-    Misi Mingguan — Reset tiap Senin
-  </div>
-  <?php foreach ($weekly as $m): ?>
-  <?php
-    $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
-    $cardClass = $m['claimed'] ? 'mission-card--claimed' : ($m['done'] ? 'mission-card--done' : '');
-  ?>
-  <div class="mission-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
-    <div class="mission-card__head">
-      <div class="mission-card__icon-wrap">
-        <i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i>
+  <!-- ── PANELS ── -->
+  
+  <!-- DAILY -->
+  <div class="ms-panel active" id="panel-daily">
+    <div class="ms-section-hdr"><i class="ph-fill ph-sun" style="color:#f59e0b"></i> Misi Harian — Reset tiap hari</div>
+    <?php foreach ($daily as $m): ?>
+    <?php
+      $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
+      $cardClass = $m['claimed'] ? 'ms-card--claimed' : ($m['done'] ? 'ms-card--done' : '');
+    ?>
+    <div class="ms-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
+      <div class="ms-card__head">
+        <div class="ms-card__icon"><i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i></div>
+        <div class="ms-card__info">
+          <div class="ms-card__title"><?= htmlspecialchars($m['title']) ?></div>
+          <div class="ms-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
+        </div>
+        <div class="ms-card__reward">+Rp<?= number_format($m['reward'],0,',','.') ?></div>
       </div>
-      <div class="mission-card__info">
-        <div class="mission-card__title"><?= htmlspecialchars($m['title']) ?></div>
-        <div class="mission-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
+      <div class="ms-prog">
+        <div class="ms-prog-bar-wrap"><div class="ms-prog-bar" style="width:<?= $pct ?>%"></div></div>
+        <div class="ms-prog-meta">
+          <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
+          <span><?= $pct ?>%</span>
+        </div>
+        <?php if ($m['claimed']): ?>
+          <button class="ms-btn ms-btn--claimed" disabled><i class="ph-bold ph-check-circle"></i> Selesai</button>
+        <?php elseif ($m['done']): ?>
+          <button class="ms-btn ms-btn--ready" onclick="claimMission('<?= $m['slug'] ?>', this)"><i class="ph-bold ph-gift"></i> Klaim Reward!</button>
+        <?php else: ?>
+          <button class="ms-btn ms-btn--locked" disabled><i class="ph-bold ph-lock"></i> Belum Selesai</button>
+        <?php endif; ?>
       </div>
-      <div class="mission-card__reward">+Rp <?= number_format($m['reward'],0,',','.') ?></div>
     </div>
-    <div class="mission-progress">
-      <div class="mission-progress__bar-wrap">
-        <div class="mission-progress__bar <?= $m['done'] ? 'mission-progress__bar--done' : '' ?>"
-             style="width:<?= $pct ?>%"></div>
-      </div>
-      <div class="mission-progress__meta">
-        <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
-        <span><?= $pct ?>%</span>
-      </div>
-      <?php if ($m['claimed']): ?>
-        <button class="mission-claim-btn mission-claim-btn--claimed" disabled>
-          <i class="ph-bold ph-check-circle"></i> Sudah Diklaim Minggu Ini
-        </button>
-      <?php elseif ($m['done']): ?>
-        <button class="mission-claim-btn" onclick="claimMission('<?= $m['slug'] ?>', this)">
-          <i class="ph-bold ph-gift"></i> Klaim Reward!
-        </button>
-      <?php else: ?>
-        <button class="mission-claim-btn" disabled>
-          <i class="ph-bold ph-lock"></i> Belum Selesai
-        </button>
-      <?php endif; ?>
-    </div>
+    <?php endforeach; ?>
   </div>
-  <?php endforeach; ?>
-</div>
 
-<!-- ── Lifetime Panel ──────────────────────────────────────────── -->
-<div class="tab-panel" id="panel-lifetime">
-  <div class="mission-section-hdr">
-    <i class="ph-fill ph-trophy" style="color:#d97706;font-size:16px"></i>
-    Pencapaian — Hanya bisa diklaim sekali
-  </div>
-  <?php foreach ($lifetime as $m): ?>
-  <?php
-    $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
-    $cardClass = $m['claimed'] ? 'mission-card--claimed' : ($m['done'] ? 'mission-card--done' : '');
-  ?>
-  <div class="mission-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
-    <div class="mission-card__head">
-      <div class="mission-card__icon-wrap">
-        <i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i>
+  <!-- WEEKLY -->
+  <div class="ms-panel" id="panel-weekly">
+    <div class="ms-section-hdr"><i class="ph-fill ph-calendar" style="color:#3b82f6"></i> Misi Mingguan — Reset tiap Senin</div>
+    <?php foreach ($weekly as $m): ?>
+    <?php
+      $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
+      $cardClass = $m['claimed'] ? 'ms-card--claimed' : ($m['done'] ? 'ms-card--done' : '');
+    ?>
+    <div class="ms-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
+      <div class="ms-card__head">
+        <div class="ms-card__icon"><i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i></div>
+        <div class="ms-card__info">
+          <div class="ms-card__title"><?= htmlspecialchars($m['title']) ?></div>
+          <div class="ms-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
+        </div>
+        <div class="ms-card__reward">+Rp<?= number_format($m['reward'],0,',','.') ?></div>
       </div>
-      <div class="mission-card__info">
-        <div class="mission-card__title"><?= htmlspecialchars($m['title']) ?></div>
-        <div class="mission-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
+      <div class="ms-prog">
+        <div class="ms-prog-bar-wrap"><div class="ms-prog-bar" style="width:<?= $pct ?>%"></div></div>
+        <div class="ms-prog-meta">
+          <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
+          <span><?= $pct ?>%</span>
+        </div>
+        <?php if ($m['claimed']): ?>
+          <button class="ms-btn ms-btn--claimed" disabled><i class="ph-bold ph-check-circle"></i> Selesai</button>
+        <?php elseif ($m['done']): ?>
+          <button class="ms-btn ms-btn--ready" onclick="claimMission('<?= $m['slug'] ?>', this)"><i class="ph-bold ph-gift"></i> Klaim Reward!</button>
+        <?php else: ?>
+          <button class="ms-btn ms-btn--locked" disabled><i class="ph-bold ph-lock"></i> Belum Selesai</button>
+        <?php endif; ?>
       </div>
-      <div class="mission-card__reward">+Rp <?= number_format($m['reward'],0,',','.') ?></div>
     </div>
-    <div class="mission-progress">
-      <div class="mission-progress__bar-wrap">
-        <div class="mission-progress__bar <?= $m['done'] ? 'mission-progress__bar--done' : '' ?>"
-             style="width:<?= $pct ?>%"></div>
-      </div>
-      <div class="mission-progress__meta">
-        <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
-        <span><?= $pct ?>%</span>
-      </div>
-      <?php if ($m['claimed']): ?>
-        <button class="mission-claim-btn mission-claim-btn--claimed" disabled>
-          <i class="ph-bold ph-check-circle"></i> Sudah Diklaim
-        </button>
-      <?php elseif ($m['done']): ?>
-        <button class="mission-claim-btn" onclick="claimMission('<?= $m['slug'] ?>', this)">
-          <i class="ph-bold ph-gift"></i> Klaim Reward!
-        </button>
-      <?php else: ?>
-        <button class="mission-claim-btn" disabled>
-          <i class="ph-bold ph-lock"></i> Belum Selesai
-        </button>
-      <?php endif; ?>
-    </div>
+    <?php endforeach; ?>
   </div>
-  <?php endforeach; ?>
+
+  <!-- LIFETIME -->
+  <div class="ms-panel" id="panel-lifetime">
+    <div class="ms-section-hdr"><i class="ph-fill ph-trophy" style="color:#f59e0b"></i> Pencapaian — Klaim sekali selamanya</div>
+    <?php foreach ($lifetime as $m): ?>
+    <?php
+      $pct = $m['target'] > 0 ? min(100, round($m['progress'] / $m['target'] * 100)) : 0;
+      $cardClass = $m['claimed'] ? 'ms-card--claimed' : ($m['done'] ? 'ms-card--done' : '');
+    ?>
+    <div class="ms-card <?= $cardClass ?>" id="mc-<?= htmlspecialchars($m['slug']) ?>">
+      <div class="ms-card__head">
+        <div class="ms-card__icon"><i class="ph-fill <?= htmlspecialchars($m['icon']) ?>"></i></div>
+        <div class="ms-card__info">
+          <div class="ms-card__title"><?= htmlspecialchars($m['title']) ?></div>
+          <div class="ms-card__desc"><?= htmlspecialchars($m['desc']) ?></div>
+        </div>
+        <div class="ms-card__reward">+Rp<?= number_format($m['reward'],0,',','.') ?></div>
+      </div>
+      <div class="ms-prog">
+        <div class="ms-prog-bar-wrap"><div class="ms-prog-bar" style="width:<?= $pct ?>%"></div></div>
+        <div class="ms-prog-meta">
+          <span><?= $m['progress'] ?> / <?= $m['target'] ?></span>
+          <span><?= $pct ?>%</span>
+        </div>
+        <?php if ($m['claimed']): ?>
+          <button class="ms-btn ms-btn--claimed" disabled><i class="ph-bold ph-check-circle"></i> Selesai</button>
+        <?php elseif ($m['done']): ?>
+          <button class="ms-btn ms-btn--ready" onclick="claimMission('<?= $m['slug'] ?>', this)"><i class="ph-bold ph-gift"></i> Klaim Reward!</button>
+        <?php else: ?>
+          <button class="ms-btn ms-btn--locked" disabled><i class="ph-bold ph-lock"></i> Belum Selesai</button>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endforeach; ?>
+  </div>
+
 </div>
 
 <script>
 const _csrf = '<?= csrf_token() ?>';
 
 function switchTab(cat) {
-  document.querySelectorAll('.mission-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ms-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ms-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + cat).classList.add('active');
   document.getElementById('panel-' + cat).classList.add('active');
 }
@@ -508,23 +476,44 @@ function claimMission(slug, btn) {
       if (data.ok) {
         const card = document.getElementById('mc-' + slug);
         if (card) {
-          card.classList.remove('mission-card--done');
-          card.classList.add('mission-card--claimed');
+          card.classList.remove('ms-card--done');
+          card.classList.add('ms-card--claimed');
         }
-        btn.className = 'mission-claim-btn mission-claim-btn--claimed';
-        btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Sudah Diklaim';
+        btn.className = 'ms-btn ms-btn--claimed';
+        btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Selesai';
         btn.disabled = true;
-        nToast(data.msg, 'success');
+        
+        // Success SFX if possible
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            const actx = new AudioCtx();
+            const osc = actx.createOscillator();
+            const gain = actx.createGain();
+            osc.connect(gain); gain.connect(actx.destination);
+            osc.frequency.value = 1046.5; // C6
+            gain.gain.setValueAtTime(0, actx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.3);
+            osc.start(); osc.stop(actx.currentTime + 0.3);
+          }
+        } catch(e) {}
+        
+        if (typeof nToast !== 'undefined') nToast(data.msg, 'success');
       } else {
         btn.disabled = false;
+        btn.className = 'ms-btn ms-btn--ready';
         btn.innerHTML = '<i class="ph-bold ph-gift"></i> Klaim Reward!';
-        nToast(data.msg, 'error');
+        if (typeof nToast !== 'undefined') nToast(data.msg, 'error');
       }
     })
     .catch(() => {
       btn.disabled = false;
+      btn.className = 'ms-btn ms-btn--ready';
       btn.innerHTML = '<i class="ph-bold ph-gift"></i> Klaim Reward!';
+      if (typeof nToast !== 'undefined') nToast('Koneksi terputus.', 'error');
     });
 }
 </script>
+
 <?php require dirname(__DIR__) . '/partials/footer.php'; ?>
