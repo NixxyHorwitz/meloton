@@ -117,10 +117,6 @@ require dirname(__DIR__) . '/partials/header.php';
 
 <div class="history-page">
   <!-- Title -->
-  <div class="h-title">
-    <h1><i class="ph-bold ph-clock-counter-clockwise"></i> Riwayat</h1>
-    <p>Catatan semua aktivitas akun kamu</p>
-  </div>
 
   <!-- Summary stats -->
   <div class="h-stats">

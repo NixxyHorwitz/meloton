@@ -44,177 +44,241 @@ require dirname(__DIR__) . '/partials/header.php';
 ?>
 
 <style>
-/* ── Compact Neo-Brutalism Overrides ── */
-.ref-card { border: 2.5px solid var(--ink); border-radius: 10px; background: #fff; box-shadow: 3px 3px 0 var(--ink); margin-bottom: 12px; overflow: hidden; }
-.ref-card__hd { padding: 8px 12px; font-size: 13px; font-weight: 900; border-bottom: 2px solid var(--ink); background: var(--yellow); display: flex; align-items: center; justify-content: space-between; }
-.ref-card__bd { padding: 10px 12px; }
+/* ══════════════════════════════════════════════
+   REFERRAL PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+.ref-page { padding: 0 0 20px; }
 
-/* Stats mini */
-.ref-stats { display: flex; gap: 8px; margin-bottom: 12px; }
-.ref-stat { flex: 1; border: 2.5px solid var(--ink); border-radius: 10px; background: #fff; box-shadow: 3px 3px 0 var(--ink); padding: 8px; text-align: center; }
-.ref-stat__val { font-size: 15px; font-weight: 900; color: var(--ink); line-height: 1.1; }
-.ref-stat__lbl { font-size: 10px; font-weight: 800; color: #666; margin-top: 3px; }
+/* ── Title Bar ── */
+.ref-title {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 3px solid #020617;
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 6px 0 #020617;
+  color: #fff;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.ref-title::before { content:''; position:absolute; top:-20px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.ref-title h1 { font-size:18px; font-weight:900; color:#34d399; display:flex; align-items:center; gap:8px; margin-bottom:4px; letter-spacing:-0.5px; }
+.ref-title p { font-size:11px; font-weight:700; color:#94a3b8; }
 
-/* Link & Share */
-.ref-link-box { display: flex; align-items: center; gap: 6px; border: 2px solid var(--ink); border-radius: 8px; padding: 4px; background: var(--white); margin-bottom: 8px; }
-.ref-link-box input { border: none; outline: none; background: transparent; font-size: 11px; font-weight: 700; width: 100%; padding: 4px 6px; color: #555; }
-.ref-link-box .btn { padding: 4px 10px; font-size: 11px; }
+/* ── Stats ── */
+.ref-stats { display: flex; gap: 8px; margin-bottom: 16px; }
+.ref-stat {
+  flex: 1; border: 2.5px solid #0f172a; border-radius: 16px; padding: 14px 6px; text-align: center; position: relative; overflow: hidden;
+  box-shadow: 0 5px 0 #0f172a; background:#fff;
+}
+.ref-stat-1 { border-color: #0c4a6e; box-shadow: 0 5px 0 #0c4a6e; }
+.ref-stat-2 { border-color: #065f46; box-shadow: 0 5px 0 #065f46; }
+.ref-stat-3 { border-color: #581c87; box-shadow: 0 5px 0 #581c87; }
 
-.ref-share-row { display: flex; gap: 6px; }
-.ref-share-row .btn { flex: 1; font-size: 11px; padding: 6px; display: flex; justify-content: center; align-items: center; gap: 4px; }
+.ref-stat__val { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; margin-bottom:4px; color:#0f172a; }
+.ref-stat__lbl { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing:0.5px; color:#64748b; }
 
-/* How it works */
-.ref-steps { display: flex; flex-direction: column; gap: 8px; }
-.ref-step { display: flex; align-items: flex-start; gap: 8px; }
-.ref-step__num { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0; box-shadow: 1.5px 1.5px 0 var(--ink); }
-.ref-step__txt { font-size: 11px; font-weight: 700; color: #444; line-height: 1.3; padding-top: 3px; }
+/* ── Cards ── */
+.ref-card {
+  border: 3px solid #cbd5e1; border-radius: 20px; background: #fff; box-shadow: 0 6px 0 #cbd5e1;
+  margin-bottom: 16px; overflow: hidden;
+}
+.ref-card__hd {
+  padding: 12px 16px; font-size: 13px; font-weight: 900; border-bottom: 3px solid #cbd5e1;
+  display: flex; align-items: center; justify-content: space-between; text-transform:uppercase; letter-spacing:0.5px;
+  color:#0f172a;
+}
+.ref-card__bd { padding: 16px; }
 
-/* Compact List */
-.c-list { display: flex; flex-direction: column; }
-.c-list-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1.5px dashed #ccc; }
-.c-list-item:last-child { border-bottom: none; }
-.c-list-item__icon { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-.c-list-item__body { flex: 1; min-width: 0; }
-.c-list-item__title { font-size: 12px; font-weight: 900; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-.c-list-item__sub { font-size: 9px; font-weight: 700; color: #666; margin-top: 2px; }
-.c-list-item__right { text-align: right; font-size: 11px; font-weight: 900; }
+/* Promotor Banner Override */
+.ref-card.promo-banner {
+  background: linear-gradient(135deg, #a7f3d0, #34d399);
+  border-color: #059669; box-shadow: 0 6px 0 #059669;
+}
+.promo-banner .ref-card__bd { display:flex; align-items:center; justify-content:space-between; }
+.promo-btn {
+  background: #0f172a; color:#fff; font-size:11px; font-weight:900; text-decoration:none;
+  padding: 8px 12px; border-radius:10px; border:2px solid #020617; box-shadow:0 3px 0 #020617;
+}
+.promo-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #020617; }
+
+/* ── Share ── */
+.ref-link-box { display: flex; align-items: center; gap: 8px; border: 2.5px solid #cbd5e1; border-radius: 14px; padding: 6px; background: #f8fafc; margin-bottom: 12px; box-shadow:0 3px 0 #e2e8f0; }
+.ref-link-box input { border: none; outline: none; background: transparent; font-size: 12px; font-weight: 800; width: 100%; padding: 4px 6px; color: #334155; }
+.ref-btn-copy {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9); border: 2px solid #0284c7; border-radius: 10px;
+  color: #fff; font-size: 11px; font-weight: 900; padding: 8px 12px; box-shadow: 0 3px 0 #0369a1; cursor:pointer;
+}
+.ref-btn-copy:active { transform:translateY(2px); box-shadow:0 1px 0 #0369a1; }
+
+.ref-share-row { display: flex; gap: 8px; }
+.ref-btn-wa { flex:1; background:linear-gradient(135deg, #4ade80, #22c55e); border:2px solid #16a34a; border-radius:12px; color:#fff; font-size:11px; font-weight:900; padding:10px; text-align:center; box-shadow:0 4px 0 #15803d; text-decoration:none; display:flex; justify-content:center; align-items:center; gap:4px; }
+.ref-btn-wa:active { transform:translateY(3px); box-shadow:0 1px 0 #15803d; }
+.ref-btn-tg { flex:1; background:linear-gradient(135deg, #60a5fa, #3b82f6); border:2px solid #2563eb; border-radius:12px; color:#fff; font-size:11px; font-weight:900; padding:10px; text-align:center; box-shadow:0 4px 0 #1d4ed8; text-decoration:none; display:flex; justify-content:center; align-items:center; gap:4px; }
+.ref-btn-tg:active { transform:translateY(3px); box-shadow:0 1px 0 #1d4ed8; }
+
+/* ── Steps ── */
+.ref-steps { display: flex; flex-direction: column; gap: 12px; }
+.ref-step { display: flex; align-items: flex-start; gap: 12px; }
+.ref-step__num { width: 30px; height: 30px; border-radius: 10px; border: 2.5px solid #0f172a; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; box-shadow: 0 3px 0 #0f172a; color:#0f172a; }
+.ref-step__txt { font-size: 12px; font-weight: 800; color: #334155; line-height: 1.4; padding-top: 5px; }
+
+/* ── List ── */
+.c-list { display: flex; flex-direction: column; gap:10px; }
+.c-list-item { display: flex; align-items: center; gap: 12px; padding: 12px; border:2.5px solid #e2e8f0; border-radius:14px; background:#f8fafc; box-shadow:0 3px 0 #e2e8f0; transition:transform 0.1s; }
+.c-list-item:hover { transform:translateY(-2px); border-color:#cbd5e1; box-shadow:0 5px 0 #cbd5e1; }
+.c-list-item__icon { width: 38px; height: 38px; border-radius: 10px; border: 2.5px solid #0f172a; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow:0 3px 0 #0f172a; }
+.c-list-item__body { flex: 1; min-width: 0; line-height:1.3; }
+.c-list-item__title { font-size: 13px; font-weight: 900; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-list-item__sub { font-size: 10px; font-weight: 800; color: #64748b; margin-top:4px; display:flex; align-items:center; gap:4px; }
+.c-list-item__right { text-align: right; }
+.c-list-badge { font-size:8px; font-weight:900; padding:3px 6px; border-radius:6px; border:1.5px solid; text-transform:uppercase; display:inline-block; margin-bottom:4px; }
+.badge--brand { background:#e0f2fe; color:#0369a1; border-color:#38bdf8; }
+
+/* Pagination */
+.ref-pg { display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding-top:16px; border-top:2px dashed #cbd5e1; }
+.ref-pg-btn { padding:6px 12px; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:10px; font-size:10px; font-weight:900; color:#64748b; box-shadow:0 2px 0 #cbd5e1; cursor:pointer; }
+.ref-pg-btn:active { transform:translateY(2px); box-shadow:none; }
+.ref-pg-info { font-size:12px; font-weight:900; color:#475569; }
 </style>
 
-<div class="page-title-bar" style="margin-bottom:12px">
-  <h1 style="font-size:18px">👥 Referral</h1>
-  <p style="font-size:11px">Ajak teman, dapatkan komisi otomatis</p>
-</div>
+<div class="ref-page">
+  <!-- Title -->
+  <div class="ref-title">
+    <h1><i class="ph-bold ph-users-three"></i> Referral</h1>
+    <p>Ajak teman, panen komisi berkali-kali</p>
+  </div>
 
-<?php if ((int)$user['is_promotor'] === 1): ?>
-<!-- Promotor Banner -->
-<div class="ref-card" style="background:var(--mint)">
-  <div class="ref-card__bd" style="display:flex;align-items:center;justify-content:space-between;padding:10px">
-    <div>
-      <div style="font-weight:900;font-size:13px">🚀 Promotor Aktif</div>
-      <div style="font-size:10px;font-weight:700;color:#555">Pantau traffic & target harianmu.</div>
-    </div>
-    <a href="/user/promotor.php" class="btn btn--primary btn--sm" style="font-size:10px;padding:5px 10px">Dashboard</a>
-  </div>
-</div>
-<?php endif; ?>
-
-<!-- Stats Row -->
-<div class="ref-stats">
-  <div class="ref-stat">
-    <div class="ref-stat__val"><?= $ref_count ?></div>
-    <div class="ref-stat__lbl">Teman Diajak</div>
-  </div>
-  <div class="ref-stat">
-    <div class="ref-stat__val" style="color:var(--green)"><?= format_rp($ref_earned) ?></div>
-    <div class="ref-stat__lbl">Total Komisi</div>
-  </div>
-  <div class="ref-stat">
-    <div class="ref-stat__val" style="font-family:monospace;letter-spacing:1px"><?= $user['referral_code'] ?></div>
-    <div class="ref-stat__lbl">Kode Referral</div>
-  </div>
-</div>
-
-<!-- Share Section -->
-<div class="ref-card">
-  <div class="ref-card__hd">🔗 Bagikan Link Referral</div>
-  <div class="ref-card__bd">
-    <div class="ref-link-box">
-      <input id="ref-link-input" type="text" value="<?= htmlspecialchars($ref_url) ?>" readonly>
-      <button onclick="copyRef()" class="btn btn--primary" id="copy-btn">📋 Salin</button>
-    </div>
-    <div class="ref-share-row">
-      <a href="https://wa.me/?text=<?= urlencode('Yuk gabung Meloton! Daftar pakai link ku: ' . $ref_url) ?>" target="_blank" class="btn btn--green">
-        <i class="ph-bold ph-whatsapp-logo"></i> WhatsApp
-      </a>
-      <a href="https://t.me/share/url?url=<?= urlencode($ref_url) ?>&text=<?= urlencode('Gabung Meloton, dapat reward tiap nonton video!') ?>" target="_blank" class="btn btn--ghost">
-        <i class="ph-bold ph-telegram-logo"></i> Telegram
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- How it works -->
-<div class="ref-card">
-  <div class="ref-card__hd" style="background:var(--sky)">💡 Cara Kerja</div>
-  <div class="ref-card__bd">
-    <div class="ref-steps">
-      <div class="ref-step">
-        <div class="ref-step__num" style="background:var(--yellow)">1</div>
-        <div class="ref-step__txt">Bagikan link referral ke teman-temanmu</div>
+  <?php if ((int)$user['is_promotor'] === 1): ?>
+  <!-- Promotor Banner -->
+  <div class="ref-card promo-banner">
+    <div class="ref-card__bd">
+      <div>
+        <div style="font-weight:900;font-size:14px;color:#064e3b;margin-bottom:2px">🚀 Promotor Aktif</div>
+        <div style="font-size:11px;font-weight:700;color:#065f46">Pantau traffic & target harianmu.</div>
       </div>
-      <div class="ref-step">
-        <div class="ref-step__num" style="background:var(--mint)">2</div>
-        <div class="ref-step__txt">Teman mendaftar melalui link tersebut</div>
+      <a href="/user/promotor.php" class="promo-btn">Dashboard</a>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <!-- Stats Row -->
+  <div class="ref-stats">
+    <div class="ref-stat ref-stat-1">
+      <div class="ref-stat__val" style="color:#7e22ce"><?= $ref_count ?></div>
+      <div class="ref-stat__lbl">Teman</div>
+    </div>
+    <div class="ref-stat ref-stat-2">
+      <div class="ref-stat__val" style="color:#0369a1"><?= format_rp($ref_earned) ?></div>
+      <div class="ref-stat__lbl">Komisi</div>
+    </div>
+    <div class="ref-stat ref-stat-3">
+      <div class="ref-stat__val" style="color:#b45309;font-family:monospace;letter-spacing:1px"><?= $user['referral_code'] ?></div>
+      <div class="ref-stat__lbl">Kode Unik</div>
+    </div>
+  </div>
+
+  <!-- Share Section -->
+  <div class="ref-card" style="border-color:#38bdf8;box-shadow:0 6px 0 #38bdf8">
+    <div class="ref-card__hd" style="background:#e0f2fe;border-color:#38bdf8;color:#0369a1">🔗 Bagikan Link Referral</div>
+    <div class="ref-card__bd">
+      <div class="ref-link-box">
+        <input id="ref-link-input" type="text" value="<?= htmlspecialchars($ref_url) ?>" readonly>
+        <button onclick="copyRef()" class="ref-btn-copy" id="copy-btn">📋 Salin</button>
       </div>
-      <div class="ref-step">
-        <div class="ref-step__num" style="background:var(--lavender)">3</div>
-        <div class="ref-step__txt">Dapatkan komisi dari setiap deposit mereka</div>
+      <div class="ref-share-row">
+        <a href="https://wa.me/?text=<?= urlencode('Yuk gabung Meloton! Daftar pakai link ku: ' . $ref_url) ?>" target="_blank" class="ref-btn-wa">
+          <i class="ph-bold ph-whatsapp-logo"></i> WhatsApp
+        </a>
+        <a href="https://t.me/share/url?url=<?= urlencode($ref_url) ?>&text=<?= urlencode('Gabung Meloton, dapat reward tiap nonton video!') ?>" target="_blank" class="ref-btn-tg">
+          <i class="ph-bold ph-telegram-logo"></i> Telegram
+        </a>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Referred Users -->
-<div class="ref-card">
-  <div class="ref-card__hd" style="background:var(--white)">🧑‍🤝‍🧑 Teman Bergabung</div>
-  <div class="ref-card__bd">
-    <?php if (empty($referreds)): ?>
-    <div style="text-align:center;padding:16px 0;color:#aaa">
-      <div style="font-size:24px;margin-bottom:4px">👥</div>
-      <div style="font-size:11px;font-weight:700">Belum ada teman yang bergabung.<br>Mulai bagikan link kamu!</div>
+  <!-- How it works -->
+  <div class="ref-card" style="border-color:#fde047;box-shadow:0 6px 0 #fde047">
+    <div class="ref-card__hd" style="background:#fef9c3;border-color:#fde047;color:#a16207">💡 Cara Kerja</div>
+    <div class="ref-card__bd">
+      <div class="ref-steps">
+        <div class="ref-step">
+          <div class="ref-step__num" style="background:#fde047">1</div>
+          <div class="ref-step__txt">Bagikan link referral ke teman-temanmu.</div>
+        </div>
+        <div class="ref-step">
+          <div class="ref-step__num" style="background:#a7f3d0">2</div>
+          <div class="ref-step__txt">Temanmu mendaftar melalui link tersebut.</div>
+        </div>
+        <div class="ref-step">
+          <div class="ref-step__num" style="background:#e9d5ff">3</div>
+          <div class="ref-step__txt">Dapatkan komisi dari setiap transaksi mereka!</div>
+        </div>
+      </div>
     </div>
-    <?php else: ?>
-    <div class="c-list">
-      <?php foreach ($referreds as $idx => $r): ?>
-      <div class="c-list-item ref-item-row" data-index="<?= $idx ?>" style="<?= $idx >= 5 ? 'display:none' : '' ?>">
-        <div class="c-list-item__icon" style="background:var(--sky)">👤</div>
-        <div class="c-list-item__body">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-            <span class="c-list-item__title"><?= htmlspecialchars($r['username']) ?></span>
-            <span class="badge badge--brand" style="font-size:8px;padding:1px 5px"><?= htmlspecialchars($r['membership_name']) ?></span>
+  </div>
+
+  <!-- Referred Users -->
+  <div class="ref-card">
+    <div class="ref-card__hd" style="background:#f8fafc">🧑‍🤝‍🧑 Teman Bergabung</div>
+    <div class="ref-card__bd">
+      <?php if (empty($referreds)): ?>
+      <div style="text-align:center;padding:24px 0;border:3px dashed #e2e8f0;border-radius:16px;background:#f8fafc">
+        <div style="font-size:36px;margin-bottom:8px;opacity:0.5">👥</div>
+        <div style="font-size:12px;font-weight:800;color:#94a3b8">Belum ada teman yang bergabung.<br>Mulai bagikan link kamu!</div>
+      </div>
+      <?php else: ?>
+      <div class="c-list">
+        <?php foreach ($referreds as $idx => $r): ?>
+        <div class="c-list-item ref-item-row" data-index="<?= $idx ?>" style="<?= $idx >= 5 ? 'display:none' : '' ?>">
+          <div class="c-list-item__icon" style="background:#e0f2fe;color:#0284c7;border-color:#0369a1;box-shadow:0 3px 0 #0369a1">👤</div>
+          <div class="c-list-item__body">
+            <div class="c-list-item__title"><?= htmlspecialchars($r['username']) ?></div>
+            <div class="c-list-item__sub"><i class="ph-bold ph-calendar-blank"></i> <?= date('d M y', strtotime($r['created_at'])) ?></div>
           </div>
-          <div class="c-list-item__sub">Bergabung: <?= date('d M y', strtotime($r['created_at'])) ?></div>
+          <div class="c-list-item__right">
+            <div class="c-list-badge badge--brand"><?= htmlspecialchars($r['membership_name']) ?></div>
+            <div style="color:#10b981;font-size:13px;font-weight:900;letter-spacing:-0.5px">+<?= format_rp((float)$r['commission_earned']) ?></div>
+            <div style="font-size:9px;color:#94a3b8;font-weight:800;margin-top:2px">Depo: <?= format_rp((float)$r['total_deposit']) ?></div>
+          </div>
         </div>
-        <div class="c-list-item__right" style="text-align:right">
-          <div style="color:var(--green)">+<?= format_rp((float)$r['commission_earned']) ?></div>
-          <div style="font-size:9px;color:#888;font-weight:800;margin-top:2px">Depo: <?= format_rp((float)$r['total_deposit']) ?></div>
-        </div>
+        <?php endforeach; ?>
       </div>
-      <?php endforeach; ?>
+      <?php if (count($referreds) > 5): ?>
+      <div class="ref-pg">
+        <button onclick="refPrev()" id="ref-btn-prev" class="ref-pg-btn" style="pointer-events:none;opacity:.5">← Prev</button>
+        <span id="ref-page-info" class="ref-pg-info">1/<?= ceil(count($referreds) / 5) ?></span>
+        <button onclick="refNext()" id="ref-btn-next" class="ref-pg-btn">Next →</button>
+      </div>
+      <?php endif; ?>
+      <?php endif; ?>
     </div>
-    <?php if (count($referreds) > 5): ?>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:2px solid var(--ink)">
-      <button onclick="refPrev()" id="ref-btn-prev" class="btn btn--ghost btn--sm" style="font-size:10px;padding:4px 12px;border:1.5px solid var(--ink);border-radius:12px;pointer-events:none;opacity:.5">← Prev</button>
-      <span id="ref-page-info" style="font-size:11px;font-weight:800;color:#666">1/<?= ceil(count($referreds) / 5) ?></span>
-      <button onclick="refNext()" id="ref-btn-next" class="btn btn--ghost btn--sm" style="font-size:10px;padding:4px 12px;border:1.5px solid var(--ink);border-radius:12px">Next →</button>
-    </div>
-    <?php endif; ?>
-    <?php endif; ?>
   </div>
-</div>
 
-<!-- Commission History -->
-<?php if (!empty($history)): ?>
-<div class="ref-card">
-  <div class="ref-card__hd" style="background:var(--lime)">💰 Riwayat Komisi Terbaru</div>
-  <div class="ref-card__bd">
-    <div class="c-list">
-      <?php foreach ($history as $h): ?>
-      <div class="c-list-item">
-        <div class="c-list-item__icon" style="background:var(--lime)">🎁</div>
-        <div class="c-list-item__body">
-          <div class="c-list-item__title">Dari <?= htmlspecialchars($h['username']) ?></div>
-          <div class="c-list-item__sub"><?= date('d M y H:i', strtotime($h['created_at'])) ?></div>
+  <!-- Commission History -->
+  <?php if (!empty($history)): ?>
+  <div class="ref-card" style="border-color:#a7f3d0;box-shadow:0 6px 0 #a7f3d0">
+    <div class="ref-card__hd" style="background:#d1fae5;border-color:#a7f3d0;color:#065f46">💰 Riwayat Komisi Terbaru</div>
+    <div class="ref-card__bd">
+      <div class="c-list">
+        <?php foreach ($history as $h): ?>
+        <div class="c-list-item">
+          <div class="c-list-item__icon" style="background:#fef08a;color:#d97706;border-color:#b45309;box-shadow:0 3px 0 #b45309">🎁</div>
+          <div class="c-list-item__body">
+            <div class="c-list-item__title">Dari <?= htmlspecialchars($h['username']) ?></div>
+            <div class="c-list-item__sub"><i class="ph-bold ph-clock"></i> <?= date('d M y H:i', strtotime($h['created_at'])) ?></div>
+          </div>
+          <div class="c-list-item__right" style="color:#10b981;font-size:14px;font-weight:900;letter-spacing:-0.5px">
+            +<?= format_rp((float)$h['amount']) ?>
+          </div>
         </div>
-        <div class="c-list-item__right" style="color:var(--green)">
-          +<?= format_rp((float)$h['amount']) ?>
-        </div>
+        <?php endforeach; ?>
       </div>
-      <?php endforeach; ?>
     </div>
   </div>
+  <?php endif; ?>
+
 </div>
-<?php endif; ?>
 
 <script>
 function copyRef() {
@@ -229,9 +293,7 @@ function copyRef() {
     document.execCommand('copy');
   });
 }
-</script>
 
-<script>
 let refCurrentPage = 1;
 const refLimit = 5;
 const refTotal = <?= count($referreds) ?>;
