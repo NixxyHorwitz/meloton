@@ -752,27 +752,30 @@ $popup_delay       = max(0, (int) setting($pdo, 'popup_delay', '1500'));
 $popup_reset_hours = max(0, (int) setting($pdo, 'popup_reset_hours', '0'));
 ?>
 <?php if ($popup_enabled): ?>
-<div id="guide-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:flex-end;justify-content:center">
-  <div style="background:#fff;border-radius:24px 24px 0 0;padding:24px;max-width:480px;width:100%;transform:translateY(100%);transition:transform .3s ease;position:relative;box-shadow:0 -8px 24px rgba(0,0,0,0.3)">
-    <button onclick="closePopup()" style="position:absolute;top:16px;right:16px;background:#f0fdff;color:#0c4a6e;border:1.5px solid #7dd3e8;width:30px;height:30px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<div id="guide-popup" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.6); backdrop-filter:blur(4px); z-index:100000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:24px; padding:24px 20px 20px; max-width:320px; width:100%; transform:scale(0.8); opacity:0; transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position:relative; border:4px solid #7dd3e8; box-shadow:0 10px 0 #0369a1, 0 16px 32px rgba(0,0,0,0.3);">
+    <button onclick="closePopup()" style="position:absolute; top:-12px; right:-12px; background:#ef4444; color:#fff; border:3px solid #fff; width:36px; height:36px; border-radius:50%; font-size:16px; font-weight:900; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 0 #b91c1c; transition:transform 0.1s;">
       <i class="ph-bold ph-x"></i>
     </button>
-    <div style="width:48px;height:48px;background:#e0f9ff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;color:#0891b2">
+    <div style="width:64px; height:64px; background:linear-gradient(135deg, #fde047, #f59e0b); border:3px solid #d97706; box-shadow:0 4px 0 #b45309; border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:32px; margin:-48px auto 16px; color:#78350f;">
       <i class="ph-fill ph-book-open"></i>
     </div>
-    <h3 style="font-size:16px;font-weight:900;text-align:center;margin:0 0 8px;color:#0c4a6e"><?= htmlspecialchars($popup_title) ?></h3>
-    <p style="font-size:12px;line-height:1.5;color:#64748b;text-align:center;margin:0 0 18px"><?= nl2br(htmlspecialchars($popup_body)) ?></p>
-    <a href="<?= htmlspecialchars($popup_cta_url) ?>" class="btn btn--primary" style="width:100%;font-size:13px;padding:12px;border-radius:12px;justify-content:center">
-      <i class="ph-bold ph-book-bookmark"></i> <?= htmlspecialchars($popup_cta_text) ?>
-    </a>
-    <button type="button" onclick="closePopup()" style="width:100%;margin-top:8px;padding:10px;background:none;border:none;font-size:12px;font-weight:700;color:#94a3b8;cursor:pointer">Nanti Saja</button>
+    <h3 style="font-size:18px; font-weight:900; text-align:center; margin:0 0 8px; color:#0f172a; line-height:1.2;"><?= htmlspecialchars($popup_title) ?></h3>
+    <p style="font-size:13px; line-height:1.5; color:#475569; font-weight:700; text-align:center; margin:0 0 20px"><?= nl2br(htmlspecialchars($popup_body)) ?></p>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <a href="<?= htmlspecialchars($popup_cta_url) ?>" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; font-size:14px; font-weight:900; padding:14px; border-radius:16px; background:linear-gradient(135deg, #0ea5e9, #0284c7); border:3px solid #fff; box-shadow:0 6px 0 #0369a1; color:#fff; text-decoration:none; transition:transform 0.1s;">
+        <i class="ph-bold ph-book-bookmark"></i> <?= htmlspecialchars($popup_cta_text) ?>
+      </a>
+      <button type="button" onclick="closePopup()" style="width:100%; padding:10px; background:transparent; border:none; font-size:12px; font-weight:800; color:#94a3b8; cursor:pointer;">Nanti Saja</button>
+    </div>
   </div>
 </div>
 <script>
 function closePopup() {
   const p = document.getElementById('guide-popup');
   const c = p.querySelector('div');
-  c.style.transform = 'translateY(100%)';
+  c.style.transform = 'scale(0.8)';
+  c.style.opacity = '0';
   setTimeout(() => p.style.display = 'none', 300);
   try { localStorage.setItem('tonton_popup_seen', JSON.stringify({ts: Date.now()})); } catch(e){}
 }
@@ -788,7 +791,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (resetMs <= 0 || (Date.now() - data.ts) < resetMs) return;
     }
   } catch(e){}
-  setTimeout(() => { p.style.display = 'flex'; p.offsetHeight; c.style.transform = 'translateY(0)'; }, <?= $popup_delay ?>);
+  setTimeout(() => { 
+    p.style.display = 'flex'; 
+    p.offsetHeight; // force reflow
+    c.style.transform = 'scale(1)'; 
+    c.style.opacity = '1';
+  }, <?= $popup_delay ?>);
 });
 </script>
 <?php endif; ?>
