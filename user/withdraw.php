@@ -229,195 +229,311 @@ require dirname(__DIR__) . '/partials/header.php';
 ?>
 
 <style>
-/* Trusted Neo-Brutalism Theme */
-.wd-bal { background: var(--yellow, #eab308); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink); padding: 12px 14px; margin-bottom: 12px; position: relative; overflow: hidden; }
-.wd-bal::after { content:''; position:absolute; top:-20px; right:-20px; width:70px; height:70px; background: rgba(0,0,0,0.05); border-radius: 50%; }
-.wd-bal__lbl { font-size: 11px; font-weight: 800; color: rgba(0,0,0,0.6); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
-.wd-bal__val { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+/* ══════════════════════════════════════════════
+   WITHDRAW PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+.wd-page { padding: 0 0 20px; }
 
-.qty-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
-.qty-btn { font-size: 11px; font-weight: 800; padding: 8px 4px; text-align: center; background: #fff; border: 2px solid var(--ink); border-radius: 8px; box-shadow: 2px 2px 0 var(--ink); cursor: pointer; transition: transform 0.1s; }
-.qty-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--ink); }
-
-.card-trusted { background: #fff; border: 2.5px solid var(--ink); border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); overflow: hidden; margin-bottom: 12px; }
-.card-trusted__header { background: #f8fafc; border-bottom: 2.5px solid var(--ink); padding: 10px 14px; font-weight: 900; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 6px; }
-.card-trusted__body { padding: 12px 14px; }
-
-.bank-info { background: #fef08a; border: 2.5px solid var(--ink); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; position: relative; box-shadow: 3px 3px 0 var(--ink); }
-.amount-option-btn.active {
-  background: var(--yellow) !important;
-  box-shadow: 0px 0px 0 var(--ink) !important;
-  transform: translate(2px, 2px) !important;
+/* ── Hero Balance ── */
+.wd-hero {
+  background: linear-gradient(135deg, #0c4a6e, #0e7490, #06b6d4);
+  border: 3px solid #075985;
+  border-radius: 22px;
+  box-shadow: 0 8px 0 #0c4a6e;
+  padding: 24px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
 }
+.wd-hero::before { content:''; position:absolute; top:-40px; right:-20px; width:120px; height:120px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
+.wd-hero__lbl { font-size:12px; font-weight:900; color:rgba(255,255,255,0.7); margin-bottom:4px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:6px; }
+.wd-hero__val { font-size:36px; font-weight:900; color:#fde68a; text-shadow:0 2px 4px rgba(0,0,0,0.2); letter-spacing:-1px; }
+
+/* ── Alerts ── */
+.wd-alert {
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 12px; font-weight: 800;
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 14px;
+  border: 2px solid;
+  line-height: 1.4;
+}
+.wd-alert--err { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+.wd-alert--warn { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+.wd-alert--succ { background: #f0fdf4; color: #166534; border-color: #86efac; }
+.wd-alert-icon { font-size: 20px; flex-shrink: 0; }
+.wd-alert-btn { background: #fbbf24; color: #92400e; border: 2px solid #fff; border-radius: 8px; font-size: 10px; font-weight: 900; padding: 6px 12px; text-decoration: none; box-shadow: 0 2px 0 rgba(0,0,0,0.1); flex-shrink: 0; }
+
+/* ── Form Card ── */
+.wd-card {
+  background: #fff;
+  border: 2.5px solid #7dd3e8;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 #7dd3e8;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.wd-card-title {
+  font-size: 15px; font-weight: 900; color: #0c4a6e;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  border-bottom: 2px solid #e0f9ff; padding-bottom: 12px;
+}
+
+/* ── Amount Grid ── */
+.wd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0 20px; }
+.wd-amt-btn {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 12px 6px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.1s;
+  box-shadow: 0 4px 0 #cbd5e1;
+  outline: none;
+}
+.wd-amt-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #cbd5e1; }
+.wd-amt-btn.active {
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  border-color: #fff;
+  box-shadow: 0 4px 0 #d97706;
+  color: #fff;
+}
+.wd-amt-btn.active:active { transform: translateY(4px); box-shadow: 0 0 0 #d97706; }
+.wd-amt-val { font-size: 13px; font-weight: 900; color: #0c4a6e; letter-spacing: -0.5px; }
+.wd-amt-btn.active .wd-amt-val { color: #78350f; }
+
+/* ── Inputs ── */
+.wd-group { margin-bottom: 14px; }
+.wd-label { font-size: 11px; font-weight: 900; color: #64748b; margin-bottom: 6px; display: block; }
+.wd-input {
+  width: 100%; background: #f8fafc;
+  border: 2px solid #e2e8f0; border-radius: 12px;
+  padding: 12px; font-size: 13px; font-weight: 800; color: #0c4a6e;
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.wd-input:focus { border-color: #7dd3e8; background: #fff; }
+.wd-input:disabled, .wd-input[readonly] { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+
+/* ── Bank Info Display (If already has bank) ── */
+.wd-bank-display {
+  background: linear-gradient(135deg, #0c4a6e, #0e7490);
+  border-radius: 14px; padding: 16px; margin-bottom: 20px;
+  color: #fff; position: relative; overflow: hidden;
+}
+.wd-bank-display::before { content:''; position:absolute; top:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.05); }
+.wd-bank-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1.5px solid rgba(255,255,255,0.1); padding-bottom:10px; }
+.wd-bank-num { font-size:18px; font-family:monospace; font-weight:900; letter-spacing:2px; margin-bottom:4px; }
+.wd-bank-name { font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); }
+
+/* ── Submit Button ── */
+.wd-submit {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #22d3ee, #0891b2);
+  border: 2.5px solid #a5f3fc;
+  border-radius: 16px;
+  color: #fff; font-size: 14px; font-weight: 900;
+  box-shadow: 0 6px 0 #0e7490;
+  cursor: pointer; transition: transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.wd-submit:active { transform: translateY(5px); box-shadow: 0 1px 0 #0e7490; }
+.wd-submit:disabled { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; box-shadow: none; cursor: not-allowed; transform: none; }
+
+/* ── Modal ── */
+#cg-modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.7); z-index:99999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px); }
+.cg-modal-box { background: #fff; width:100%; max-width:320px; border-radius:24px; border:3.5px solid #7dd3e8; box-shadow:0 10px 0 #0c4a6e; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow:hidden; }
+.cg-modal-hdr { background: linear-gradient(135deg, #fde68a, #f59e0b); padding: 16px; text-align: center; color: #78350f; font-weight: 900; font-size: 16px; border-bottom: 2px solid rgba(255,255,255,0.5); }
+.cg-modal-bd { padding: 20px 16px; text-align: center; }
+.cg-modal-actions { display:flex; gap:10px; padding:0 16px 20px; }
+.cg-btn-cancel { flex:1; padding:12px; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:12px; font-weight:900; color:#64748b; }
+.cg-btn-confirm { flex:1.5; padding:12px; background:linear-gradient(135deg, #34d399, #10b981); border:2px solid #6ee7b7; border-radius:12px; font-weight:900; color:#fff; box-shadow:0 4px 0 #059669; }
+.cg-btn-confirm:active { transform:translateY(3px); box-shadow:0 1px 0 #059669; }
+
+@keyframes popIn { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
 </style>
 
-<!-- Balance -->
-<div class="wd-bal">
-  <div class="wd-bal__lbl"><i class="ph-bold ph-wallet"></i> Saldo Penarikan</div>
-  <div class="wd-bal__val"><?= format_rp((float)$user['balance_wd']) ?></div>
-</div>
-
-
-<!-- Limit alert removed per user request -->
-
-<?php if ($flash): ?>
-<div class="alert alert--<?= $flashType === 'error' ? 'error' : 'success' ?>" style="margin-bottom:10px;font-size:12px;padding:8px 12px"><?= htmlspecialchars($flash) ?></div>
-<?php endif; ?>
-
-<!-- Lock notice / Estimation -->
-<?php if ($wd_estimation): ?>
-  <?php if ($wd_locked): ?>
-  <div class="alert alert--error" style="margin-bottom:12px;font-size:11px;border:2px solid var(--red);border-radius:10px;padding:8px 12px;display:flex;align-items:flex-start;gap:6px;font-weight:800;box-shadow:2px 2px 0 var(--red)">
-    <i class="ph-fill ph-lock-key" style="color:var(--red);font-size:16px;margin-top:1px"></i>
-    <div>
-      <div><?= $wd_estimation ?></div>
-      <?php if ($wd_lock_notice): ?>
-        <div style="margin-top:4px"><em>"<?= htmlspecialchars($wd_lock_notice) ?>"</em></div>
-      <?php endif; ?>
-      <div style="margin-top:4px;font-size:10px;opacity:0.8;font-weight:700"><i class="ph-bold ph-clock"></i> Jam operasional: <?= date('h:i A', strtotime($wd_lock_end)) ?> – <?= date('h:i A', strtotime($wd_lock_start)) ?></div>
-    </div>
+<div class="wd-page">
+  <!-- HERO BALANCE -->
+  <div class="wd-hero">
+    <div class="wd-hero__lbl"><i class="ph-bold ph-wallet"></i> Saldo Penarikan</div>
+    <div class="wd-hero__val"><?= format_rp((float)$user['balance_wd']) ?></div>
   </div>
-  <?php else: ?>
-  <div style="margin-bottom:12px;font-size:11px;color:#15803d;background:#dcfce7;border:2px solid #16a34a;border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:6px;font-weight:800;box-shadow:2px 2px 0 #16a34a">
-    <i class="ph-fill ph-check-circle" style="font-size:16px"></i> 
-    <div><?= $wd_estimation ?></div>
+
+  <!-- FLASH ALERTS -->
+  <?php if ($flash): ?>
+  <div class="wd-alert wd-alert--<?= $flashType === 'error' ? 'err' : 'succ' ?>">
+    <div class="wd-alert-icon"><?= $flashType === 'error' ? '❌' : '✨' ?></div>
+    <div style="flex:1"><?= htmlspecialchars($flash) ?></div>
   </div>
   <?php endif; ?>
-<?php endif; ?>
 
-<!-- Level block notice -->
-<?php if ($free_wd_limit_reached): ?>
-<div class="alert alert--error" style="display:flex;margin-bottom:12px;font-size:11px;padding:8px 12px;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;border:2px solid var(--red)">
-  <span style="display:flex;align-items:center;gap:4px"><i class="ph-fill ph-prohibit" style="color:var(--red);font-size:14px"></i> Akun Free maksimal 1x penarikan. Upgrade untuk tarik dana lagi!</span>
-  <a href="/upgrade" class="btn btn--yellow btn--sm" style="white-space:nowrap;font-size:10px;padding:4px 10px;flex-shrink:0">Upgrade →</a>
-</div>
-<?php elseif ($free_wrong_bank): ?>
-<div class="alert alert--error" style="display:flex;margin-bottom:12px;font-size:11px;padding:8px 12px;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;border:2px solid var(--red)">
-  <span style="display:flex;align-items:center;gap:4px"><i class="ph-fill ph-warning-circle" style="color:var(--red);font-size:14px"></i> Akun Free hanya bisa withdraw ke DANA.</span>
-  <a href="/edit-rekening" class="btn btn--yellow btn--sm" style="white-space:nowrap;font-size:10px;padding:4px 10px;flex-shrink:0">Ubah Bank →</a>
-</div>
-<?php elseif (!empty($user_mem['is_wd_disabled'])): ?>
-<div class="alert alert--error" style="display:flex;margin-bottom:12px;font-size:11px;padding:8px 12px;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;border:2px solid var(--red)">
-  <span style="display:flex;align-items:center;gap:4px"><i class="ph-fill ph-warning-circle" style="color:var(--red);font-size:14px"></i> Penarikan untuk level Anda sedang ditutup!</span>
-  <a href="/upgrade" class="btn btn--yellow btn--sm" style="white-space:nowrap;font-size:10px;padding:4px 10px;flex-shrink:0">Upgrade →</a>
-</div>
-<?php elseif ($level_blocked): ?>
-<div id="level-blocked-notice" class="alert alert--warn" style="display:flex;margin-bottom:12px;font-size:12px;padding:12px;align-items:center;justify-content:space-between;gap:10px;border:2.5px solid var(--orange);background:#fffbeb;box-shadow:3px 3px 0 var(--orange);border-radius:12px;">
-  <div style="display:flex;align-items:flex-start;gap:8px">
-    <i class="ph-fill ph-lock-key" style="color:var(--orange);font-size:24px;margin-top:2px"></i>
-    <div>
-      <div style="font-weight:900;color:var(--ink);margin-bottom:4px">Penarikan Terkunci!</div>
-      <div style="font-size:11px;color:#666;line-height:1.4">Pengguna akun <strong>Free (Gratis)</strong> saat ini belum bisa melakukan penarikan. Kamu perlu upgrade ke minimal <strong><?= htmlspecialchars($min_level_name) ?></strong> untuk membuka akses penarikan.</div>
+  <!-- NOTICES -->
+  <?php if ($wd_estimation): ?>
+    <?php if ($wd_locked): ?>
+    <div class="wd-alert wd-alert--err">
+      <div class="wd-alert-icon">🔒</div>
+      <div style="flex:1">
+        <div style="margin-bottom:4px"><?= $wd_estimation ?></div>
+        <?php if ($wd_lock_notice): ?>
+          <div style="font-size:11px;opacity:0.9"><em>"<?= htmlspecialchars($wd_lock_notice) ?>"</em></div>
+        <?php endif; ?>
+        <div style="font-size:10px;margin-top:4px"><i class="ph-bold ph-clock"></i> Buka: <?= date('h:i A', strtotime($wd_lock_end)) ?></div>
+      </div>
     </div>
-  </div>
-  <a href="/upgrade" class="btn btn--yellow btn--sm" style="white-space:nowrap;font-size:11px;padding:6px 12px;flex-shrink:0;box-shadow:2px 2px 0 var(--ink);border:2px solid var(--ink);border-radius:8px;font-weight:900">Upgrade →</a>
-</div>
-<?php endif; ?>
+    <?php else: ?>
+    <div class="wd-alert wd-alert--succ">
+      <div class="wd-alert-icon">✅</div>
+      <div style="flex:1"><?= $wd_estimation ?></div>
+    </div>
+    <?php endif; ?>
+  <?php endif; ?>
 
-<a href="/user/level_performance.php" class="btn w-100" style="background:#fff;border:2.5px dashed var(--ink);border-radius:10px;font-weight:800;color:var(--ink);text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;margin-bottom:16px">
-  <i class="ph-bold ph-chart-line-up" style="font-size:18px"></i> Cek Kinerja Server & WD Per Level
-</a>
+  <?php if ($free_wd_limit_reached): ?>
+  <div class="wd-alert wd-alert--err">
+    <div class="wd-alert-icon">🛑</div>
+    <div style="flex:1">Akun Free maksimal 1x penarikan.</div>
+    <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+  </div>
+  <?php elseif ($free_wrong_bank): ?>
+  <div class="wd-alert wd-alert--err">
+    <div class="wd-alert-icon">⚠️</div>
+    <div style="flex:1">Akun Free hanya bisa WD ke DANA.</div>
+    <a href="/edit-rekening" class="wd-alert-btn">Ubah</a>
+  </div>
+  <?php elseif (!empty($user_mem['is_wd_disabled'])): ?>
+  <div class="wd-alert wd-alert--err">
+    <div class="wd-alert-icon">🛑</div>
+    <div style="flex:1">Penarikan untuk level ini ditutup sementara.</div>
+    <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+  </div>
+  <?php elseif ($level_blocked): ?>
+  <div class="wd-alert wd-alert--warn">
+    <div class="wd-alert-icon">🔒</div>
+    <div style="flex:1">
+      <div style="margin-bottom:2px"><strong>Terkunci!</strong></div>
+      <div style="font-size:11px;font-weight:700">Akun Gratis belum bisa WD. Butuh minimal level <?= htmlspecialchars($min_level_name) ?>.</div>
+    </div>
+    <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+  </div>
+  <?php endif; ?>
 
-<!-- Form -->
-<?php if ($has_pending_bank): ?>
-<div class="card card--danger" style="margin-bottom:16px;background:rgba(245, 158, 11, 0.1);border:2.5px solid #f59e0b;box-shadow:4px 4px 0 #f59e0b">
-  <div class="card__body" style="text-align:center;padding:24px 16px">
-    <div style="font-size:42px;margin-bottom:12px">⚙️</div>
-    <h6 style="color:#d97706;margin-bottom:6px;font-weight:900;font-size:16px">Verifikasi Rekening Baru</h6>
-    <div style="font-size:12px;color:#555;font-weight:700">Akses penarikan ditunda sementara karena sistem sedang memverifikasi data rekening barumu secara otomatis.</div>
+  <!-- FORM CARD -->
+  <?php if ($has_pending_bank): ?>
+  <div class="wd-card" style="text-align:center;padding:30px 20px;border-color:#f59e0b;box-shadow:0 6px 0 #f59e0b;background:#fffbeb">
+    <div style="font-size:40px;margin-bottom:10px">⚙️</div>
+    <div style="font-size:16px;font-weight:900;color:#d97706;margin-bottom:6px">Verifikasi Rekening Baru</div>
+    <div style="font-size:12px;font-weight:700;color:#92400e">Akses ditunda. Sistem sedang memverifikasi rekening barumu.</div>
   </div>
-</div>
-<?php elseif (!$user['can_withdraw']): ?>
-<div class="card card--danger" style="margin-bottom:16px;background:rgba(255,59,48,0.1);border:2px solid var(--red)">
-  <div class="card__body" style="text-align:center;padding:24px 16px">
-    <i class="ph-fill ph-prohibit" style="font-size:42px;color:var(--red);margin-bottom:12px"></i>
-    <h6 style="color:var(--red);margin-bottom:6px;font-weight:900;font-size:16px">Akses Penarikan Dibatasi</h6>
-    <div style="font-size:12px;color:#555;font-weight:700">Akun kamu saat ini tidak diizinkan untuk melakukan penarikan dana. Silakan hubungi admin.</div>
+  <?php elseif (!$user['can_withdraw']): ?>
+  <div class="wd-card" style="text-align:center;padding:30px 20px;border-color:#ef4444;box-shadow:0 6px 0 #ef4444;background:#fef2f2">
+    <div style="font-size:40px;margin-bottom:10px">🛑</div>
+    <div style="font-size:16px;font-weight:900;color:#dc2626;margin-bottom:6px">Akses Dibatasi</div>
+    <div style="font-size:12px;font-weight:700;color:#991b1b">Akun ini tidak diizinkan melakukan penarikan dana.</div>
   </div>
-</div>
-<?php else: ?>
-<div class="card-trusted">
-  <div class="card-trusted__header"><i class="ph-fill ph-bank" style="color:var(--yellow);font-size:18px"></i> Form Penarikan</div>
-  <div class="card-trusted__body">
+  <?php else: ?>
+  <div class="wd-card">
+    <div class="wd-card-title"><i class="ph-bold ph-paper-plane-right" style="color:#0ea5e9;font-size:18px"></i> Form Penarikan</div>
     <form method="POST" id="wd-form">
       <?= csrf_field() ?>
       <input type="hidden" name="form_token" value="<?= htmlspecialchars($_form_token_wd) ?>">
       <input type="hidden" name="amount" id="selected-amount" value="" required>
 
-      <div class="form-group" style="margin-bottom:12px">
-        <label class="form-label" style="font-size:11px;font-weight:800;color:#555">Pilih Nominal Penarikan (Rp)</label>
-        <div class="amount-selection-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px;">
+      <div class="wd-group">
+        <label class="wd-label">Pilih Nominal</label>
+        <div class="wd-grid">
           <?php foreach ($available_amounts as $amt): ?>
-            <button type="button" class="amount-option-btn" data-value="<?= $amt ?>" onclick="selectWdAmount(this, <?= $amt ?>)" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 4px; background: #fff; border: 2.5px solid var(--ink); border-radius: 8px; box-shadow: 2.5px 2.5px 0 var(--ink); cursor: pointer; transition: all 0.1s; outline: none; font-family: inherit;">
-              <img src="/assets/dollar.png" alt="uang" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px; mix-blend-mode: multiply; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.1));">
-              <span style="font-size: 12px; font-weight: 900; color: var(--ink); letter-spacing: -0.5px;"><?= format_rp($amt) ?></span>
-              <span style="font-size: 8px; font-weight: 800; color: #64748b; margin-top: 2px; text-transform: uppercase;">Tarik</span>
+            <button type="button" class="wd-amt-btn" data-value="<?= $amt ?>" onclick="selectWdAmount(this, <?= $amt ?>)">
+              <div class="wd-amt-val"><?= format_rp($amt) ?></div>
             </button>
           <?php endforeach; ?>
         </div>
       </div>
 
       <?php if (!$has_bank): ?>
-      <div class="alert alert--warn" style="margin-bottom:12px;font-size:12px">⚠️ Harap isi data rekening bankmu ya. Data ini gak bisa diubah lagi setelah disimpan!</div>
-      
-      <?php if ($is_free_level): ?>
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label" style="font-size:12px">Nama Bank / E-Wallet (Khusus Akun Free)</label>
-        <input class="form-control" type="text" name="bank_name" value="DANA" readonly style="background:#f1f5f9;cursor:not-allowed">
-      </div>
+        <div class="wd-alert wd-alert--warn" style="font-size:11px;padding:10px">⚠️ Data rekening tidak bisa diubah setelah disimpan!</div>
+        <?php if ($is_free_level): ?>
+          <div class="wd-group">
+            <label class="wd-label">Bank / E-Wallet</label>
+            <input class="wd-input" type="text" name="bank_name" value="DANA" readonly>
+          </div>
+        <?php else: ?>
+          <div class="wd-group">
+            <label class="wd-label">Bank / E-Wallet</label>
+            <input class="wd-input" type="text" name="bank_name" placeholder="BCA, Dana, OVO..." required>
+          </div>
+        <?php endif; ?>
+        <div class="wd-group">
+          <label class="wd-label">Nomor Rekening</label>
+          <input class="wd-input" type="text" name="account_number" placeholder="08xxxxxxxx" required>
+        </div>
+        <div class="wd-group">
+          <label class="wd-label">Nama Pemilik</label>
+          <input class="wd-input" type="text" name="account_name" placeholder="Sesuai nama rekening" required>
+        </div>
       <?php else: ?>
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label" style="font-size:12px">Nama Bank / E-Wallet</label>
-        <input class="form-control" type="text" name="bank_name"
-               value="<?= htmlspecialchars($_POST['bank_name'] ?? '') ?>"
-               placeholder="BCA, GoPay, OVO, Dana..." required>
-      </div>
-      <?php endif; ?>
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label" style="font-size:12px">Nomor Rekening / Akun</label>
-        <input class="form-control" type="text" name="account_number"
-               value="<?= htmlspecialchars($_POST['account_number'] ?? '') ?>"
-               placeholder="08xxxxxxxxxx atau nomor rekening" required>
-      </div>
-      <div class="form-group" style="margin-bottom:12px">
-        <label class="form-label" style="font-size:12px">Nama Pemilik Rekening</label>
-        <input class="form-control" type="text" name="account_name"
-               value="<?= htmlspecialchars($_POST['account_name'] ?? '') ?>"
-               placeholder="Nama sesuai rekening bank" required>
-      </div>
+        <div class="wd-bank-display">
+          <div class="wd-bank-hdr">
+            <div style="font-size:10px;font-weight:900;text-transform:uppercase;color:rgba(255,255,255,0.7)"><i class="ph-bold ph-bank"></i> Tujuan Transfer</div>
+            <a href="/edit-rekening" style="font-size:10px;color:#fff;font-weight:800;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:6px;text-decoration:none"><i class="ph-bold ph-pencil-simple"></i> Edit</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <?php $user_wl = $channel_logos[strtolower($user['bank_name'] ?? '')] ?? null; ?>
+            <?php if ($user_wl): ?>
+              <img src="/assets/banks/<?= htmlspecialchars($user_wl) ?>" style="height:24px;border-radius:4px;object-fit:contain;background:#fff;padding:2px">
+            <?php endif; ?>
+            <span style="font-size:16px;font-weight:900"><?= htmlspecialchars($user['bank_name']) ?></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div id="wd-accnum-display" class="wd-bank-num"><?= htmlspecialchars(mask_account($user['account_number'] ?? '')) ?></div>
+            <button type="button" id="wd-accnum-toggle" onclick="toggleAccNum()" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer"><i class="ph-bold ph-eye"></i></button>
+          </div>
+          <div class="wd-bank-name"><?= htmlspecialchars($user['account_name']) ?></div>
+        </div>
       <?php endif; ?>
 
-      <?php if ($free_wd_limit_reached): ?>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px"><i class="ph-bold ph-prohibit"></i> Limit Free Tercapai</button>
-      <?php elseif ($free_wrong_bank): ?>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px"><i class="ph-bold ph-prohibit"></i> Hanya Bisa ke DANA</button>
+      <!-- Submit logic -->
+      <?php if ($free_wd_limit_reached || $free_wrong_bank || $wd_locked || $level_blocked): ?>
+        <button type="button" class="wd-submit" disabled>❌ Tidak Memenuhi Syarat</button>
       <?php elseif ($has_pending_wd): ?>
-        <div class="alert alert--warn" style="margin-bottom:10px;font-size:11px;border:2px solid var(--orange);padding:8px">
-          <i class="ph-bold ph-hourglass" style="color:var(--orange)"></i> <strong>Ada penarikan pending.</strong> Tunggu kelar diproses dulu ya.
-        </div>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px"><i class="ph-bold ph-hourglass-high"></i> Sabar, Lagi Diproses...</button>
+        <button type="button" class="wd-submit" disabled>⏳ Ada Penarikan Pending</button>
       <?php elseif ((float)$user['balance_wd'] < $min_withdraw): ?>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px"><i class="ph-bold ph-wallet"></i> Saldo Kurang Dikit!</button>
-      <?php elseif ($wd_locked): ?>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px"><i class="ph-bold ph-clock"></i> Lagi Tutup Nih</button>
-      <?php elseif ($level_blocked): ?>
-        <button type="button" class="btn btn--primary btn--full" disabled style="font-size:13px;height:42px;background:#e2e8f0;color:#64748b;border:2px solid #cbd5e1;cursor:not-allowed"><i class="ph-bold ph-lock-key"></i> Upgrade Level Dulu!</button>
+        <button type="button" class="wd-submit" disabled>⚠️ Saldo Kurang</button>
       <?php else: ?>
-        <button type="submit" id="wd-submit-btn" class="btn btn--primary btn--full no-dbl-submit" style="font-size:13px;height:42px;background:var(--yellow);color:var(--ink);border:2.5px solid var(--ink);box-shadow:3px 3px 0 var(--ink)"><i class="ph-bold ph-paper-plane-right"></i> Tarik Saldo Sekarang</button>
+        <button type="submit" id="wd-submit-btn" class="wd-submit">🚀 Tarik Sekarang</button>
       <?php endif; ?>
     </form>
   </div>
+  <?php endif; ?>
+
 </div>
-<?php endif; ?>
+
+<!-- CONFIRM MODAL -->
+<div id="cg-modal">
+  <div class="cg-modal-box">
+    <div class="cg-modal-hdr">Konfirmasi Penarikan</div>
+    <div class="cg-modal-bd">
+      <div style="font-size:12px;font-weight:800;color:#64748b;margin-bottom:6px">Total Tarik Dana</div>
+      <div id="cg-modal-amt" style="font-size:28px;font-weight:900;color:#0c4a6e;margin-bottom:10px;letter-spacing:-1px"></div>
+      <?php if (!$has_bank): ?>
+      <div style="font-size:11px;font-weight:700;color:#ef4444;background:#fef2f2;padding:8px;border-radius:8px">Pastikan nomor rekening yang kamu masukkan sudah benar!</div>
+      <?php endif; ?>
+    </div>
+    <div class="cg-modal-actions">
+      <button type="button" class="cg-btn-cancel" onclick="document.getElementById('cg-modal').style.display='none'">Batal</button>
+      <button type="button" class="cg-btn-confirm" onclick="confirmCGWd()">Gas Tarik!</button>
+    </div>
+  </div>
+</div>
 
 <script>
 function selectWdAmount(btn, val) {
-  document.querySelectorAll('.amount-option-btn').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.wd-amt-btn').forEach(el => el.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('selected-amount').value = val;
 }
 
-// ── Toggle show/hide account number ──
 const _maskedNum = '<?= htmlspecialchars(mask_account($user['account_number'] ?? '')) ?>';
 const _realNum   = '<?= htmlspecialchars($user['account_number'] ?? '') ?>';
 let _numVisible  = false;
@@ -425,62 +541,37 @@ function toggleAccNum() {
   _numVisible = !_numVisible;
   const el  = document.getElementById('wd-accnum-display');
   const btn = document.getElementById('wd-accnum-toggle');
-  if (el)  el.textContent = _numVisible ? _realNum : _maskedNum;
-  if (btn) { btn.style.opacity = _numVisible ? '1' : '0.5'; btn.title = _numVisible ? 'Sembunyikan nomor' : 'Tampilkan nomor'; }
+  if (el) el.textContent = _numVisible ? _realNum : _maskedNum;
+  if (btn) btn.style.color = _numVisible ? '#fff' : 'rgba(255,255,255,0.6)';
 }
-// Init opacity
-document.addEventListener('DOMContentLoaded', () => {
-  const b = document.getElementById('wd-accnum-toggle');
-  if (b) b.style.opacity = '0.5';
-});
 
 (function(){
-  const form    = document.getElementById('wd-form');
-  const btn     = document.getElementById('wd-submit-btn');
-  const notice  = document.getElementById('level-blocked-notice');
-  const minWd   = <?= (int)$min_withdraw ?>;
-  const balWd   = <?= (float)$user['balance_wd'] ?>;
-  const levelBlocked = <?= $level_blocked ? 'true' : 'false' ?>;
+  const form  = document.getElementById('wd-form');
+  const btn   = document.getElementById('wd-submit-btn');
+  const minWd = <?= (int)$min_withdraw ?>;
+  const maxWd = <?= (float)$max_available ?>;
 
   if (!form) return;
 
   form.addEventListener('submit', function(e) {
     const amtInput = document.querySelector('[name=amount]');
     const amt = amtInput ? parseFloat(amtInput.value) : 0;
-    const maxWd = <?= (float)$max_available ?>;
+    
+    if (!amt || isNaN(amt)) { e.preventDefault(); if(typeof nToast !== 'undefined') nToast('Pilih nominal dulu bosku!', 'warn'); return; }
+    if (amt < minWd) { e.preventDefault(); if(typeof nToast !== 'undefined') nToast('Minimal tarik Rp ' + minWd.toLocaleString('id-ID'), 'error'); return; }
+    if (amt > maxWd) { e.preventDefault(); if(typeof nToast !== 'undefined') nToast('Maksimal tarik Rp ' + maxWd.toLocaleString('id-ID'), 'error'); return; }
 
-    if (!amt || isNaN(amt)) {
-      e.preventDefault();
-      alert('Pilih dulu nominal penarikannya ya!');
-      return;
-    }
-    if (amt < minWd) {
-      e.preventDefault();
-      alert('Minimal withdraw Rp ' + minWd.toLocaleString('id-ID'));
-      return;
-    }
-    if (amt > maxWd) {
-      e.preventDefault();
-      alert('Maksimal withdraw Rp ' + maxWd.toLocaleString('id-ID'));
-      return;
-    }
-
-    if (levelBlocked) {
-      e.preventDefault();
-      return;
-    }
-
-    // Modal confirmation
     if (!form.dataset.confirmed) {
       e.preventDefault();
-      document.getElementById('brutal-confirm-amt').innerText = 'Rp ' + amt.toLocaleString('id-ID');
-      document.getElementById('brutal-confirm').style.display = 'flex';
+      document.getElementById('cg-modal-amt').innerText = 'Rp ' + amt.toLocaleString('id-ID');
+      document.getElementById('cg-modal').style.display = 'flex';
     }
   });
 
-  window.confirmBrutalWd = function() {
-    document.getElementById('brutal-confirm').style.display = 'none';
-    if (btn) { btn.disabled = true; btn.innerText = 'Memproses...'; }
+  window.confirmCGWd = function() {
+    document.getElementById('cg-modal').style.display = 'none';
+    if (btn) { btn.disabled = true; btn.innerText = '⏳ Memproses...'; }
+    
     const fd = new FormData(form);
     fd.append('ajax', '1');
     fetch('', { method: 'POST', body: fd })
@@ -488,104 +579,18 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(res => {
       if (res.error) {
         if (typeof nToast !== 'undefined') nToast(res.error, 'error'); else alert(res.error);
-        if (btn) { btn.disabled = false; btn.innerText = '💸 Ajukan Penarikan'; }
+        if (btn) { btn.disabled = false; btn.innerText = '🚀 Tarik Sekarang'; }
       } else {
         if (typeof nToast !== 'undefined') nToast(res.message, 'success'); else alert(res.message);
-        setTimeout(() => window.location.reload(), 1500);
+        setTimeout(() => window.location.href = '/history?tab=withdraw', 1500); // Redirect to history immediately
       }
     })
     .catch(() => {
-      if (typeof nToast !== 'undefined') nToast('Koneksi terputus.', 'error'); else alert('Koneksi terputus.');
-      if (btn) { btn.disabled = false; btn.innerText = '💸 Ajukan Penarikan'; }
+      if (typeof nToast !== 'undefined') nToast('Koneksi terputus.', 'error'); else alert('Koneksi.');
+      if (btn) { btn.disabled = false; btn.innerText = '🚀 Tarik Sekarang'; }
     });
   };
 })();
 </script>
-
-<!-- History -->
-<?php if (!empty($wds)): ?>
-<div class="section-header" style="margin-top:20px;margin-bottom:12px">
-  <div class="section-title" style="font-size:14px;display:flex;align-items:center;gap:6px"><i class="ph-fill ph-clock-counter-clockwise" style="color:var(--ink)"></i> Riwayat Penarikan</div>
-  <a href="/history" class="section-link" style="font-weight:800;color:var(--yellow)">Lihat semua →</a>
-</div>
-<div class="card-trusted" style="border:none;box-shadow:none;background:transparent"><div class="card__body" style="padding:0">
-  <?php foreach ($wds as $w): ?>
-  <?php $wl = $channel_logos[strtolower($w['bank_name'])] ?? null; ?>
-    <div class="list-item" style="padding:12px 14px;background:#fff;border:2.5px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);margin-bottom:10px">
-      <?php if ($wl): ?>
-      <div class="list-item__icon" style="background:transparent;padding:0;width:34px;height:34px">
-        <img src="/assets/banks/<?= htmlspecialchars($wl) ?>" style="width:100%;height:100%;object-fit:contain;border-radius:6px;">
-      </div>
-      <?php else: ?>
-      <div class="list-item__icon" style="background:#fef08a;color:#d97706;width:34px;height:34px;font-size:16px"><i class="ph-bold ph-bank"></i></div>
-      <?php endif; ?>
-    <div class="list-item__body">
-      <div class="list-item__title" style="font-size:13px"><?= format_rp((float)$w['amount']) ?></div>
-      <div class="list-item__sub" style="font-size:10px"><?= htmlspecialchars($w['bank_name']) ?> · <?= date('d M H:i', strtotime($w['created_at'])) ?></div>
-      <?php if ($w['admin_note']): ?>
-      <div class="list-item__sub" style="color:var(--red,#ef4444);font-size:10px">📝 <?= htmlspecialchars($w['admin_note']) ?></div>
-      <?php endif; ?>
-    </div>
-    <div class="list-item__right">
-      <span class="badge badge--<?= match($w['status']){'approved'=>'success','pending'=>'warn','hold'=>'warn','rejected'=>'error','refunded'=>'info',default=>'error'} ?>" style="font-size:10px;font-weight:800">
-        <?= match($w['status']){'approved'=>'Sukses', 'pending'=>'Menunggu', 'hold'=>'Ditahan', 'rejected'=>'Ditolak', 'refunded'=>'Dikembalikan', default=>ucfirst($w['status'])} ?>
-      </span>
-    </div>
-  </div>
-  <?php endforeach; ?>
-</div></div>
-<?php endif; ?>
-
-<!-- Neobrutalism Modal Confirm -->
-<div id="brutal-confirm" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.7);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);">
-  <div class="card card--mint" style="width:100%;max-width:340px;box-shadow:6px 6px 0 var(--ink);border:3px solid var(--ink);border-radius:12px;animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-    <div class="card__header" style="background:var(--yellow);border-bottom:3px solid var(--ink);border-radius:9px 9px 0 0;padding:14px 16px;">
-      <div class="card__title" style="color:var(--ink);font-weight:900;font-size:16px;display:flex;align-items:center;gap:6px"><i class="ph-bold ph-paper-plane-right"></i> Konfirmasi Penarikan</div>
-    </div>
-    <div class="card__body" style="padding:16px;background:#fff;border-radius:0 0 9px 9px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:#333;text-align:center;">Nominal Penarikan:</div>
-      <div id="brutal-confirm-amt" style="font-size:26px;font-weight:900;color:var(--brand);margin-bottom:16px;text-align:center;letter-spacing:-0.5px;"></div>
-      
-      <?php if ($has_bank): ?>
-      <div class="bank-info" style="margin-bottom:20px;padding:12px;box-shadow:3px 3px 0 var(--ink);">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-size:10px;font-weight:900;color:var(--ink);text-transform:uppercase"><i class="ph-bold ph-bank"></i> Rekening Tujuan</div>
-          <a href="/edit-rekening" class="btn btn--sm" style="font-size:9px;padding:4px 8px;border:2px solid var(--ink);background:#fff;color:var(--ink);font-weight:900;border-radius:6px;box-shadow:2px 2px 0 var(--ink)"><i class="ph-bold ph-pencil-simple"></i> Edit</a>
-        </div>
-        <div style="font-size:13px;font-weight:700;color:var(--ink)">
-          <?php $user_wl = $channel_logos[strtolower($user['bank_name'] ?? '')] ?? null; ?>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <?php if ($user_wl): ?>
-            <img src="/assets/banks/<?= htmlspecialchars($user_wl) ?>" style="height:24px;border-radius:4px;object-fit:contain">
-            <?php else: ?>
-            <div style="width:24px;height:24px;background:#fff;border:2px solid var(--ink);border-radius:4px;display:flex;align-items:center;justify-content:center"><i class="ph-bold ph-bank"></i></div>
-            <?php endif; ?>
-            <span style="font-size:14px;font-weight:900"><?= htmlspecialchars($user['bank_name']) ?></span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <span id="wd-accnum-display" style="font-size:16px;font-family:monospace;letter-spacing:1px;font-weight:900;color:var(--ink)"><?= htmlspecialchars(mask_account($user['account_number'] ?? '')) ?></span>
-            <button type="button" id="wd-accnum-toggle" onclick="toggleAccNum()"
-              title="Tampilkan/sembunyikan nomor"
-              style="background:none;border:none;cursor:pointer;padding:0;line-height:1;font-size:18px;color:#64748b;flex-shrink:0;transition:color 0.2s">
-              <i class="ph-bold ph-eye"></i>
-            </button>
-          </div>
-          <div style="font-size:12px;font-weight:800;color:#334155"><?= htmlspecialchars($user['account_name']) ?></div>
-        </div>
-      </div>
-      <?php else: ?>
-      <div style="font-size:12px;color:#666;margin-bottom:20px;font-weight:600;text-align:center;">Pastikan data rekening yang diisi sudah benar.<br>Apakah kamu ingin melanjutkan?</div>
-      <?php endif; ?>
-
-      <div style="display:flex;gap:12px;">
-        <button type="button" onclick="document.getElementById('brutal-confirm').style.display='none'" class="btn" style="flex:1;background:#eee;color:var(--ink);border:3px solid var(--ink);font-weight:800;border-radius:8px;">Batal</button>
-        <button type="button" onclick="confirmBrutalWd()" class="btn btn--primary" style="flex:1.5;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);font-weight:900;border-radius:8px;box-shadow:3px 3px 0 var(--ink);">Ya, Tarik Dana</button>
-      </div>
-    </div>
-  </div>
-</div>
-<style>
-@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-</style>
 
 <?php require dirname(__DIR__) . '/partials/footer.php'; ?>

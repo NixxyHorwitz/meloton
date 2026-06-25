@@ -25,35 +25,43 @@
   const BGS   = {
     success: 'linear-gradient(135deg, #34d399, #10b981)',
     error:   'linear-gradient(135deg, #f87171, #dc2626)',
-    warn:    'linear-gradient(135deg, #fbbf24, #f59e0b)',
+    warn:    'linear-gradient(135deg, #fde047, #f59e0b)',
     info:    'linear-gradient(135deg, #38bdf8, #0ea5e9)',
     copy:    'linear-gradient(135deg, #34d399, #10b981)'
   };
+  const BORDERS = {
+    success: '#059669',
+    error:   '#b91c1c',
+    warn:    '#d97706',
+    info:    '#0284c7',
+    copy:    '#059669'
+  };
   const SHADOWS = {
-    success: '0 4px 0 #059669',
-    error:   '0 4px 0 #b91c1c',
-    warn:    '0 4px 0 #b45309',
-    info:    '0 4px 0 #0369a1',
-    copy:    '0 4px 0 #059669'
+    success: '0 6px 0 #047857',
+    error:   '0 6px 0 #991b1b',
+    warn:    '0 6px 0 #b45309',
+    info:    '0 6px 0 #0369a1',
+    copy:    '0 6px 0 #047857'
   };
 
   window.nToast = function(msg, type='info', duration=2800) {
     const el   = document.createElement('div');
     const icon = ICONS[type] || ICONS.info;
     const bg   = BGS[type]   || BGS.info;
+    const bd   = BORDERS[type] || BORDERS.info;
     const sh   = SHADOWS[type] || SHADOWS.info;
 
     el.style.cssText = [
       'background:' + bg,
-      'border:2.5px solid rgba(255,255,255,0.4)',
+      'border:3px solid ' + bd,
       'border-radius:18px',
-      'box-shadow:' + sh + ', 0 10px 15px -3px rgba(0,0,0,0.1)',
-      'padding:10px 16px',
-      'display:flex','align-items:center','gap:10px',
+      'box-shadow:' + sh,
+      'padding:12px 18px',
+      'display:flex','align-items:center','gap:12px',
       'font-family:Nunito,Inter,sans-serif',
-      'font-size:13px','font-weight:900',
+      'font-size:14px','font-weight:900',
       'color:#fff',
-      'text-shadow:0 1px 2px rgba(0,0,0,0.2)',
+      'text-shadow:0 1px 2px rgba(0,0,0,0.3)',
       'pointer-events:auto',
       'width:100%',
       'opacity:0',
@@ -61,7 +69,7 @@
       'transition:opacity .3s ease, transform .4s cubic-bezier(0.34, 1.56, 0.64, 1)',
     ].join(';');
 
-    el.innerHTML = '<span style="font-size:20px;flex-shrink:0;filter:drop-shadow(0 2px 1px rgba(0,0,0,0.2))">' + icon + '</span>'
+    el.innerHTML = '<span style="font-size:24px;flex-shrink:0;filter:drop-shadow(0 2px 1px rgba(0,0,0,0.3))">' + icon + '</span>'
                  + '<span style="flex:1;line-height:1.3">' + msg + '</span>';
 
     getContainer().appendChild(el);
