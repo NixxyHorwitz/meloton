@@ -1,4 +1,3 @@
-
 <?php
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
@@ -41,153 +40,217 @@ require dirname(__DIR__) . '/partials/header.php';
 ?>
 
 <style>
-.history-stats { display: flex; gap: 8px; margin-bottom: 20px; }
-.history-stat { flex: 1; border: 2.5px solid var(--ink); border-radius: 12px; padding: 12px 8px; box-shadow: 3px 3px 0 var(--ink); text-align: center; position: relative; overflow: hidden; }
-.history-stat::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(#000 1px, transparent 1px); background-size: 8px 8px; opacity: 0.1; }
-.history-stat__lbl { font-size: 10px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 4px; position: relative; z-index: 2; }
-.history-stat__val { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; position: relative; z-index: 2; }
+/* ══════════════════════════════════════════════
+   HISTORY PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+.history-page { padding: 0 0 20px; }
 
-.history-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.history-tab { flex: 1; text-align: center; padding: 10px 4px; font-size: 11px; font-weight: 900; text-decoration: none; color: var(--ink); background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink); transition: transform .1s, box-shadow .1s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.history-tab:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
-.history-tab--active { background: linear-gradient(135deg, #fde047, #facc15); box-shadow: 3px 3px 0 var(--ink); }
+/* ── Title Bar ── */
+.h-title {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border: 3px solid #020617;
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 6px 0 #020617;
+  color: #fff;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.h-title::before { content:''; position:absolute; top:-20px; right:-10px; width:80px; height:80px; background:rgba(255,255,255,0.05); border-radius:50%; }
+.h-title h1 { font-size:18px; font-weight:900; color:#38bdf8; display:flex; align-items:center; gap:8px; margin-bottom:4px; letter-spacing:-0.5px; }
+.h-title p { font-size:11px; font-weight:700; color:#94a3b8; }
 
-.h-list { display: flex; flex-direction: column; gap: 12px; }
-.h-item { display: flex; align-items: center; padding: 12px; background: #fff; border: 2.5px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink); gap: 12px; position: relative; transition: transform 0.1s; }
-.h-item:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 var(--ink); }
-.h-item__ico { width: 38px; height: 38px; flex-shrink: 0; border: 2px solid var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; background: #f8fafc; box-shadow: 2px 2px 0 var(--ink); }
+/* ── Stats ── */
+.h-stats { display: flex; gap: 8px; margin-bottom: 16px; }
+.h-stat {
+  flex: 1; border: 2.5px solid #0f172a; border-radius: 16px; padding: 12px 6px; text-align: center; position: relative; overflow: hidden;
+  box-shadow: 0 5px 0 #0f172a;
+}
+.h-stat-1 { background: linear-gradient(135deg, #c084fc, #9333ea); border-color: #581c87; box-shadow: 0 5px 0 #581c87; color:#fff; }
+.h-stat-2 { background: linear-gradient(135deg, #38bdf8, #0ea5e9); border-color: #0c4a6e; box-shadow: 0 5px 0 #0c4a6e; color:#fff; }
+.h-stat-3 { background: linear-gradient(135deg, #fbbf24, #f59e0b); border-color: #78350f; box-shadow: 0 5px 0 #78350f; color:#fff; }
+.h-stat__lbl { font-size: 10px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; letter-spacing:0.5px; opacity:0.9; }
+.h-stat__val { font-size: 14px; font-weight: 900; letter-spacing: -0.5px; }
+
+/* ── Tabs ── */
+.h-tabs { display: flex; gap: 6px; margin-bottom: 16px; background:#f1f5f9; padding:6px; border-radius:18px; border:2.5px solid #cbd5e1; }
+.h-tab {
+  flex: 1; text-align: center; padding: 12px 4px; font-size: 12px; font-weight: 900;
+  text-decoration: none; color: #64748b; background: transparent; border-radius: 12px;
+  transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.h-tab--active {
+  background: #fff; color: #0ea5e9; border: 2.5px solid #7dd3e8;
+  box-shadow: 0 4px 0 #7dd3e8; transform: translateY(-2px);
+}
+.h-tab:not(.h-tab--active):active { background: #e2e8f0; }
+
+/* ── List ── */
+.h-list { display: flex; flex-direction: column; gap: 10px; }
+.h-item {
+  display: flex; align-items: center; padding: 14px 12px; background: #fff;
+  border: 2.5px solid #cbd5e1; border-radius: 16px; box-shadow: 0 4px 0 #cbd5e1;
+  gap: 12px; transition: transform 0.1s, box-shadow 0.1s;
+}
+.h-item:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #cbd5e1; border-color:#94a3b8; }
+.h-item__ico { width: 42px; height: 42px; flex-shrink: 0; border: 2.5px solid #0f172a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; background: #f8fafc; box-shadow: 0 3px 0 #0f172a; }
 .h-item__bd { flex: 1; min-width: 0; line-height: 1.3; }
-.h-item__title { font-size: 14px; font-weight: 900; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-.h-item__sub { font-size: 10px; font-weight: 800; color: #64748b; }
-.h-item__note { font-size: 10px; color: var(--red); font-weight: 900; margin-top: 4px; display: flex; align-items: center; gap: 4px; background: #fee2e2; padding: 4px 6px; border-radius: 6px; border: 1.5px dashed var(--red); display: inline-flex; }
-.h-item__rt { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.h-item__amt { font-size: 15px; font-weight: 900; }
+.h-item__title { font-size: 14px; font-weight: 900; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; letter-spacing:-0.3px; }
+.h-item__sub { font-size: 11px; font-weight: 800; color: #64748b; }
+.h-item__note { font-size: 10px; color: #991b1b; font-weight: 900; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; background: #fef2f2; padding: 4px 8px; border-radius: 8px; border: 2px dashed #fca5a5; }
+.h-item__rt { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.h-item__amt { font-size: 15px; font-weight: 900; letter-spacing:-0.5px; }
+
+/* ── Badges ── */
+.cg-badge { font-size:9px; font-weight:900; padding:4px 8px; border-radius:8px; border:2px solid; text-transform:uppercase; letter-spacing:0.5px; }
+.cg-badge--succ { background:#d1fae5; color:#065f46; border-color:#34d399; }
+.cg-badge--warn { background:#fef3c7; color:#92400e; border-color:#fbbf24; }
+.cg-badge--err  { background:#fee2e2; color:#991b1b; border-color:#f87171; }
+.cg-badge--info { background:#e0f2fe; color:#075985; border-color:#38bdf8; }
+
+/* ── Empty ── */
+.h-empty { text-align:center; padding:40px 20px; background:#fff; border:3px dashed #cbd5e1; border-radius:20px; }
+.h-empty-ico { font-size:48px; margin-bottom:12px; opacity:0.4; }
+.h-empty-txt { font-size:13px; font-weight:900; color:#94a3b8; }
 </style>
 
-<div class="page-title-bar" style="margin-bottom:12px">
-  <h1 style="font-size:18px"><i class="ph-bold ph-list-dashes" style="color:var(--brand)"></i> Riwayat</h1>
-  <p style="font-size:11px">Aktivitas akun kamu</p>
-</div>
-
-<!-- Summary stats -->
-<div class="history-stats">
-  <div class="history-stat" style="background:linear-gradient(135deg, #c084fc, #9333ea);color:#fff">
-    <div class="history-stat__lbl" style="color:#f3e8ff"><i class="ph-bold ph-gift"></i> Reward</div>
-    <div class="history-stat__val"><?= format_rp($total_earned) ?></div>
+<div class="history-page">
+  <!-- Title -->
+  <div class="h-title">
+    <h1><i class="ph-bold ph-clock-counter-clockwise"></i> Riwayat</h1>
+    <p>Catatan semua aktivitas akun kamu</p>
   </div>
-  <div class="history-stat" style="background:linear-gradient(135deg, #38bdf8, #0284c7);color:#fff">
-    <div class="history-stat__lbl" style="color:#e0f2fe"><i class="ph-bold ph-wallet"></i> Top Up</div>
-    <div class="history-stat__val"><?= format_rp($total_dep) ?></div>
-  </div>
-  <div class="history-stat" style="background:linear-gradient(135deg, #fb923c, #ea580c);color:#fff">
-    <div class="history-stat__lbl" style="color:#ffedd5"><i class="ph-bold ph-paper-plane-right"></i> Tarik</div>
-    <div class="history-stat__val"><?= format_rp($total_wd) ?></div>
-  </div>
-</div>
 
-<!-- Tabs -->
-<div class="history-tabs">
-  <a href="?tab=reward" class="history-tab <?= $tab==='reward'?'history-tab--active':'' ?>"><i class="ph-bold ph-gift"></i> Reward</a>
-  <a href="?tab=deposit" class="history-tab <?= $tab==='deposit'?'history-tab--active':'' ?>"><i class="ph-bold ph-wallet"></i> Top Up</a>
-  <a href="?tab=withdraw" class="history-tab <?= $tab==='withdraw'?'history-tab--active':'' ?>"><i class="ph-bold ph-paper-plane-right"></i> Tarik</a>
-</div>
-
-<!-- Reward Tab -->
-<?php if ($tab === 'reward'): ?>
-<div class="h-list">
-  <?php if (empty($rewards)): ?>
-  <div class="empty-state" style="padding:30px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;text-align:center"><p style="font-size:12px;font-weight:700;color:#888">Belum ada riwayat nonton.</p></div>
-  <?php else: ?>
-    <?php foreach ($rewards as $r): ?>
-    <div class="h-item">
-      <div class="h-item__ico" style="background:#ecfdf5;color:var(--green)">
-        <i class="ph-fill ph-play-circle"></i>
-      </div>
-      <div class="h-item__bd">
-        <div class="h-item__title"><?= htmlspecialchars($r['video_title'] ?? 'Video #'.$r['video_id']) ?></div>
-        <div class="h-item__sub"><?= date('d M Y H:i', strtotime($r['watched_at'])) ?></div>
-      </div>
-      <div class="h-item__rt">
-        <div class="h-item__amt" style="color:var(--green)">+<?= format_rp((float)$r['reward_given']) ?></div>
-      </div>
+  <!-- Summary stats -->
+  <div class="h-stats">
+    <div class="h-stat h-stat-1">
+      <div class="h-stat__lbl">Reward</div>
+      <div class="h-stat__val"><?= format_rp($total_earned) ?></div>
     </div>
-    <?php endforeach; ?>
-  <?php endif; ?>
-</div>
+    <div class="h-stat h-stat-2">
+      <div class="h-stat__lbl">Top Up</div>
+      <div class="h-stat__val"><?= format_rp($total_dep) ?></div>
+    </div>
+    <div class="h-stat h-stat-3">
+      <div class="h-stat__lbl">Tarik</div>
+      <div class="h-stat__val"><?= format_rp($total_wd) ?></div>
+    </div>
+  </div>
 
-<!-- Deposit Tab -->
-<?php elseif ($tab === 'deposit'): ?>
-<div class="h-list">
-  <?php if (empty($deposits)): ?>
-  <div class="empty-state" style="padding:30px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;text-align:center"><p style="font-size:12px;font-weight:700;color:#888">Belum ada riwayat top up.</p></div>
-  <?php else: ?>
-    <?php foreach ($deposits as $d): ?>
-    <?php $dl = $channel_logos[strtolower($d['method'])] ?? null; ?>
-    <div class="h-item">
-      <?php if ($dl): ?>
-      <div class="h-item__ico" style="padding:0;background:#fff">
-        <img src="/assets/banks/<?= htmlspecialchars($dl) ?>" style="width:100%;height:100%;object-fit:contain">
-      </div>
-      <?php else: ?>
-        <div class="h-item__ico" style="background:#fef08a;color:#d97706">
-          <i class="<?= $d['method']==='qris' ? 'ph-bold ph-qr-code' : 'ph-bold ph-bank' ?>"></i>
+  <!-- Tabs -->
+  <div class="h-tabs">
+    <a href="?tab=reward" class="h-tab <?= $tab==='reward'?'h-tab--active':'' ?>"><i class="ph-bold ph-gift"></i> Reward</a>
+    <a href="?tab=deposit" class="h-tab <?= $tab==='deposit'?'h-tab--active':'' ?>"><i class="ph-bold ph-wallet"></i> Top Up</a>
+    <a href="?tab=withdraw" class="h-tab <?= $tab==='withdraw'?'h-tab--active':'' ?>"><i class="ph-bold ph-paper-plane-right"></i> Tarik</a>
+  </div>
+
+  <!-- Reward Tab -->
+  <?php if ($tab === 'reward'): ?>
+  <div class="h-list">
+    <?php if (empty($rewards)): ?>
+    <div class="h-empty">
+      <div class="h-empty-ico">🎁</div>
+      <div class="h-empty-txt">Belum ada riwayat reward.</div>
+    </div>
+    <?php else: ?>
+      <?php foreach ($rewards as $r): ?>
+      <div class="h-item">
+        <div class="h-item__ico" style="background:#d1fae5;color:#10b981;border-color:#059669;box-shadow:0 3px 0 #059669">
+          <i class="ph-fill ph-play-circle"></i>
         </div>
-      <?php endif; ?>
-      <div class="h-item__bd">
-        <div class="h-item__title"><?= format_rp((float)$d['amount']) ?></div>
-        <div class="h-item__sub"><?= strtoupper($d['method']) ?> · <?= date('d M y H:i', strtotime($d['created_at'])) ?></div>
-        <?php if ($d['admin_note']): ?>
-        <div class="h-item__note"><i class="ph-bold ph-note"></i> <?= htmlspecialchars($d['admin_note']) ?></div>
-        <?php endif; ?>
+        <div class="h-item__bd">
+          <div class="h-item__title"><?= htmlspecialchars($r['video_title'] ?? 'Video #'.$r['video_id']) ?></div>
+          <div class="h-item__sub"><i class="ph-bold ph-clock"></i> <?= date('d M Y H:i', strtotime($r['watched_at'])) ?></div>
+        </div>
+        <div class="h-item__rt">
+          <div class="h-item__amt" style="color:#10b981">+<?= format_rp((float)$r['reward_given']) ?></div>
+        </div>
       </div>
-      <div class="h-item__rt">
-        <span class="badge badge--<?= match($d['status']){'confirmed'=>'success','pending'=>'warn','rejected'=>'error',default=>'error'} ?>" style="font-size:9px;padding:2px 5px">
-          <?= match($d['status']){'confirmed'=>'Sukses', 'pending'=>'Menunggu', 'rejected'=>'Ditolak', default=>ucfirst($d['status'])} ?>
-        </span>
-        <?php if ($d['status']==='pending' && $d['method']==='qris'): ?>
-        <a href="/pay?id=<?= $d['id'] ?>" class="btn btn--yellow btn--sm" style="padding:3px 6px;font-size:9px"><i class="ph-bold ph-arrow-right"></i> Bayar</a>
-        <?php endif; ?>
-      </div>
-    </div>
-    <?php endforeach; ?>
-  <?php endif; ?>
-</div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
 
-<!-- Withdraw Tab -->
-<?php elseif ($tab === 'withdraw'): ?>
-<div class="h-list">
-  <?php if (empty($wds)): ?>
-  <div class="empty-state" style="padding:30px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;text-align:center"><p style="font-size:12px;font-weight:700;color:#888">Belum ada riwayat penarikan.</p></div>
-  <?php else: ?>
-    <?php foreach ($wds as $w): ?>
-    <?php $wl = $channel_logos[strtolower($w['bank_name'])] ?? null; ?>
-    <div class="h-item">
-      <?php if ($wl): ?>
-      <div class="h-item__ico" style="padding:0;background:#fff">
-        <img src="/assets/banks/<?= htmlspecialchars($wl) ?>" style="width:100%;height:100%;object-fit:contain">
-      </div>
-      <?php else: ?>
-      <div class="h-item__ico" style="background:#fef08a;color:#d97706">
-        <i class="ph-bold ph-bank"></i>
-      </div>
-      <?php endif; ?>
-      <div class="h-item__bd">
-        <div class="h-item__title"><?= format_rp((float)$w['amount']) ?></div>
-        <div class="h-item__sub"><?= htmlspecialchars($w['bank_name']) ?> · <?= date('d M y H:i', strtotime($w['created_at'])) ?></div>
-        <?php if ($w['admin_note']): ?>
-        <div class="h-item__note"><i class="ph-bold ph-note"></i> <?= htmlspecialchars($w['admin_note']) ?></div>
-        <?php endif; ?>
-      </div>
-      <div class="h-item__rt">
-        <span class="badge badge--<?= match($w['status']){'approved'=>'success','pending'=>'warn','rejected'=>'error','refunded'=>'info',default=>'error'} ?>" style="font-size:9px;padding:2px 5px">
-          <?= match($w['status']){'approved'=>'Sukses', 'pending'=>'Menunggu', 'hold'=>'Ditahan', 'rejected'=>'Ditolak', 'refunded'=>'Dikembalikan', default=>ucfirst($w['status'])} ?>
-        </span>
-        <div class="h-item__amt" style="color:var(--red);margin-top:2px">-<?= format_rp((float)$w['amount']) ?></div>
-      </div>
+  <!-- Deposit Tab -->
+  <?php elseif ($tab === 'deposit'): ?>
+  <div class="h-list">
+    <?php if (empty($deposits)): ?>
+    <div class="h-empty">
+      <div class="h-empty-ico">💳</div>
+      <div class="h-empty-txt">Belum ada riwayat top up.</div>
     </div>
-    <?php endforeach; ?>
+    <?php else: ?>
+      <?php foreach ($deposits as $d): ?>
+      <?php $dl = $channel_logos[strtolower($d['method'])] ?? null; ?>
+      <div class="h-item">
+        <?php if ($dl): ?>
+        <div class="h-item__ico" style="padding:4px;background:#fff;border-color:#e2e8f0;box-shadow:0 3px 0 #e2e8f0">
+          <img src="/assets/banks/<?= htmlspecialchars($dl) ?>" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <?php else: ?>
+          <div class="h-item__ico" style="background:#e0f2fe;color:#0284c7;border-color:#0369a1;box-shadow:0 3px 0 #0369a1">
+            <i class="<?= $d['method']==='qris' ? 'ph-bold ph-qr-code' : 'ph-bold ph-bank' ?>"></i>
+          </div>
+        <?php endif; ?>
+        <div class="h-item__bd">
+          <div class="h-item__title"><?= format_rp((float)$d['amount']) ?></div>
+          <div class="h-item__sub"><?= strtoupper($d['method']) ?> &bull; <?= date('d M y H:i', strtotime($d['created_at'])) ?></div>
+          <?php if ($d['admin_note']): ?>
+          <div class="h-item__note"><i class="ph-bold ph-note"></i> <?= htmlspecialchars($d['admin_note']) ?></div>
+          <?php endif; ?>
+        </div>
+        <div class="h-item__rt">
+          <span class="cg-badge cg-badge--<?= match($d['status']){'confirmed'=>'succ','pending'=>'warn','rejected'=>'err',default=>'err'} ?>">
+            <?= match($d['status']){'confirmed'=>'Sukses', 'pending'=>'Menunggu', 'rejected'=>'Ditolak', default=>ucfirst($d['status'])} ?>
+          </span>
+          <?php if ($d['status']==='pending' && $d['method']==='qris'): ?>
+          <a href="/pay?id=<?= $d['id'] ?>" class="cg-badge cg-badge--warn" style="background:#fde68a;border-color:#d97706;color:#92400e;text-decoration:none;box-shadow:0 2px 0 #d97706"><i class="ph-bold ph-arrow-right"></i> Bayar</a>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+
+  <!-- Withdraw Tab -->
+  <?php elseif ($tab === 'withdraw'): ?>
+  <div class="h-list">
+    <?php if (empty($wds)): ?>
+    <div class="h-empty">
+      <div class="h-empty-ico">💸</div>
+      <div class="h-empty-txt">Belum ada riwayat penarikan.</div>
+    </div>
+    <?php else: ?>
+      <?php foreach ($wds as $w): ?>
+      <?php $wl = $channel_logos[strtolower($w['bank_name'])] ?? null; ?>
+      <div class="h-item">
+        <?php if ($wl): ?>
+        <div class="h-item__ico" style="padding:4px;background:#fff;border-color:#e2e8f0;box-shadow:0 3px 0 #e2e8f0">
+          <img src="/assets/banks/<?= htmlspecialchars($wl) ?>" style="width:100%;height:100%;object-fit:contain">
+        </div>
+        <?php else: ?>
+        <div class="h-item__ico" style="background:#fef3c7;color:#d97706;border-color:#b45309;box-shadow:0 3px 0 #b45309">
+          <i class="ph-bold ph-bank"></i>
+        </div>
+        <?php endif; ?>
+        <div class="h-item__bd">
+          <div class="h-item__title"><?= format_rp((float)$w['amount']) ?></div>
+          <div class="h-item__sub"><?= htmlspecialchars($w['bank_name']) ?> &bull; <?= date('d M y H:i', strtotime($w['created_at'])) ?></div>
+          <?php if ($w['admin_note']): ?>
+          <div class="h-item__note"><i class="ph-bold ph-note"></i> <?= htmlspecialchars($w['admin_note']) ?></div>
+          <?php endif; ?>
+        </div>
+        <div class="h-item__rt">
+          <span class="cg-badge cg-badge--<?= match($w['status']){'approved'=>'succ','pending'=>'warn','hold'=>'warn','rejected'=>'err','refunded'=>'info',default=>'err'} ?>">
+            <?= match($w['status']){'approved'=>'Sukses', 'pending'=>'Menunggu', 'hold'=>'Ditahan', 'rejected'=>'Ditolak', 'refunded'=>'Dikembalikan', default=>ucfirst($w['status'])} ?>
+          </span>
+          <div class="h-item__amt" style="color:#ef4444">-<?= format_rp((float)$w['amount']) ?></div>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
   <?php endif; ?>
 </div>
-<?php endif; ?>
 
 <?php require dirname(__DIR__) . '/partials/footer.php'; ?>
