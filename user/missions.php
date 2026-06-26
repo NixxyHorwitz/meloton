@@ -2,6 +2,10 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
 
+// Dynamic level name for Daily Spin
+$level2_name = $pdo->query("SELECT name FROM memberships WHERE id = 2")->fetchColumn() ?: 'Juragan Silver';
+
+
 // ── Mission definitions (hardcoded) ───────────────────────────
 $ALL_MISSIONS = [
     // HARIAN
@@ -111,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
         $rate_10k    = 40;  // Sangat Mudah
 
         $prizes = [
-            ['id'=>0, 'name'=>'Juragan Silver', 'weight'=>$rate_silver],
+            ['id'=>0, 'name'=>$level2_name, 'weight'=>$rate_silver],
             ['id'=>1, 'name'=>'Tarik Rp 100k', 'weight'=>$rate_100k],
             ['id'=>2, 'name'=>'Tarik Rp 50k', 'weight'=>$rate_50k],
             ['id'=>3, 'name'=>'Diskon Rp 10k', 'weight'=>$rate_diskon],
@@ -452,13 +456,13 @@ require dirname(__DIR__) . '/partials/header.php';
       </div>
 
       <div style="position: relative; width: 260px; height: 260px; margin: 0 auto;">
-          <div id="wheel" data-rotation="0" style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 6px #6366f1, 0 10px 20px rgba(0,0,0,0.3); background: conic-gradient(from -30deg, #fde047 0% 16.6%, #fbbf24 16.6% 33.3%, #34d399 33.3% 50%, #2dd4bf 50% 66.6%, #60a5fa 66.6% 83.3%, #c084fc 83.3% 100%); transition: transform 4s cubic-bezier(0.2, 0.8, 0.1, 1); position: relative; overflow: hidden;">
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(0deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><i class="ph-fill ph-crown" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Silver</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(60deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>100k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(120deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>50k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(180deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><i class="ph-fill ph-ticket" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Diskon<br>10k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #1e3a8a; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Beli<br>20k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(300deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #4c1d95; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>10k</div>
+          <div id="wheel" data-rotation="0" style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 6px #6366f1, 0 10px 20px rgba(0,0,0,0.3); background: conic-gradient(from -30deg, #fde047 0% 16.6%, #fbbf24 16.6% 33.3%, #34d399 33.3% 50%, #2dd4bf 50% 66.6%, #60a5fa 66.6% 83.3%, #c084fc 83.3% 100%); transition: transform 8s cubic-bezier(0.1, 0.9, 0.1, 1); position: relative; overflow: hidden;">
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(0deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1; word-break: break-word;"><i class="ph-fill ph-crown" style="font-size:24px; display:block; margin:0 auto 2px;"></i><?= htmlspecialchars($level2_name) ?></div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(60deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>100k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(120deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>50k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(180deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><i class="ph-fill ph-ticket" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Diskon<br>10k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Beli<br>20k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(300deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>10k</div>
           </div>
           <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid #ef4444; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));"></div>
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: #ef4444; color: #fff; border: 4px solid #fff; box-shadow: 0 4px 0 #b91c1c; z-index: 11; display:flex; align-items:center; justify-content:center;">
@@ -701,12 +705,19 @@ function spinWheel() {
             const diff = targetRotation - normalizedCurrent;
             const finalRotation = currentRot + fullSpins + diff;
             
-            let ticking;
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx) {
-                    const actx = new AudioCtx();
-                    ticking = setInterval(() => {
+            const totalDuration = 8000;
+            const startTime = Date.now();
+            let isTickingActive = true;
+            
+            function playTick() {
+                if (!window.isSpinning || !isTickingActive) return;
+                const elapsed = Date.now() - startTime;
+                if (elapsed >= totalDuration) return;
+                
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        const actx = new AudioCtx();
                         const osc = actx.createOscillator();
                         const gain = actx.createGain();
                         osc.connect(gain); gain.connect(actx.destination);
@@ -715,21 +726,26 @@ function spinWheel() {
                         gain.gain.linearRampToValueAtTime(0.1, actx.currentTime + 0.01);
                         gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.05);
                         osc.start(); osc.stop(actx.currentTime + 0.05);
-                    }, 100);
-                }
-            } catch(e) {}
+                    }
+                } catch(e) {}
+                
+                const progress = elapsed / totalDuration;
+                const currentDelay = 50 + (Math.pow(progress, 3) * 450); 
+                setTimeout(playTick, currentDelay);
+            }
+            playTick();
             
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             wheel.dataset.rotation = finalRotation;
             
             setTimeout(() => {
+                isTickingActive = false;
                 window.isSpinning = false;
                 btn.innerHTML = 'SPIN';
                 if (t <= 0) {
                     btn.disabled = true;
                     btn.style.opacity = '0.5';
                 }
-                if (ticking) clearInterval(ticking);
                 
                 try {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -770,7 +786,7 @@ function spinWheel() {
                 document.getElementById('spin-modal-icon').innerText = icons[data.prize_index] || '🎁';
                 document.getElementById('spin-modal-text').innerText = data.msg;
                 document.getElementById('spin-result-modal').style.display = 'flex';
-            }, 4000);
+            }, totalDuration);
         })
         .catch(e => {
             window.isSpinning = false;
