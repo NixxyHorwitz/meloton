@@ -514,8 +514,7 @@ require dirname(__DIR__) . '/partials/header.php';
         
         <div class="m-specs">
           <div><i class="ph-bold ph-video-camera"></i> <?= $m['watch_limit'] ?>× Tonton / hari</div>
-          <?php if ((float)$m['min_wd'] > 0): ?><div><i class="ph-bold ph-coins"></i> Min. WD: <?= format_rp((float)$m['min_wd']) ?></div><?php endif; ?>
-          <div class="m-spec-full"><i class="ph-bold ph-trend-up"></i> Bisa mencairkan hingga <?= (float)$m['max_wd'] > 0 ? format_rp((float)$m['max_wd']) : '<span style="color:#10b981;font-weight:900">Tanpa batas</span>' ?></div>
+          <div><i class="ph-bold ph-trend-up"></i> Maksimal Narik <?= (float)$m['max_wd'] > 0 ? format_rp((float)$m['max_wd']) : '<span style="color:#10b981;font-weight:900">Tanpa batas</span>' ?></div>
           <?php if ($m['description']): ?><div class="m-desc"><i class="ph-bold ph-info"></i> <?= nl2br(htmlspecialchars($m['description'])) ?></div><?php endif; ?>
         </div>
         

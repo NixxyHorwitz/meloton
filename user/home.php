@@ -756,7 +756,7 @@ $notif_dot_colors = [
     </div>
     <div class="m-specs">
       <div><i class="ph-bold ph-video-camera"></i> <?= $m['watch_limit'] ?>× Tonton / hari</div>
-      <div><i class="ph-bold ph-trend-up"></i> Bisa mencairkan hingga <?= (float)$m['max_wd'] > 0 ? format_rp((float)$m['max_wd']) : '<span style="color:#10b981">Tanpa batas</span>' ?></div>
+      <div><i class="ph-bold ph-trend-up"></i> Maksimal Narik <?= (float)$m['max_wd'] > 0 ? format_rp((float)$m['max_wd']) : '<span style="color:#10b981">Tanpa batas</span>' ?></div>
     </div>
   </a>
   <?php endforeach; ?>
