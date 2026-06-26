@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($level_blocked) {
         $flash = "Upgrade ke {$min_level_name} dulu yuk biar bisa tarik saldo!"; $flashType = 'error';
     } elseif ($is_free_level && setting($pdo, 'wd_free_require_1day', '1') === '1' && strtotime($user['created_at']) > strtotime('-1 day')) {
-        $flash = '❌ Akun harus berumur minimal 1 hari untuk bisa melakukan WD di level Gratis!'; $flashType = 'error';
+        $flash = '❌ Akun harus berumur min. 1 hari untuk WD (Level Gratis).<br><span style="color:#fde047;font-size:12px;font-weight:800;display:inline-block;margin-top:4px">🚀 Mau WD instan? Yuk naik level di atas gratis!</span>'; $flashType = 'error';
     } else {
         $amount  = (float) preg_replace('/\D/', '', $_POST['amount'] ?? '0');
         

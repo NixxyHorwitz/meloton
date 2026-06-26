@@ -24,7 +24,7 @@
   const ICONS = { success:'✨', error:'💥', warn:'⚠️', info:'💡', copy:'📋' };
   const BGS   = {
     success: 'linear-gradient(135deg, #34d399, #10b981)',
-    error:   'linear-gradient(135deg, #f87171, #dc2626)',
+    error:   'linear-gradient(135deg, #ef4444, #dc2626)',
     warn:    'linear-gradient(135deg, #fde047, #f59e0b)',
     info:    'linear-gradient(135deg, #38bdf8, #0ea5e9)',
     copy:    'linear-gradient(135deg, #34d399, #10b981)'
@@ -59,9 +59,9 @@
       'padding:12px 18px',
       'display:flex','align-items:center','gap:12px',
       'font-family:Nunito,Inter,sans-serif',
-      'font-size:14px','font-weight:900',
-      'color:#fff',
-      'text-shadow:0 1px 2px rgba(0,0,0,0.3)',
+      'font-size:13px','font-weight:700',
+      'line-height:1.4',
+      'color:#ffffff',
       'pointer-events:auto',
       'width:100%',
       'opacity:0',
