@@ -51,21 +51,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
     if ($chk->fetch()) { echo json_encode(['error' => 'Kamu sudah menggunakan voucher ini sebelumnya.']); exit; }
     
     $discounts = json_decode($v['discounts'], true) ?: [];
-    if (!isset($discounts[$mid])) { echo json_encode(['error' => 'Voucher ini tidak dapat digunakan untuk paket pilihanmu.']); exit; }
     
-    $discount_pct = (int)$discounts[$mid];
+    if (isset($discounts['*'])) {
+        $val = $discounts['*'];
+    } elseif (isset($discounts[$mid])) {
+        $val = $discounts[$mid];
+    } else {
+        echo json_encode(['error' => 'Voucher ini tidak dapat digunakan untuk paket pilihanmu.']); exit;
+    }
     
     $ms = $pdo->prepare("SELECT price FROM memberships WHERE id=? AND is_active=1");
     $ms->execute([$mid]);
     $price = (float)$ms->fetchColumn();
     if (!$price) { echo json_encode(['error' => 'Paket tidak valid.']); exit; }
     
-    $discount_amount = ($price * $discount_pct) / 100;
-    $final_price     = $price - $discount_amount;
+    $is_rp = false;
+    $pct = 0;
+    if (is_string($val) && stripos($val, 'rp') !== false) {
+        $discount_amount = (float)str_ireplace('rp', '', $val);
+        $is_rp = true;
+    } elseif (is_numeric($val) && $val > 100) {
+        $discount_amount = (float)$val; // legacy format fallback
+        $is_rp = true;
+    } else {
+        $pct = (float)$val;
+        $discount_amount = ($price * $pct) / 100;
+    }
+    
+    $final_price = $price - $discount_amount;
+    if ($final_price < 0) $final_price = 0;
+    
+    $discount_text = $is_rp ? 'Rp ' . number_format($discount_amount, 0, ',', '.') : $pct . '%';
     
     echo json_encode([
         'ok' => true,
-        'discount_pct' => $discount_pct,
+        'discount_text' => $discount_text,
         'discount_amount' => $discount_amount,
         'discount_amount_formatted' => format_rp($discount_amount),
         'final_price' => $final_price,
@@ -689,13 +709,13 @@ function applyVoucher() {
       checkAffordability(originalPrice);
     } else {
       msgEl.style.color = '#10b981';
-      msgEl.innerText = '✅ Diskon ' + res.discount_pct + '% aktif!';
+      msgEl.innerText = '✅ Diskon ' + res.discount_text + ' aktif!';
       msgEl.style.display = 'block';
       
       document.getElementById('applied-voucher-code').value = code;
       
       document.getElementById('modal-discount').textContent = res.discount_amount_formatted;
-      document.getElementById('modal-pct').textContent = res.discount_pct + '%';
+      document.getElementById('modal-pct').textContent = res.discount_text;
       document.getElementById('modal-final-price').textContent = res.final_price_formatted;
       
       document.getElementById('discount-row').style.display = 'block';
