@@ -111,7 +111,7 @@ require dirname(__DIR__) . '/partials/header.php';
             
             <div id="play-area" style="display:none;">
                 <div id="tap-target">
-                    <img src="/assets/moneybag.png" style="width: 140px; height: 140px; object-fit: contain;">
+                    <img src="/assets/moneybag_v2.png" style="width: 140px; height: 140px; object-fit: contain;">
                 </div>
                 <div id="floating-texts"></div>
             </div>
@@ -326,6 +326,8 @@ require dirname(__DIR__) . '/partials/header.php';
 </style>
 
 <script>
+const _csrf = '<?= csrf_token() ?>';
+
 document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start-btn');
     if(!startBtn) return; // If already played
@@ -439,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData();
             formData.append('action', 'claim');
             formData.append('clicks', finalScore);
+            formData.append('_csrf', _csrf);
             
             const res = await fetch('', {
                 method: 'POST',
