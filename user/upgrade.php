@@ -165,14 +165,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             $discounts = json_decode($v_data['discounts'], true) ?: [];
-            if (!isset($discounts[$mid])) {
+            
+            if (isset($discounts['*'])) {
+                $val = $discounts['*'];
+            } elseif (isset($discounts[$mid])) {
+                $val = $discounts[$mid];
+            } else {
                 $flash = 'Voucher diskon ini gak bisa dipakai buat paket pilihanmu ya.'; $flashType = 'error';
                 goto end_post;
             }
             
-            $pct = (int)$discounts[$mid];
-            $discount_amount = ($price * $pct) / 100;
+            if (is_string($val) && stripos($val, 'rp') !== false) {
+                $discount_amount = (float)str_ireplace('rp', '', $val);
+            } elseif (is_numeric($val) && $val > 100) {
+                $discount_amount = (float)$val; // legacy format fallback
+            } else {
+                $pct = (float)$val;
+                $discount_amount = ($price * $pct) / 100;
+            }
+            
             $final_price = $price - $discount_amount;
+            if ($final_price < 0) $final_price = 0;
         }
         
         if ((float)$user['balance_dep'] < $final_price) {

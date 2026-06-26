@@ -18,13 +18,15 @@ if (isset($_POST['add_voucher'])) {
     $code   = strtoupper(trim($_POST['code'] ?? ''));
     $quota  = (int)($_POST['quota'] ?? 0);
     $expiry = trim($_POST['expiry'] ?? '');
+    $type   = $_POST['discount_type'] ?? 'pct';
     
-    // Parse discounts percentages per level
+    // Parse discounts
     $discounts = [];
-    foreach ($_POST['discount_level'] ?? [] as $lvl_id => $pct) {
-        $pct = (int)$pct;
-        if ($pct > 0 && $pct <= 100) {
-            $discounts[(int)$lvl_id] = $pct;
+    foreach ($_POST['discount_level'] ?? [] as $lvl_id => $val) {
+        $val = (float)$val;
+        if ($val > 0) {
+            if ($type === 'pct' && $val > 100) $val = 100;
+            $discounts[(int)$lvl_id] = $type === 'rp' ? $val . 'rp' : $val;
         }
     }
     
@@ -32,7 +34,7 @@ if (isset($_POST['add_voucher'])) {
         $flash = "Kode voucher tidak boleh kosong!";
         $flashType = "danger";
     } elseif (empty($discounts)) {
-        $flash = "Minimal satu level harus memiliki persentase diskon > 0%!";
+        $flash = "Minimal satu level harus memiliki diskon > 0!";
         $flashType = "danger";
     } else {
         $exp_date = null;
@@ -107,9 +109,18 @@ require __DIR__ . '/partials/header.php';
             
             $disc_list = json_decode($v['discounts'], true) ?: [];
             $disc_desc = [];
-            foreach ($disc_list as $lvl_id => $pct) {
-                $lvl_name = $mem_map[$lvl_id] ?? "Level #$lvl_id";
-                $disc_desc[] = '<span style="color:#FFC107">' . htmlspecialchars($lvl_name) . ': Diskon <strong>' . $pct . '%</strong></span>';
+            foreach ($disc_list as $lvl_id => $val) {
+                $lvl_name = $lvl_id === '*' ? 'Semua Paket' : ($mem_map[$lvl_id] ?? "Level #$lvl_id");
+                
+                $is_rp = is_string($val) && stripos((string)$val, 'rp') !== false;
+                if (!$is_rp && is_numeric($val) && $val > 100) { $is_rp = true; } // legacy
+                
+                if ($is_rp) {
+                    $amt = (float)str_ireplace('rp', '', (string)$val);
+                    $disc_desc[] = '<span style="color:#FFC107">' . htmlspecialchars($lvl_name) . ': Diskon <strong>Rp ' . number_format($amt, 0, ',', '.') . '</strong></span>';
+                } else {
+                    $disc_desc[] = '<span style="color:#FFC107">' . htmlspecialchars($lvl_name) . ': Diskon <strong>' . $val . '%</strong></span>';
+                }
             }
           ?>
           <tr>
@@ -161,7 +172,15 @@ require __DIR__ . '/partials/header.php';
         </div>
         
         <div class="mb-3">
-          <label class="c-label mb-2">Persentase Diskon Per Level Membership <span class="text-danger">*</span></label>
+          <label class="c-label">Tipe Diskon <span class="text-danger">*</span></label>
+          <select name="discount_type" id="discount_type" class="c-form-control mb-3">
+            <option value="pct">Persentase (%)</option>
+            <option value="rp">Nominal (Rp)</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="c-label mb-2">Nilai Diskon Per Level <span class="text-danger">*</span></label>
           <div class="p-3 rounded" style="background:#0f1117;border:1px solid #1f2235">
             <?php foreach ($memberships as $m): ?>
             <?php if ((float)$m['price'] == 0) continue; // skip Free plan ?>
@@ -173,13 +192,14 @@ require __DIR__ . '/partials/header.php';
               </label>
               <div class="col-sm-5">
                 <div class="input-group input-group-sm">
-                  <input type="number" name="discount_level[<?= $m['id'] ?>]" data-price="<?= (float)$m['price'] ?>" data-target="calc_<?= $m['id'] ?>" class="c-form-control py-1 px-2 disc-input" min="0" max="100" placeholder="0" value="0" style="text-align:right">
-                  <span class="input-group-text bg-dark border-secondary text-white" style="font-size:11px">%</span>
+                  <span class="input-group-text bg-dark border-secondary text-white unit-prefix" style="font-size:11px; display:none;">Rp</span>
+                  <input type="number" name="discount_level[<?= $m['id'] ?>]" data-price="<?= (float)$m['price'] ?>" data-target="calc_<?= $m['id'] ?>" class="c-form-control py-1 px-2 disc-input" min="0" placeholder="0" value="0" style="text-align:right">
+                  <span class="input-group-text bg-dark border-secondary text-white unit-suffix" style="font-size:11px">%</span>
                 </div>
               </div>
             </div>
             <?php endforeach; ?>
-            <small class="text-muted d-block" style="font-size:11px;line-height:1.4">Isi persentase (1 - 100) pada paket membership yang ingin diberikan diskon. Biarkan 0 atau kosong jika level tersebut tidak didiskon.</small>
+            <small class="text-muted d-block" style="font-size:11px;line-height:1.4">Isi nilai diskon pada paket yang diinginkan. Biarkan 0 jika level tersebut tidak didiskon.</small>
           </div>
         </div>
         
@@ -206,18 +226,30 @@ require __DIR__ . '/partials/header.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.disc-input').forEach(input => {
-        input.addEventListener('input', function() {
-            let pct = parseFloat(this.value) || 0;
-            if (pct > 100) { pct = 100; this.value = 100; }
-            if (pct < 0) { pct = 0; this.value = 0; }
-            let price = parseFloat(this.getAttribute('data-price')) || 0;
-            let targetId = this.getAttribute('data-target');
-            let targetEl = document.getElementById(targetId);
+    const typeSelect = document.getElementById('discount_type');
+    
+    function updatePreviews() {
+        let type = typeSelect ? typeSelect.value : 'pct';
+        document.querySelectorAll('.disc-input').forEach(input => {
+            let val = parseFloat(input.value) || 0;
+            let price = parseFloat(input.getAttribute('data-price')) || 0;
+            let targetEl = document.getElementById(input.getAttribute('data-target'));
+            let prefix = input.parentElement.querySelector('.unit-prefix');
+            let suffix = input.parentElement.querySelector('.unit-suffix');
             
-            if (pct > 0) {
-                let discAmt = price * (pct / 100);
+            if (type === 'pct') {
+                if (val > 100) { val = 100; input.value = 100; }
+                if (prefix) prefix.style.display = 'none';
+                if (suffix) { suffix.style.display = 'block'; suffix.innerText = '%'; }
+            } else {
+                if (prefix) prefix.style.display = 'block';
+                if (suffix) suffix.style.display = 'none';
+            }
+            
+            if (val > 0) {
+                let discAmt = type === 'pct' ? (price * (val / 100)) : val;
                 let finalPrice = price - discAmt;
+                if (finalPrice < 0) finalPrice = 0;
                 
                 let formatRp = (num) => 'Rp ' + Math.round(num).toLocaleString('id-ID');
                 
@@ -227,6 +259,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetEl.style.display = 'none';
             }
         });
+    }
+    
+    if (typeSelect) typeSelect.addEventListener('change', updatePreviews);
+    document.querySelectorAll('.disc-input').forEach(input => {
+        input.addEventListener('input', updatePreviews);
     });
 });
 </script>

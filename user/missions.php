@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
             $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 50000 WHERE id=?")->execute([$user['id']]);
         } elseif ($winner['id'] === 3) {
             $code = "SPIN" . strtoupper(substr(md5(uniqid()), 0, 6));
-            $discountsJson = json_encode(['*'=>10000]);
+            $discountsJson = json_encode(['*'=>'10000rp']);
             $pdo->prepare("INSERT INTO discount_vouchers (code, discounts, max_claims, claims_count) VALUES (?, ?, 1, 0)")->execute([$code, $discountsJson]);
             $msg .= ". Kode Vouchermu: " . $code;
         } elseif ($winner['id'] === 4) {
