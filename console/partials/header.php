@@ -268,6 +268,12 @@ body { background: #0f1117; color: #e0e0f0; min-height: 100vh; }
       <?php if ($pending_wd > 0): ?><span class="badge-dot"><?= $pending_wd ?></span><?php endif; ?>
     </a>
     <?php endif; ?>
+    <?php if (staff_can('settings')): ?>
+    <a href="/console/wd_settings.php" class="c-nav-link <?= $activePage==='wd_settings'?'active':'' ?>">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/><path d="M21 12H3"/></svg>
+      Wd Settings
+    </a>
+    <?php endif; ?>
     <?php if (staff_can('upgrades')): ?>
     <a href="/console/upgrades.php" class="c-nav-link <?= $activePage==='upgrades'?'active':'' ?>">
       <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>

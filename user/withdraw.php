@@ -44,6 +44,7 @@ sort($predefined_amounts);
 $has_bank = !empty($user['bank_name']) && !empty($user['account_number']) && !empty($user['account_name']);
 
 $wd_locked = is_wd_locked($pdo);
+$wd_global_enabled = setting($pdo, 'wd_global_enabled', '1') === '1';
 
 // Level block — only enforced if admin enables the toggle
 $wd_require_level = setting($pdo, 'wd_require_level', '0') === '1';
@@ -110,6 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$user['can_withdraw']) {
         $flash = '❌ Akses withdraw kamu dibatasi nih. Hubungi admin yuk buat info lebih lanjut!'; $flashType = 'error';
+    } elseif (!$wd_global_enabled) {
+        $flash = '🔴 Fitur penarikan saat ini sedang dinonaktifkan secara global (Maintenance).'; $flashType = 'error';
     } elseif ($wd_locked) {
         $flash = '⏰ ' . $wd_lock_notice; $flashType = 'error';
     } elseif ($free_wd_limit_reached) {
@@ -207,7 +210,9 @@ $stmtPendingBank->execute([$user['id']]);
 $has_pending_bank = (bool)$stmtPendingBank->fetchColumn();
 
 $wd_estimation = '';
-if ($wd_lock_start && $wd_lock_end) {
+if (!$wd_global_enabled) {
+    $wd_estimation = "🔴 Penarikan saat ini <strong>DINONAKTIFKAN</strong> (Maintenance).";
+} elseif ($wd_lock_start && $wd_lock_end) {
     $now_ts = time();
     $s_ts = strtotime(date('Y-m-d ') . $wd_lock_start);
     $e_ts = strtotime(date('Y-m-d ') . $wd_lock_end);
