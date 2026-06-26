@@ -180,7 +180,10 @@ $_ewallets = array_filter($_pay_channels, fn($c) => $c['type'] === 'ewallet');
 
 $_seo_title  = setting($pdo, 'seo_title', 'Meloton');
 $_seo_desc   = setting($pdo, 'seo_description', 'Daftar gratis dan mulai tonton video untuk dapat reward!');
+$_seo_kw     = setting($pdo, 'seo_keywords', '');
+$_seo_og     = setting($pdo, 'seo_og_image', '');
 $_seo_robots = setting($pdo, 'seo_robots', 'index,follow');
+$_seo_og_type = setting($pdo, 'seo_og_type', 'website');
 $_favicon    = setting($pdo, 'favicon_path', '');
 $_page_title = 'Daftar — ' . $_seo_title;
 ?>
@@ -192,10 +195,27 @@ $_page_title = 'Daftar — ' . $_seo_title;
 <meta name="theme-color" content="#1a1a2e">
 <title><?= htmlspecialchars($_page_title) ?></title>
 <?php if ($_seo_desc): ?><meta name="description" content="<?= htmlspecialchars($_seo_desc) ?>"><?php endif; ?>
+<?php if ($_seo_kw):   ?><meta name="keywords"    content="<?= htmlspecialchars($_seo_kw) ?>"><?php endif; ?>
 <meta name="robots" content="<?= htmlspecialchars($_seo_robots) ?>">
-<?php $absolute_fav = $_favicon ? (preg_match('~^https?://~', $_favicon) ? $_favicon : '/' . ltrim($_favicon, '/')) : ''; ?>
+<?php
+$absolute_og = $_seo_og ? (preg_match('~^https?://~', $_seo_og) ? $_seo_og : base_url(ltrim($_seo_og, '/'))) : '';
+$absolute_fav = $_favicon ? (preg_match('~^https?://~', $_favicon) ? $_favicon : '/' . ltrim($_favicon, '/')) : '';
+$current_url = base_url(ltrim($_SERVER['REQUEST_URI'] ?? '', '/'));
+$final_og_desc = $_seo_desc;
+?>
+<meta property="og:url" content="<?= htmlspecialchars($current_url) ?>">
+<meta property="og:type" content="<?= htmlspecialchars($_seo_og_type) ?>">
+<meta property="og:title" content="<?= htmlspecialchars($_page_title) ?>">
+<?php if ($final_og_desc): ?><meta property="og:description" content="<?= htmlspecialchars($final_og_desc) ?>"><?php endif; ?>
+<?php if ($absolute_og): ?>
+<meta property="og:image" content="<?= htmlspecialchars($absolute_og) ?>">
+<meta property="og:image:secure_url" content="<?= htmlspecialchars($absolute_og) ?>">
+<meta property="og:image:alt" content="<?= htmlspecialchars($_seo_title) ?>">
+<?php endif; ?>
+<meta name="twitter:card" content="summary_large_image">
 <?php if ($absolute_fav): ?>
 <link rel="icon" href="<?= htmlspecialchars($absolute_fav) ?>?v=<?= @filemtime(dirname(__DIR__).$_favicon)?:time() ?>">
+<link rel="apple-touch-icon" href="<?= htmlspecialchars($absolute_fav) ?>?v=<?= @filemtime(dirname(__DIR__).$_favicon)?:time() ?>">
 <?php endif; ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
@@ -440,6 +460,21 @@ function selectEmoji(btn, val) {
   btn.classList.add('selected');
   document.getElementById('captcha_answer').value = val;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form');
+  if (form) {
+    form.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        if (cur === 1) goStep2();
+        else if (cur === 2) goStep3();
+        else if (cur === 3) goStep4();
+        else if (cur === 4) document.getElementById('submit-btn').click();
+      }
+    });
+  }
+});
 let cur = <?= $error_step ?>;
 function goStep(n){
   document.getElementById('step'+cur).classList.remove('active');
