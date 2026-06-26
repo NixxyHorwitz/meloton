@@ -5,6 +5,8 @@ if (auth_user($pdo)) redirect('/home');
 csrf_enforce();
 
 $error = '';
+$error_step = 1;
+$error_fields = [];
 
 // Rate limiting
 $ip_key  = 'reg_' . md5($_SERVER['REMOTE_ADDR'] ?? 'x');
@@ -62,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$user_answer || !hash_equals($expected_hash, $check_hash)) {
         $error = 'Pilihan gambar salah, coba lagi!';
+        $error_step = 4;
         goto end_reg;
     }
 
@@ -81,19 +84,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$username || !$email || !$whatsapp || !$password || !$bank_name || !$account_number || !$account_name) {
         $error = 'Semua field wajib diisi.';
+        if (!$username) $error_fields[] = 'f_username';
+        if (!$email) $error_fields[] = 'f_email';
+        if (!$whatsapp) $error_fields[] = 'f_wa';
+        if (!$password) $error_fields[] = 'f_pwd';
+        if (!$bank_name) $error_fields[] = 'f_bank_name';
+        if (!$account_number) $error_fields[] = 'f_account_number';
+        if (!$account_name) $error_fields[] = 'f_account_name';
+        
+        if (!$username || !$email) $error_step = 1;
+        elseif (!$whatsapp || !$password) $error_step = 2;
+        elseif (!$bank_name || !$account_number || !$account_name) $error_step = 3;
     } elseif (!preg_match('/^[a-zA-Z0-9_]{3,30}$/', $username)) {
-        $error = 'Username 3–30 karakter, hanya huruf/angka/underscore.';
+        $error = 'Username 3–30 karakter, hanya huruf/angka/underscore.'; $error_step = 1; $error_fields[] = 'f_username';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Format email tidak valid.';
+        $error = 'Format email tidak valid.'; $error_step = 1; $error_fields[] = 'f_email';
     } elseif (strlen($whatsapp) < 9 || strlen($whatsapp) > 15) {
-        $error = 'Nomor WhatsApp tidak valid.';
+        $error = 'Nomor WhatsApp tidak valid.'; $error_step = 2; $error_fields[] = 'f_wa';
     } elseif (strlen($password) < 6) {
-        $error = 'Password minimal 6 karakter.';
+        $error = 'Password minimal 6 karakter.'; $error_step = 2; $error_fields[] = 'f_pwd';
     } else {
         $chk = $pdo->prepare("SELECT id FROM users WHERE username=? OR email=?");
         $chk->execute([$username, $email]);
         if ($chk->fetch()) {
-            $error = 'Username atau email sudah terdaftar.';
+            $error = 'Username atau email sudah terdaftar.'; $error_step = 1; $error_fields[] = 'f_username'; $error_fields[] = 'f_email';
             $_SESSION[$ip_key . '_attempts'] = $attempts + 1;
             if ($attempts + 1 >= 5) {
                 $_SESSION[$ip_key . '_lock'] = time() + 900;
@@ -257,7 +271,7 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
       <input type="hidden" name="acc_name_input_type" id="f_acc_name_input_type" value="typed">
 
       <!-- STEP 1: Data Akun -->
-      <div class="fs <?= !$error ? 'active' : '' ?>" id="step1">
+      <div class="fs <?= $error_step === 1 ? 'active' : '' ?>" id="step1">
         <label class="gc-lbl">Username</label>
         <div class="gc-inp">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -275,7 +289,7 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
       </div>
 
       <!-- STEP 2: Kontak & Password -->
-      <div class="fs" id="step2">
+      <div class="fs <?= $error_step === 2 ? 'active' : '' ?>" id="step2">
         <label class="gc-lbl">Nomor WhatsApp</label>
         <div class="gc-inp">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16z"/></svg>
@@ -309,7 +323,7 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
       </div>
 
       <!-- STEP 3: Bank -->
-      <div class="fs" id="step3">
+      <div class="fs <?= $error_step === 3 ? 'active' : '' ?>" id="step3">
         <label class="gc-lbl">Bank / E-Wallet</label>
         <div class="gc-inp">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -353,7 +367,7 @@ body{font-family:'Nunito',sans-serif;background:#1a1a2e;min-height:100vh;display
       </div>
 
       <!-- STEP 4: Verifikasi -->
-      <div class="fs <?= $error ? 'active' : '' ?>" id="step4">
+      <div class="fs <?= $error_step === 4 ? 'active' : '' ?>" id="step4">
         <!-- Emoji CAPTCHA -->
         <div class="emoji-captcha">
           <div class="emoji-captcha-q">
@@ -426,7 +440,7 @@ function selectEmoji(btn, val) {
   btn.classList.add('selected');
   document.getElementById('captcha_answer').value = val;
 }
-let cur = <?= ($error ? 4 : 1) ?>;
+let cur = <?= $error_step ?>;
 function goStep(n){
   document.getElementById('step'+cur).classList.remove('active');
   document.getElementById('step'+n).classList.add('active');
@@ -519,6 +533,23 @@ function trk(id,rec,hid,tid,ref){
 trk('f_account_number',nr,'f_acc_num_record','f_acc_num_input_type',{v:0});
 trk('f_account_name',ar,'f_acc_name_record','f_acc_name_input_type',{v:0});
 <?php if ($error): ?>updateSum();<?php endif; ?>
+<?php if (!empty($error_fields)): ?>
+  const errFields = <?= json_encode($error_fields) ?>;
+  errFields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+          const inp = el.closest('.gc-inp');
+          if (inp) {
+              inp.style.borderColor = '#EF4444';
+              inp.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+              el.addEventListener('focus', () => {
+                  inp.style.borderColor = '';
+                  inp.style.boxShadow = '';
+              }, {once:true});
+          }
+      }
+  });
+<?php endif; ?>
 </script>
 <script src="/assets/js/bank-select.js"></script>
 </body>
