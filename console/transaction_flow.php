@@ -113,10 +113,12 @@ require __DIR__ . '/partials/header.php';
                     $groups[$uid] = [
                         'upline_name' => $row['upline_name'],
                         'is_promotor' => $row['is_promotor'],
-                        'deposits' => []
+                        'deposits' => [],
+                        'total_deposit' => 0
                     ];
                 }
                 $groups[$uid]['deposits'][] = $row;
+                $groups[$uid]['total_deposit'] += (float)$row['amount'];
             }
         ?>
         <?php foreach ($groups as $g): ?>
@@ -136,6 +138,8 @@ require __DIR__ . '/partials/header.php';
                     <div class="tf-up-node <?= $g['is_promotor'] ? 'pro' : '' ?>">
                         <div class="tf-up-role"><?= $g['is_promotor'] ? 'Promotor' : 'Upline' ?></div>
                         <div class="tf-up-name"><?= htmlspecialchars($g['upline_name']) ?></div>
+                        <div style="font-size:10px;color:#888;margin-top:8px">Total Masuk:</div>
+                        <div style="font-size:12px;color:#4CAF82;font-weight:900;"><?= format_rp($g['total_deposit']) ?></div>
                     </div>
                 </div>
             </div>
