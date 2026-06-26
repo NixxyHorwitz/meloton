@@ -13,7 +13,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS minigame_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
 // Ensure settings exist for configuration
-$pdo->exec("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES 
+$pdo->exec("INSERT IGNORE INTO settings (`key`, `value`) VALUES 
     ('minigame_reward_per_click', '10'),
     ('minigame_base_bonus', '50')
 ");
