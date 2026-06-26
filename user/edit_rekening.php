@@ -41,12 +41,11 @@ $has_pending_bank = (bool)$stmtPending->fetchColumn();
 // ── POST handler ─────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($has_pending_bank) {
-        $flash = '❌ Data rekening kamu sebelumnya masih dalam tahap verifikasi sistem otomatis.'; $flashType = 'error';
-    } else
-    if (!$can_edit_bank) {
+        $flash = '❌ Data rekening kamu sebelumnya masih dalam verifikasi.'; $flashType = 'error';
+    } elseif (!$can_edit_bank) {
         $flash = '❌ Level kamu belum memiliki izin untuk mengubah rekening.'; $flashType = 'error';
     } elseif (!$dep_ok_for_edit) {
-        $flash = '❌ Saldo beli kamu belum mencukupi syarat minimum (Rp ' . number_format($edit_bank_min_dep, 0, ',', '.') . ').'; $flashType = 'error';
+        $flash = '❌ Saldo beli kamu belum mencukupi syarat minimum.'; $flashType = 'error';
     } else {
         $new_bank    = trim($_POST['bank_name']      ?? '');
         $new_accnum  = trim($_POST['account_number'] ?? '');
@@ -71,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             send_telegram_notif($pdo, $msg, $kb, 'permintaan');
             
-            $flash = '✅ Data rekening baru telah diunggah ke sistem dan sedang diproses otomatis.';
+            $flash = '✅ Pengajuan rekening baru berhasil dikirim!';
             $has_pending_bank = true;
         }
     }
@@ -93,214 +92,264 @@ $activePage = 'profile';
 require dirname(__DIR__) . '/partials/header.php';
 ?>
 
-<div class="page-title-bar">
-  <h1>🏦 Edit Rekening Bank</h1>
-  <p>Kelola informasi rekening tujuan penarikan dana</p>
-</div>
+<style>
+/* ══════════════════════════════════════════════
+   EDIT REKENING PAGE — CASUAL GAME STYLE
+   ══════════════════════════════════════════════ */
+.wd-page { padding: 0 0 20px; }
 
-<?php if ($flash): ?>
-<div class="alert alert--<?= $flashType === 'error' ? 'error' : 'success' ?>" style="margin-bottom:12px;font-size:13px">
-  <?= htmlspecialchars($flash) ?>
-</div>
-<?php endif; ?>
-
-<!-- Info level (disembunyikan untuk promotor) -->
-<?php if (!$is_promotor): ?>
-<div class="card" style="margin-bottom:14px;border:2.5px solid <?= $can_edit_bank ? 'var(--mint)' : '#e5e7eb' ?>;box-shadow:3px 3px 0 <?= $can_edit_bank ? 'var(--mint)' : '#ccc' ?>">
-  <div class="card__body" style="display:flex;align-items:center;gap:10px;padding:12px 14px">
-    <div style="font-size:26px"><?= $can_edit_bank ? '✅' : '🔒' ?></div>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:800"><?= $can_edit_bank ? 'Level kamu mengizinkan edit rekening' : 'Level kamu belum mengizinkan edit rekening' ?></div>
-      <div style="font-size:11px;color:#666;margin-top:2px">
-        Level saat ini: <strong><?= htmlspecialchars($level_name) ?></strong>
-        <?php if (!$can_edit_bank): ?>
-          · Upgrade level untuk bisa mengubah rekening
-        <?php endif; ?>
-      </div>
-    </div>
-    <?php if (!$can_edit_bank): ?>
-    <a href="/upgrade" class="btn btn--yellow btn--sm" style="font-size:11px;padding:5px 12px;white-space:nowrap">Upgrade →</a>
-    <?php endif; ?>
-  </div>
-</div>
-<?php endif; ?>
-
-<?php if ($can_edit_bank && !$dep_ok_for_edit): ?>
-<?php
-  $dep_pct = min(100, (int)round(((float)$user['balance_dep'] / $edit_bank_min_dep) * 100));
-  $dep_kurang = $edit_bank_min_dep - (float)$user['balance_dep'];
-?>
-<div class="card" style="margin-bottom:14px;border:2px solid #f59e0b;box-shadow:3px 3px 0 #f59e0b">
-  <div class="card__body" style="padding:12px 14px">
-    <div style="font-size:11px;font-weight:800;color:#d97706;letter-spacing:.5px;margin-bottom:10px">🛡️ SYARAT SALDO BELI</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-        <span style="color:#888;font-weight:600">Minimal Deposit</span>
-        <span style="font-weight:900;color:var(--ink)">Rp <?= number_format($edit_bank_min_dep, 0, ',', '.') ?></span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-        <span style="color:#888;font-weight:600">Saldo Kamu</span>
-        <span style="font-weight:900;color:#e67e22">Rp <?= number_format((float)$user['balance_dep'], 0, ',', '.') ?></span>
-      </div>
-      <div style="height:6px;background:#f3f4f6;border-radius:99px;overflow:hidden;margin:2px 0">
-        <div style="height:100%;width:<?= $dep_pct ?>%;background:#f59e0b;border-radius:99px;transition:width .3s"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
-        <span style="color:#aaa"><?= $dep_pct ?>% terpenuhi</span>
-        <span style="font-weight:700;color:#e67e22">Kurang Rp <?= number_format($dep_kurang, 0, ',', '.') ?></span>
-      </div>
-    </div>
-  </div>
-</div>
-<?php endif; ?>
-
-<!-- Current bank info -->
-<div class="card" style="margin-bottom:14px">
-  <div class="card__header"><div class="card__title" style="font-size:13px">🏦 Rekening Saat Ini</div></div>
-  <div class="card__body">
-    <?php if ($has_bank): ?>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;justify-content:space-between;font-size:13px">
-        <span style="color:#888;font-weight:600">Bank</span>
-        <span style="font-weight:800">
-          <?php $user_wl = $channel_logos[strtolower($user['bank_name'] ?? '')] ?? null; ?>
-          <?php if ($user_wl): ?>
-          <img src="/assets/banks/<?= htmlspecialchars($user_wl) ?>" style="height:20px;vertical-align:middle;margin-right:6px;border-radius:4px">
-          <?php endif; ?>
-          <?= htmlspecialchars($user['bank_name']) ?>
-        </span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px">
-        <span style="color:#888;font-weight:600">Nomor</span>
-        <span style="font-weight:800"><?= htmlspecialchars(mask_account($user['account_number'])) ?></span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:13px">
-        <span style="color:#888;font-weight:600">A/N</span>
-        <span style="font-weight:800"><?= htmlspecialchars($user['account_name']) ?></span>
-      </div>
-    </div>
-    <?php else: ?>
-    <div style="text-align:center;padding:14px;color:#aaa;font-size:13px">Belum ada rekening yang tersimpan.</div>
-    <?php endif; ?>
-  </div>
-</div>
-
-<!-- Edit form -->
-<?php if ($has_pending_bank): ?>
-<div class="card" style="margin-bottom:14px;border:2.5px solid #f59e0b;box-shadow:4px 4px 0 #f59e0b">
-  <div class="card__body" style="padding:16px;text-align:center">
-    <div style="font-size:32px;margin-bottom:8px">⚙️</div>
-    <div style="font-size:14px;font-weight:900;color:var(--ink)">Proses Upload Data</div>
-    <div style="font-size:12px;color:#666;margin-top:4px">Data rekening baru kamu telah diterima sistem dan sedang dalam antrean verifikasi otomatis. Silakan tunggu beberapa saat.</div>
-  </div>
-</div>
-<?php elseif ($can_edit_bank && $dep_ok_for_edit): ?>
-<div class="card" style="margin-bottom:14px;border:2.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink)">
-  <div class="card__header" style="background:var(--brand);border-radius:9px 9px 0 0">
-    <div class="card__title" style="font-size:13px;color:var(--ink)">✏️ Ubah Rekening</div>
-  </div>
-  <div class="card__body">
-    <div class="alert alert--warn" style="font-size:11px;margin-bottom:12px;padding:8px 10px">
-      ⚠️ <strong>Pastikan data rekening baru sudah benar.</strong> Salah isi bisa menyebabkan dana tidak masuk ke rekening yang dimaksud.
-    </div>
-    <form method="POST" id="edit-rek-form">
-      <?= csrf_field() ?>
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label" style="font-size:12px">Bank / E-Wallet</label>
-        <select class="form-control custom-logo-select" name="bank_name" required>
-          <option value="" data-logo="">— Pilih Bank / E-Wallet —</option>
-          <?php if (!empty($banks)): ?>
-          <optgroup label="🏦 Bank">
-            <?php foreach ($banks as $ch): ?>
-            <?php $logoPath = !empty($ch['logo']) ? (str_starts_with($ch['logo'], '/') || str_starts_with($ch['logo'], 'http') ? $ch['logo'] : '/assets/banks/' . $ch['logo']) : ''; ?>
-            <option value="<?= htmlspecialchars($ch['name']) ?>" data-logo="<?= htmlspecialchars($logoPath) ?>" <?= ($user['bank_name'] ?? '') === $ch['name'] ? 'selected' : '' ?>><?= htmlspecialchars($ch['name']) ?></option>
-            <?php endforeach; ?>
-          </optgroup>
-          <?php endif; ?>
-          <?php if (!empty($ewallets)): ?>
-          <optgroup label="📱 E-Wallet">
-            <?php foreach ($ewallets as $ch): ?>
-            <?php $logoPath = !empty($ch['logo']) ? (str_starts_with($ch['logo'], '/') || str_starts_with($ch['logo'], 'http') ? $ch['logo'] : '/assets/banks/' . $ch['logo']) : ''; ?>
-            <option value="<?= htmlspecialchars($ch['name']) ?>" data-logo="<?= htmlspecialchars($logoPath) ?>" <?= ($user['bank_name'] ?? '') === $ch['name'] ? 'selected' : '' ?>><?= htmlspecialchars($ch['name']) ?></option>
-            <?php endforeach; ?>
-          </optgroup>
-          <?php endif; ?>
-        </select>
-      </div>
-      <div class="form-group" style="margin-bottom:8px">
-        <label class="form-label" style="font-size:12px">Nomor Rekening / Akun</label>
-        <input class="form-control" type="text" name="account_number"
-               value="<?= htmlspecialchars($user['account_number'] ?? '') ?>"
-               placeholder="08xxxxxxxxxx atau nomor rekening" required>
-      </div>
-      <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label" style="font-size:12px">Nama Pemilik Rekening</label>
-        <input class="form-control" type="text" name="account_name"
-               value="<?= htmlspecialchars($user['account_name'] ?? '') ?>"
-               placeholder="Nama sesuai rekening" required>
-      </div>
-      <button type="submit" class="btn btn--primary btn--full" style="font-size:13px" id="rek-submit-btn">
-        💾 Simpan Rekening
-      </button>
-    </form>
-  </div>
-</div>
-
-<!-- Neobrutalism confirm modal -->
-<div id="brutal-rek-confirm" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)">
-  <div class="card card--yellow" style="width:100%;max-width:340px;box-shadow:6px 6px 0 var(--ink);border:3px solid var(--ink);border-radius:12px;animation:popIn .3s cubic-bezier(.175,.885,.32,1.275)">
-    <div class="card__header" style="background:var(--brand);border-bottom:3px solid var(--ink);border-radius:9px 9px 0 0;padding:12px 16px">
-      <div class="card__title" style="color:var(--ink);font-weight:900;font-size:15px">🏦 Konfirmasi Ganti Rekening</div>
-    </div>
-    <div class="card__body" style="padding:16px;background:#fff;border-radius:0 0 9px 9px">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:#333">Rekening baru yang akan disimpan:</div>
-      <div id="rek-preview" style="background:#f8f8f8;border:1.5px solid #ddd;border-radius:8px;padding:10px 12px;font-size:13px;font-weight:700;margin-bottom:14px;line-height:1.8"></div>
-      <div style="font-size:11px;color:#e67e22;font-weight:700;margin-bottom:16px">⚠️ Pastikan informasi di atas sudah benar sebelum menyimpan.</div>
-      <div style="display:flex;gap:10px">
-        <button type="button" onclick="document.getElementById('brutal-rek-confirm').style.display='none'" class="btn" style="flex:1;background:#eee;color:var(--ink);border:2px solid var(--ink);font-weight:800;border-radius:8px">Batal</button>
-        <button type="button" onclick="confirmRek()" class="btn btn--primary" style="flex:2;background:var(--brand);color:var(--ink);border:2px solid var(--ink);font-weight:900;border-radius:8px;box-shadow:2px 2px 0 var(--ink)">✅ Ya, Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
-<style>@keyframes popIn{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}</style>
-
-<script>
-const rekForm = document.getElementById('edit-rek-form');
-rekForm.addEventListener('submit', function(e) {
-  if (this.dataset.confirmed) return;
-  e.preventDefault();
-  const bank    = this.querySelector('[name=bank_name]').value.trim();
-  const accnum  = this.querySelector('[name=account_number]').value.trim();
-  const accname = this.querySelector('[name=account_name]').value.trim();
-  document.getElementById('rek-preview').innerHTML =
-    `🏦 <b>${bank}</b><br>📋 ${accnum}<br>👤 a/n ${accname}`;
-  document.getElementById('brutal-rek-confirm').style.display = 'flex';
-});
-function confirmRek() {
-  document.getElementById('brutal-rek-confirm').style.display = 'none';
-  rekForm.dataset.confirmed = '1';
-  rekForm.submit();
+/* ── Hero Balance (Compact & Ornamented) ── */
+.wd-hero {
+  background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+  border: 3px solid #0f172a;
+  border-radius: 18px;
+  box-shadow: 0 6px 0 #0f172a;
+  padding: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
-</script>
-<?php else: ?>
-<div style="text-align:center;padding:30px 20px;color:#aaa;font-size:13px">
-  <div style="font-size:40px;margin-bottom:10px">🔒</div>
-  <div style="font-weight:700">
-    <?php if (!$can_edit_bank): ?>
-      Level kamu belum mendukung fitur edit rekening.<br>
-      <a href="/upgrade" style="color:var(--brand);font-weight:800">Upgrade level →</a>
+.wd-hero::before { content:''; position:absolute; top:-20px; left:-20px; width:80px; height:80px; background:url('/assets/dollar.png') no-repeat center/contain; opacity:0.05; transform:rotate(-15deg); pointer-events:none; filter:grayscale(1); }
+.wd-hero::after { content:''; position:absolute; bottom:-20px; right:-20px; width:100px; height:100px; background:rgba(255,255,255,0.03); border-radius:50%; pointer-events:none; }
+.wd-hero-dot { position:absolute; bottom:15px; left:40px; width:8px; height:8px; background:#fde68a; border-radius:50%; opacity:0.2; pointer-events:none; }
+
+.wd-hero__lbl { font-size:11px; font-weight:900; color:rgba(255,255,255,0.5); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; position:relative; z-index:1; }
+.wd-hero__val { font-size:24px; font-weight:900; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.4); letter-spacing:1px; position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+/* ── Alerts ── */
+.wd-alert {
+  padding: 10px 12px; border-radius: 12px;
+  font-size: 11px; font-weight: 800; display: flex; gap: 8px; align-items: center; margin-bottom: 12px;
+  border: 2px solid; line-height: 1.3;
+}
+.wd-alert--err { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+.wd-alert--warn { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+.wd-alert--succ { background: #f0fdf4; color: #166534; border-color: #86efac; }
+.wd-alert-icon { font-size: 18px; flex-shrink: 0; }
+.wd-alert-btn { background: #fbbf24; color: #92400e; border: 2px solid #fff; border-radius: 8px; font-size: 9px; font-weight: 900; padding: 4px 10px; text-decoration: none; box-shadow: 0 2px 0 rgba(0,0,0,0.1); flex-shrink: 0; }
+
+/* ── Form Card ── */
+.wd-card {
+  background: #fff; border: 2.5px solid #cbd5e1; border-radius: 16px;
+  box-shadow: 0 5px 0 #cbd5e1; padding: 16px; margin-bottom: 12px;
+}
+.wd-card-title { font-size: 14px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+
+/* ── Inputs ── */
+.wd-group { margin-bottom: 10px; }
+.wd-label { font-size: 10px; font-weight: 900; color: #64748b; margin-bottom: 4px; display: block; }
+.wd-input {
+  width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px;
+  padding: 10px; font-size: 12px; font-weight: 800; color: #0c4a6e;
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.wd-input:focus { border-color: #94a3b8; background: #fff; }
+
+/* ── Custom Select (Fix Logo Meledak) ── */
+.custom-select-wrap { position: relative; width: 100%; }
+.custom-select-trigger {
+  width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px;
+  padding: 10px; font-size: 12px; font-weight: 800; color: #0c4a6e;
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+}
+.custom-select-trigger.open { border-color: #94a3b8; background: #fff; }
+.sel-val { display: flex; align-items: center; gap: 8px; }
+.sel-val img, .custom-option img { height: 16px; width: auto; border-radius: 2px; object-fit: contain; }
+.custom-select-options {
+  position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
+  background: #fff; border: 2px solid #e2e8f0; border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100;
+  max-height: 200px; overflow-y: auto; display: none; padding: 4px;
+}
+.custom-select-options.open { display: block; }
+.custom-optgroup { font-size: 10px; font-weight: 900; color: #94a3b8; padding: 6px 8px 2px; text-transform: uppercase; }
+.custom-option {
+  padding: 8px; font-size: 12px; font-weight: 700; color: #334155;
+  border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+}
+.custom-option:hover { background: #f1f5f9; color: #0f172a; }
+
+/* ── Submit Button ── */
+.wd-submit {
+  width: 100%; padding: 12px; background: linear-gradient(135deg, #10b981, #059669);
+  border: 2.5px solid #34d399; border-radius: 14px; color: #fff; font-size: 13px; font-weight: 900;
+  box-shadow: 0 5px 0 #047857; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;
+}
+.wd-submit:active { transform: translateY(4px); box-shadow: 0 1px 0 #047857; }
+
+/* ── Modal ── */
+#cg-modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.7); z-index:99999; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
+.cg-modal-box { background: #fff; width:100%; max-width:300px; border-radius:20px; border:3px solid #cbd5e1; box-shadow:0 8px 0 #0f172a; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow:hidden; }
+.cg-modal-hdr { background: linear-gradient(135deg, #fde68a, #f59e0b); padding: 12px; text-align: center; color: #78350f; font-weight: 900; font-size: 14px; border-bottom: 2px solid rgba(255,255,255,0.5); }
+.cg-modal-bd { padding: 16px; text-align: left; }
+.cg-modal-actions { display:flex; gap:8px; padding:0 16px 16px; }
+.cg-btn-cancel { flex:1; padding:10px; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:10px; font-weight:900; color:#64748b; font-size:12px; }
+.cg-btn-confirm { flex:1.5; padding:10px; background:linear-gradient(135deg, #34d399, #10b981); border:2px solid #6ee7b7; border-radius:10px; font-weight:900; color:#fff; box-shadow:0 4px 0 #059669; font-size:12px; }
+.cg-btn-confirm:active { transform:translateY(3px); box-shadow:0 1px 0 #059669; }
+@keyframes popIn { from{transform:scale(0.8);opacity:0;} to{transform:scale(1);opacity:1;} }
+</style>
+
+<div class="wd-page">
+  <!-- HERO BALANCE / CURRENT BANK -->
+  <div class="wd-hero">
+    <div class="wd-hero-dot"></div>
+    <div class="wd-hero__lbl">🏦 Rekening Saat Ini</div>
+    
+    <?php if ($has_bank): ?>
+      <div class="wd-hero__val" style="margin-bottom:4px">
+        <?php $user_wl = $channel_logos[strtolower($user['bank_name'] ?? '')] ?? null; ?>
+        <?php if ($user_wl): ?>
+          <img src="/assets/banks/<?= htmlspecialchars($user_wl) ?>" style="height:20px;border-radius:4px;object-fit:contain;background:#fff;padding:2px">
+        <?php endif; ?>
+        <?= htmlspecialchars(mask_account($user['account_number'])) ?>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.7)"><?= htmlspecialchars($user['account_name']) ?></div>
     <?php else: ?>
-      Saldo beli belum mencukupi untuk menggunakan fitur ini.
+      <div style="font-size:18px;font-weight:900;color:#fff;margin-top:6px;opacity:0.6">Belum Ada Rekening</div>
     <?php endif; ?>
   </div>
-</div>
-<?php endif; ?>
 
-<div style="margin-top:8px">
-  <a href="/profile" class="btn btn--ghost btn--full" style="font-size:13px">← Kembali ke Profil</a>
+  <!-- FLASH ALERTS -->
+  <?php if ($flash): ?>
+  <div class="wd-alert wd-alert--<?= $flashType === 'error' ? 'err' : 'succ' ?>">
+    <div class="wd-alert-icon"><?= $flashType === 'error' ? '❌' : '✨' ?></div>
+    <div style="flex:1"><?= htmlspecialchars($flash) ?></div>
+  </div>
+  <?php endif; ?>
+
+  <!-- NOTICES & CONDITIONS -->
+  <?php if ($has_pending_bank): ?>
+    <div class="wd-alert wd-alert--warn">
+      <div class="wd-alert-icon">⏳</div>
+      <div style="flex:1">Data rekening baru sedang diverifikasi otomatis. Mohon tunggu.</div>
+    </div>
+  <?php elseif (!$can_edit_bank): ?>
+    <div class="wd-alert wd-alert--err">
+      <div class="wd-alert-icon">🔒</div>
+      <div style="flex:1">
+         <div style="margin-bottom:2px"><strong>Akses Terkunci!</strong></div>
+         <div style="font-size:10px">Level <?= htmlspecialchars($level_name) ?> belum memiliki izin untuk mengubah data rekening.</div>
+      </div>
+      <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+    </div>
+  <?php elseif (!$dep_ok_for_edit): ?>
+    <?php
+      $dep_pct = min(100, (int)round(((float)$user['balance_dep'] / $edit_bank_min_dep) * 100));
+      $dep_kurang = $edit_bank_min_dep - (float)$user['balance_dep'];
+    ?>
+    <div class="wd-card" style="border-color:#f59e0b;box-shadow:0 5px 0 #f59e0b">
+       <div class="wd-card-title" style="color:#d97706;border-bottom-color:#fef3c7">🛡️ Syarat Ubah Rekening</div>
+       <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:12px;line-height:1.4">
+          Kamu harus memiliki akumulasi Saldo Beli minimal Rp <?= number_format($edit_bank_min_dep,0,',','.') ?> untuk membuka fitur ini.
+       </div>
+       <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:900;color:#64748b;margin-bottom:4px">
+         <span>Progres: <?= $dep_pct ?>%</span>
+         <span style="color:#f59e0b">Kurang Rp <?= number_format($dep_kurang,0,',','.') ?></span>
+       </div>
+       <div style="height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
+         <div style="height:100%;width:<?= $dep_pct ?>%;background:#f59e0b;border-radius:4px"></div>
+       </div>
+       <a href="/deposit" class="wd-submit" style="background:linear-gradient(135deg, #fde68a, #f59e0b);border-color:#fef3c7;box-shadow:0 4px 0 #d97706;color:#78350f;padding:10px;margin-top:12px">Isi Saldo Sekarang</a>
+    </div>
+  <?php else: ?>
+    <!-- FORM UBAH REKENING -->
+    <div class="wd-card">
+      <div class="wd-card-title">✏️ Form Ganti Rekening</div>
+      
+      <form method="POST" id="edit-rek-form">
+        <?= csrf_field() ?>
+        
+        <div class="wd-group">
+          <label class="wd-label">Bank / E-Wallet</label>
+          <select class="custom-logo-select" name="bank_name" required>
+            <option value="" data-logo="">— Pilih Tujuan —</option>
+            <?php if (!empty($banks)): ?>
+            <optgroup label="🏦 Bank">
+              <?php foreach ($banks as $ch): ?>
+              <?php $logoPath = !empty($ch['logo']) ? (str_starts_with($ch['logo'], '/') || str_starts_with($ch['logo'], 'http') ? $ch['logo'] : '/assets/banks/' . $ch['logo']) : ''; ?>
+              <option value="<?= htmlspecialchars($ch['name']) ?>" data-logo="<?= htmlspecialchars($logoPath) ?>" <?= ($user['bank_name'] ?? '') === $ch['name'] ? 'selected' : '' ?>><?= htmlspecialchars($ch['name']) ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+            <?php endif; ?>
+            <?php if (!empty($ewallets)): ?>
+            <optgroup label="📱 E-Wallet">
+              <?php foreach ($ewallets as $ch): ?>
+              <?php $logoPath = !empty($ch['logo']) ? (str_starts_with($ch['logo'], '/') || str_starts_with($ch['logo'], 'http') ? $ch['logo'] : '/assets/banks/' . $ch['logo']) : ''; ?>
+              <option value="<?= htmlspecialchars($ch['name']) ?>" data-logo="<?= htmlspecialchars($logoPath) ?>" <?= ($user['bank_name'] ?? '') === $ch['name'] ? 'selected' : '' ?>><?= htmlspecialchars($ch['name']) ?></option>
+              <?php endforeach; ?>
+            </optgroup>
+            <?php endif; ?>
+          </select>
+        </div>
+        
+        <div class="wd-group">
+          <label class="wd-label">Nomor Rekening / Akun</label>
+          <input class="wd-input" type="text" name="account_number"
+                 value="<?= htmlspecialchars($user['account_number'] ?? '') ?>"
+                 placeholder="Cth: 08123456789" required>
+        </div>
+        
+        <div class="wd-group" style="margin-bottom:0">
+          <label class="wd-label">Nama Pemilik</label>
+          <input class="wd-input" type="text" name="account_name"
+                 value="<?= htmlspecialchars($user['account_name'] ?? '') ?>"
+                 placeholder="Sesuai buku tabungan" required>
+        </div>
+        
+        <button type="submit" class="wd-submit">💾 Ajukan Perubahan</button>
+      </form>
+    </div>
+  <?php endif; ?>
+
+  <div style="text-align:center;margin-top:20px">
+    <a href="/profile" style="font-size:12px;font-weight:800;color:#64748b;text-decoration:none">← Kembali ke Profil</a>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="cg-modal">
+  <div class="cg-modal-box">
+    <div class="cg-modal-hdr">Konfirmasi Rekening</div>
+    <div class="cg-modal-bd">
+      <div style="font-size:11px;font-weight:800;color:#64748b;margin-bottom:8px">Data yang akan disimpan:</div>
+      <div id="rek-preview" style="background:#f8fafc;border:2px solid #e2e8f0;border-radius:10px;padding:12px;font-size:13px;font-weight:800;color:#0f172a;line-height:1.6;margin-bottom:12px"></div>
+      <div style="font-size:10px;font-weight:700;color:#ef4444;background:#fef2f2;padding:6px;border-radius:6px;text-align:center">Pastikan informasi di atas sudah benar!</div>
+    </div>
+    <div class="cg-modal-actions">
+      <button type="button" class="cg-btn-cancel" onclick="document.getElementById('cg-modal').style.display='none'">Batal</button>
+      <button type="button" class="cg-btn-confirm" onclick="confirmRek()">Ya, Simpan!</button>
+    </div>
+  </div>
 </div>
 
 <script src="/assets/js/bank-select.js"></script>
+<script>
+const rekForm = document.getElementById('edit-rek-form');
+if (rekForm) {
+  rekForm.addEventListener('submit', function(e) {
+    if (this.dataset.confirmed) return;
+    e.preventDefault();
+    const bank    = this.querySelector('[name=bank_name]').value.trim();
+    const accnum  = this.querySelector('[name=account_number]').value.trim();
+    const accname = this.querySelector('[name=account_name]').value.trim();
+    
+    document.getElementById('rek-preview').innerHTML =
+      `<span style="color:#64748b">Bank:</span> ${bank}<br>
+       <span style="color:#64748b">Nomor:</span> ${accnum}<br>
+       <span style="color:#64748b">A/N:</span> ${accname}`;
+       
+    document.getElementById('cg-modal').style.display = 'flex';
+  });
+}
+function confirmRek() {
+  document.getElementById('cg-modal').style.display = 'none';
+  if(rekForm) {
+    rekForm.dataset.confirmed = '1';
+    rekForm.submit();
+  }
+}
+</script>
 
 <?php require dirname(__DIR__) . '/partials/footer.php'; ?>
+
