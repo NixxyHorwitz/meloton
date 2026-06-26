@@ -101,13 +101,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
 
         $pdo->prepare("UPDATE users SET spin_tickets = spin_tickets - 1 WHERE id=?")->execute([$user['id']]);
 
+        // SET TINGKAT KESULITAN (WEIGHT / PELUANG) DI SINI
+        // Semakin besar angka, semakin mudah/sering muncul
+        $rate_silver = 2;   // Sangat Sulit
+        $rate_100k   = 3;   // Sangat Sulit
+        $rate_50k    = 5;   // Sulit
+        $rate_diskon = 20;  // Sedang
+        $rate_beli   = 30;  // Mudah
+        $rate_10k    = 40;  // Sangat Mudah
+
         $prizes = [
-            ['id'=>0, 'name'=>'Juragan Silver', 'weight'=>2],
-            ['id'=>1, 'name'=>'Tarik Rp 100k', 'weight'=>3],
-            ['id'=>2, 'name'=>'Tarik Rp 50k', 'weight'=>5],
-            ['id'=>3, 'name'=>'Diskon Rp 10k', 'weight'=>20],
-            ['id'=>4, 'name'=>'Beli Rp 20k', 'weight'=>30],
-            ['id'=>5, 'name'=>'Tarik Rp 10k', 'weight'=>40],
+            ['id'=>0, 'name'=>'Juragan Silver', 'weight'=>$rate_silver],
+            ['id'=>1, 'name'=>'Tarik Rp 100k', 'weight'=>$rate_100k],
+            ['id'=>2, 'name'=>'Tarik Rp 50k', 'weight'=>$rate_50k],
+            ['id'=>3, 'name'=>'Diskon Rp 10k', 'weight'=>$rate_diskon],
+            ['id'=>4, 'name'=>'Beli Rp 20k', 'weight'=>$rate_beli],
+            ['id'=>5, 'name'=>'Tarik Rp 10k', 'weight'=>$rate_10k],
         ];
 
         $totalWeight = array_sum(array_column($prizes, 'weight'));
@@ -178,14 +187,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
             ON DUPLICATE KEY UPDATE progress=VALUES(progress), completed_at=COALESCE(completed_at,NOW()), claimed_at=NOW()")
             ->execute([$user['id'], $slug, $progress, $period]);
         // Give reward
-        $ticketSql = ($mission['category'] === 'daily') ? ", spin_tickets = spin_tickets + 1" : "";
+        $is_daily = ($mission['category'] === 'daily');
+        $ticketSql = $is_daily ? ", spin_tickets = spin_tickets + 1" : "";
         $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? {$ticketSql} WHERE id=?")
             ->execute([$mission['reward'], $user['id']]);
         $pdo->commit();
         
         $msg = '🎉 Reward diklaim! +'.number_format($mission['reward'],0,',','.').' ke Saldo Tarik.';
-        if ($mission['category'] === 'daily') $msg .= ' (+1 Tiket Spin)';
-        echo json_encode(['ok'=>true,'msg'=>$msg,'reward'=>$mission['reward']]);
+        if ($is_daily) $msg .= ' (+1 Tiket Spin)';
+        echo json_encode(['ok'=>true,'msg'=>$msg,'reward'=>$mission['reward'],'tickets_added'=>$is_daily ? 1 : 0]);
     } catch (\Throwable $e) {
         $pdo->rollBack();
         echo json_encode(['ok'=>false,'msg'=>'Terjadi kesalahan: '.$e->getMessage()]);
@@ -394,6 +404,7 @@ require dirname(__DIR__) . '/partials/header.php';
 
 @keyframes fade-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 
 <div class="mission-page">
@@ -442,18 +453,28 @@ require dirname(__DIR__) . '/partials/header.php';
 
       <div style="position: relative; width: 260px; height: 260px; margin: 0 auto;">
           <div id="wheel" data-rotation="0" style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 6px #6366f1, 0 10px 20px rgba(0,0,0,0.3); background: conic-gradient(from -30deg, #fde047 0% 16.6%, #fbbf24 16.6% 33.3%, #34d399 33.3% 50%, #2dd4bf 50% 66.6%, #60a5fa 66.6% 83.3%, #c084fc 83.3% 100%); transition: transform 4s cubic-bezier(0.2, 0.8, 0.1, 1); position: relative; overflow: hidden;">
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(0deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Juragan Silver</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(60deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Tarik<br>100k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(120deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Tarik<br>50k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(180deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Diskon<br>10k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #1e3a8a; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Beli<br>20k</div>
-              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(300deg); padding-top: 20px; text-align: center; font-weight: 900; font-size: 11px; color: #4c1d95; text-shadow: 1px 1px 0 #fff; line-height: 1.1;">Tarik<br>10k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(0deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><i class="ph-fill ph-crown" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Silver</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(60deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #78350f; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>100k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(120deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>50k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(180deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #064e3b; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><i class="ph-fill ph-ticket" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Diskon<br>10k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #1e3a8a; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Beli<br>20k</div>
+              <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(300deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #4c1d95; text-shadow: 1px 1px 0 #fff; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>10k</div>
           </div>
           <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid #ef4444; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));"></div>
           <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: #ef4444; color: #fff; border: 4px solid #fff; box-shadow: 0 4px 0 #b91c1c; z-index: 11; display:flex; align-items:center; justify-content:center;">
-              <button id="btn-spin" onclick="spinWheel()" <?= $spin_tickets <= 0 ? 'disabled' : '' ?> style="background:transparent; border:none; color:#fff; font-weight:900; font-size:16px; cursor:pointer; width:100%; height:100%; outline:none; <?= $spin_tickets <= 0 ? 'opacity:0.5;' : '' ?>">SPIN</button>
+              <button id="btn-spin" onclick="spinWheel()" <?= $spin_tickets <= 0 ? 'disabled' : '' ?> style="background:transparent; border:none; color:#fff; font-weight:900; font-size:16px; cursor:pointer; width:100%; height:100%; outline:none; transition:opacity 0.2s; <?= $spin_tickets <= 0 ? 'opacity:0.5;' : '' ?>">SPIN</button>
           </div>
       </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="spin-result-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; width:100%; max-width:320px; border-radius:24px; padding:30px 20px; text-align:center; border:4px solid #fde047; box-shadow:0 8px 0 #f59e0b; animation:popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div id="spin-modal-icon" style="font-size:60px; line-height:1; margin-bottom:16px;">🎁</div>
+            <h2 style="color:#d97706; font-size:24px; font-weight:900; margin:0 0 8px;">SELAMAT!</h2>
+            <p id="spin-modal-text" style="font-size:14px; color:#78350f; font-weight:700; margin:0 0 24px; line-height:1.4;">Kamu memenangkan hadiah!</p>
+            <button onclick="document.getElementById('spin-result-modal').style.display='none'" style="display:inline-block; width:100%; background:#0ea5e9; color:#fff; font-weight:800; font-size:16px; padding:14px 24px; border-radius:100px; border:none; box-shadow:0 4px 0 #0284c7; cursor:pointer; font-family:inherit; transition:transform 0.1s;">Mantap!</button>
+        </div>
     </div>
   </div>
 
@@ -589,6 +610,18 @@ function claimMission(slug, btn) {
     .then(r => r.json())
     .then(data => {
       if (data.ok) {
+        if (data.tickets_added && data.tickets_added > 0) {
+            const tc = document.getElementById('spin-tickets-count');
+            if (tc) {
+                tc.innerText = parseInt(tc.innerText) + data.tickets_added;
+                const btnSpin = document.getElementById('btn-spin');
+                if (btnSpin) {
+                    btnSpin.disabled = false;
+                    btnSpin.style.opacity = '1';
+                }
+            }
+        }
+        
         const card = document.getElementById('mc-' + slug);
         if (card) {
           card.classList.remove('ms-card--done');
@@ -705,21 +738,44 @@ function spinWheel() {
                         const osc = actx.createOscillator();
                         const gain = actx.createGain();
                         osc.connect(gain); gain.connect(actx.destination);
-                        osc.frequency.value = 1200;
+                        osc.frequency.value = 600;
                         gain.gain.setValueAtTime(0, actx.currentTime);
-                        gain.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.1);
-                        gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.5);
-                        osc.start(); osc.stop(actx.currentTime + 0.5);
+                        gain.gain.linearRampToValueAtTime(0.3, actx.currentTime + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 1.5);
+                        osc.start(); osc.stop(actx.currentTime + 1.5);
+                        
+                        [800, 1000, 1200].forEach((freq, i) => {
+                            setTimeout(() => {
+                                const o = actx.createOscillator();
+                                const g = actx.createGain();
+                                o.connect(g); g.connect(actx.destination);
+                                o.frequency.value = freq;
+                                g.gain.setValueAtTime(0, actx.currentTime);
+                                g.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
+                                g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.8);
+                                o.start(); o.stop(actx.currentTime + 0.8);
+                            }, i * 150);
+                        });
                     }
                 } catch(e) {}
                 
-                alert(data.msg); // Using alert so they can copy voucher code easily
+                const icons = {
+                    0: '👑',
+                    1: '💰',
+                    2: '💰',
+                    3: '🎫',
+                    4: '🪙',
+                    5: '🪙',
+                };
+                document.getElementById('spin-modal-icon').innerText = icons[data.prize_index] || '🎁';
+                document.getElementById('spin-modal-text').innerText = data.msg;
+                document.getElementById('spin-result-modal').style.display = 'flex';
             }, 4000);
         })
         .catch(e => {
             window.isSpinning = false;
             btn.innerHTML = 'SPIN';
-            alert('Error: ' + e);
+            if (typeof nToast !== 'undefined') nToast('Error: ' + e, 'error');
         });
 }
 </script>
