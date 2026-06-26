@@ -82,6 +82,73 @@ function is_claimed(PDO $pdo, int|string $user_id, string $slug, ?string $period
 }
 
 // ── Handle AJAX claim ─────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_wheel') {
+    header('Content-Type: application/json');
+    if (!csrf_verify()) { echo json_encode(['ok'=>false,'msg'=>'CSRF tidak valid.']); exit; }
+
+    try {
+        $pdo->beginTransaction();
+        
+        $stmt = $pdo->prepare("SELECT spin_tickets FROM users WHERE id=? FOR UPDATE");
+        $stmt->execute([$user['id']]);
+        $tickets = (int)$stmt->fetchColumn();
+
+        if ($tickets <= 0) {
+            $pdo->rollBack();
+            echo json_encode(['ok'=>false,'msg'=>'Tiket Spin habis! Kerjakan misi harian untuk dapat tiket.']);
+            exit;
+        }
+
+        $pdo->prepare("UPDATE users SET spin_tickets = spin_tickets - 1 WHERE id=?")->execute([$user['id']]);
+
+        $prizes = [
+            ['id'=>0, 'name'=>'Juragan Silver', 'weight'=>2],
+            ['id'=>1, 'name'=>'Tarik Rp 100k', 'weight'=>3],
+            ['id'=>2, 'name'=>'Tarik Rp 50k', 'weight'=>5],
+            ['id'=>3, 'name'=>'Diskon Rp 10k', 'weight'=>20],
+            ['id'=>4, 'name'=>'Beli Rp 20k', 'weight'=>30],
+            ['id'=>5, 'name'=>'Tarik Rp 10k', 'weight'=>40],
+        ];
+
+        $totalWeight = array_sum(array_column($prizes, 'weight'));
+        $rand = mt_rand(1, $totalWeight);
+        $winner = $prizes[count($prizes)-1];
+        $current = 0;
+        foreach ($prizes as $p) {
+            $current += $p['weight'];
+            if ($rand <= $current) {
+                $winner = $p;
+                break;
+            }
+        }
+
+        $msg = "Selamat! Kamu memenangkan: " . $winner['name'];
+        if ($winner['id'] === 0) {
+            $pdo->prepare("UPDATE users SET membership_id=2 WHERE id=?")->execute([$user['id']]);
+        } elseif ($winner['id'] === 1) {
+            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 100000 WHERE id=?")->execute([$user['id']]);
+        } elseif ($winner['id'] === 2) {
+            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 50000 WHERE id=?")->execute([$user['id']]);
+        } elseif ($winner['id'] === 3) {
+            $code = "SPIN" . strtoupper(substr(md5(uniqid()), 0, 6));
+            $discountsJson = json_encode(['*'=>10000]);
+            $pdo->prepare("INSERT INTO discount_vouchers (code, discounts, max_claims, claims_count) VALUES (?, ?, 1, 0)")->execute([$code, $discountsJson]);
+            $msg .= ". Kode Vouchermu: " . $code;
+        } elseif ($winner['id'] === 4) {
+            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + 20000 WHERE id=?")->execute([$user['id']]);
+        } elseif ($winner['id'] === 5) {
+            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 10000 WHERE id=?")->execute([$user['id']]);
+        }
+
+        $pdo->commit();
+        echo json_encode(['ok'=>true, 'prize_index'=>$winner['id'], 'msg'=>$msg, 'prize_name'=>$winner['name']]);
+    } catch (\Throwable $e) {
+        $pdo->rollBack();
+        echo json_encode(['ok'=>false,'msg'=>'Terjadi kesalahan: '.$e->getMessage()]);
+    }
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim_mission') {
     header('Content-Type: application/json');
     if (!csrf_verify()) { echo json_encode(['ok'=>false,'msg'=>'CSRF tidak valid.']); exit; }
@@ -111,10 +178,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
             ON DUPLICATE KEY UPDATE progress=VALUES(progress), completed_at=COALESCE(completed_at,NOW()), claimed_at=NOW()")
             ->execute([$user['id'], $slug, $progress, $period]);
         // Give reward
-        $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? WHERE id=?")
+        $ticketSql = ($mission['category'] === 'daily') ? ", spin_tickets = spin_tickets + 1" : "";
+        $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? {$ticketSql} WHERE id=?")
             ->execute([$mission['reward'], $user['id']]);
         $pdo->commit();
-        echo json_encode(['ok'=>true,'msg'=>'🎉 Reward diklaim! +'.number_format($mission['reward'],0,',','.').' ke Saldo Tarik.','reward'=>$mission['reward']]);
+        
+        $msg = '🎉 Reward diklaim! +'.number_format($mission['reward'],0,',','.').' ke Saldo Tarik.';
+        if ($mission['category'] === 'daily') $msg .= ' (+1 Tiket Spin)';
+        echo json_encode(['ok'=>true,'msg'=>$msg,'reward'=>$mission['reward']]);
     } catch (\Throwable $e) {
         $pdo->rollBack();
         echo json_encode(['ok'=>false,'msg'=>'Terjadi kesalahan: '.$e->getMessage()]);
@@ -143,6 +214,10 @@ $weekly   = array_filter($missions_data, fn($m) => $m['category'] === 'weekly');
 $lifetime = array_filter($missions_data, fn($m) => $m['category'] === 'lifetime');
 
 $claimed_today = count(array_filter($missions_data, fn($m) => $m['claimed']));
+
+$stmt = $pdo->prepare("SELECT spin_tickets FROM users WHERE id=?");
+$stmt->execute([$user['id']]);
+$spin_tickets = (int)$stmt->fetchColumn();
 
 $pageTitle  = 'Misi — Meloton';
 $activePage = 'missions';
@@ -355,6 +430,33 @@ require dirname(__DIR__) . '/partials/header.php';
     <i class="ph-fill ph-coin" style="position:absolute; right:-10px; bottom:-20px; font-size:80px; color:rgba(255,255,255,0.3); z-index:1;"></i>
   </a>
 
+  <div class="spin-container" style="background: linear-gradient(135deg, #a78bfa, #818cf8); border: 4px solid #c4b5fd; border-radius: 24px; padding: 20px; margin-bottom: 24px; box-shadow: 0 8px 0 #6366f1; text-align: center; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -50px; right: -50px; font-size: 150px; color: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1;"><i class="ph-fill ph-spinner-gap"></i></div>
+    <div style="position: relative; z-index: 2;">
+      <h3 style="margin: 0 0 8px; color: #fff; font-weight: 900; font-size: 20px; text-shadow: 1px 1px 0 #4f46e5;"><i class="ph-fill ph-gift"></i> DAILY SPIN</h3>
+      <p style="margin: 0 0 16px; font-size: 13px; font-weight: 700; color: #e0e7ff;">Gunakan tiket spin untuk memutar roda hadiah!</p>
+      
+      <div style="font-size: 16px; font-weight: 900; background: #fff; color: #4f46e5; padding: 10px 20px; border-radius: 100px; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <i class="ph-fill ph-ticket"></i> Tiket Anda: <span id="spin-tickets-count"><?= $spin_tickets ?></span>
+      </div>
+
+      <div style="position: relative; width: 260px; height: 260px; margin: 0 auto;">
+          <div id="wheel" data-rotation="0" style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 0 6px #6366f1, 0 10px 20px rgba(0,0,0,0.3); background: conic-gradient(#fde047 0% 16.6%, #fbbf24 16.6% 33.3%, #34d399 33.3% 50%, #2dd4bf 50% 66.6%, #60a5fa 66.6% 83.3%, #c084fc 83.3% 100%); transition: transform 4s cubic-bezier(0.2, 0.8, 0.1, 1); position: relative; overflow: hidden;">
+              <div style="position:absolute; top: 15px; left: 50%; transform: translateX(-50%); font-weight: 900; font-size: 12px; color: #78350f; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Juragan Silver</div>
+              <div style="position:absolute; top: 60px; right: 5px; transform: rotate(60deg); font-weight: 900; font-size: 12px; color: #78350f; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Tarik 100k</div>
+              <div style="position:absolute; bottom: 60px; right: 5px; transform: rotate(120deg); font-weight: 900; font-size: 12px; color: #064e3b; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Tarik 50k</div>
+              <div style="position:absolute; bottom: 15px; left: 50%; transform: translateX(-50%) rotate(180deg); font-weight: 900; font-size: 12px; color: #064e3b; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Diskon 10k</div>
+              <div style="position:absolute; bottom: 60px; left: 5px; transform: rotate(240deg); font-weight: 900; font-size: 12px; color: #1e3a8a; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Beli 20k</div>
+              <div style="position:absolute; top: 60px; left: 5px; transform: rotate(300deg); font-weight: 900; font-size: 12px; color: #4c1d95; text-align:center; width:80px; text-shadow: 1px 1px 0 #fff;">Tarik 10k</div>
+          </div>
+          <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid #ef4444; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));"></div>
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: #ef4444; color: #fff; border: 4px solid #fff; box-shadow: 0 4px 0 #b91c1c; z-index: 11; display:flex; align-items:center; justify-content:center;">
+              <button id="btn-spin" onclick="spinWheel()" <?= $spin_tickets <= 0 ? 'disabled' : '' ?> style="background:transparent; border:none; color:#fff; font-weight:900; font-size:16px; cursor:pointer; width:100%; height:100%; outline:none; <?= $spin_tickets <= 0 ? 'opacity:0.5;' : '' ?>">SPIN</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── PANELS ── -->
   
   <!-- DAILY -->
@@ -526,6 +628,99 @@ function claimMission(slug, btn) {
       btn.innerHTML = '<i class="ph-bold ph-gift"></i> Klaim Reward!';
       if (typeof nToast !== 'undefined') nToast('Koneksi terputus.', 'error');
     });
+}
+function spinWheel() {
+    if (typeof window.isSpinning !== 'undefined' && window.isSpinning) return;
+    const btn = document.getElementById('btn-spin');
+    if (btn.disabled) return;
+    
+    window.isSpinning = true;
+    btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+    
+    const fd = new FormData();
+    fd.append('action', 'spin_wheel');
+    fd.append('_csrf', _csrf);
+    
+    fetch(location.href, { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.ok) {
+                window.isSpinning = false;
+                btn.innerHTML = 'SPIN';
+                if (typeof nToast !== 'undefined') nToast(data.msg, 'error');
+                return;
+            }
+            
+            const tc = document.getElementById('spin-tickets-count');
+            let t = parseInt(tc.innerText) - 1;
+            tc.innerText = t >= 0 ? t : 0;
+            
+            const sliceDeg = 60;
+            // Add a slight random offset so it doesn't always land exactly in the middle of the slice
+            const offset = Math.floor(Math.random() * 40) - 20; 
+            const targetRotation = (360 - (data.prize_index * sliceDeg)) + offset; 
+            
+            const fullSpins = 360 * 6;
+            const wheel = document.getElementById('wheel');
+            let currentRot = parseFloat(wheel.dataset.rotation || '0');
+            // Normalize current rotation so we don't just spin backwards if logic misaligns
+            const normalizedCurrent = currentRot % 360;
+            const diff = targetRotation - normalizedCurrent;
+            const finalRotation = currentRot + fullSpins + diff;
+            
+            let ticking;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    const actx = new AudioCtx();
+                    ticking = setInterval(() => {
+                        const osc = actx.createOscillator();
+                        const gain = actx.createGain();
+                        osc.connect(gain); gain.connect(actx.destination);
+                        osc.frequency.value = 800;
+                        gain.gain.setValueAtTime(0, actx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.1, actx.currentTime + 0.01);
+                        gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.05);
+                        osc.start(); osc.stop(actx.currentTime + 0.05);
+                    }, 100);
+                }
+            } catch(e) {}
+            
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            wheel.dataset.rotation = finalRotation;
+            
+            setTimeout(() => {
+                window.isSpinning = false;
+                btn.innerHTML = 'SPIN';
+                if (t <= 0) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                }
+                if (ticking) clearInterval(ticking);
+                
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        const actx = new AudioCtx();
+                        const osc = actx.createOscillator();
+                        const gain = actx.createGain();
+                        osc.connect(gain); gain.connect(actx.destination);
+                        osc.frequency.value = 1200;
+                        gain.gain.setValueAtTime(0, actx.currentTime);
+                        gain.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.5);
+                        osc.start(); osc.stop(actx.currentTime + 0.5);
+                    }
+                } catch(e) {}
+                
+                alert(data.msg); // Using alert so they can copy voucher code easily
+            }, 4000);
+        })
+        .catch(e => {
+            window.isSpinning = false;
+            btn.innerHTML = 'SPIN';
+            alert('Error: ' + e);
+        });
 }
 </script>
 
