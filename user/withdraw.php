@@ -110,11 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($_SESSION[$_ftk_wd] ?? '', $submitted_ftk_wd)) {
         $flash = '⚠️ Request kamu gagal diproses atau gak valid. Coba refresh halaman dulu ya!';
         $flashType = 'error';
-        goto end_wd;
-    }
-    unset($_SESSION[$_ftk_wd]);
-
-    if (!$user['can_withdraw']) {
+    } elseif (!$user['can_withdraw']) {
         $flash = '❌ Akses withdraw kamu dibatasi nih. Hubungi admin yuk buat info lebih lanjut!'; $flashType = 'error';
     } elseif (!$wd_global_enabled) {
         $flash = '🔴 Fitur penarikan saat ini sedang dinonaktifkan secara global (Maintenance).'; $flashType = 'error';
