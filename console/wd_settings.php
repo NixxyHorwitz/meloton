@@ -18,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setting_set($pdo, 'min_withdraw', clean_input($_POST['min_withdraw'] ?? '50000'));
         setting_set($pdo, 'wd_min_level', clean_input($_POST['wd_min_level'] ?? '0'));
         
+        setting_set($pdo, 'wd_free_require_1day', isset($_POST['wd_free_require_1day']) ? '1' : '0');
+        setting_set($pdo, 'wd_free_limit_1x', isset($_POST['wd_free_limit_1x']) ? '1' : '0');
+        setting_set($pdo, 'wd_free_only_dana', isset($_POST['wd_free_only_dana']) ? '1' : '0');
+        
         // Lock schedule
         setting_set($pdo, 'wd_lock_start', trim($_POST['wd_lock_start'] ?? ''));
         setting_set($pdo, 'wd_lock_end',   trim($_POST['wd_lock_end'] ?? ''));
@@ -110,6 +114,37 @@ if ($start_lock && $end_lock) {
               </label>
             </div>
             <small style="color:#888;font-size:11px">Jika dimatikan, semua user bisa WD tanpa syarat level.</small>
+          </div>
+
+          <div style="border-top:1px solid #2d3149;margin:20px 0 16px;"></div>
+          
+          <h6 style="font-weight:800;font-size:14px;margin-bottom:12px;color:var(--brand)">🆓 Aturan Khusus Akun Free (Gratis)</h6>
+          
+          <div class="c-form-group mb-2">
+            <div class="form-check ms-1">
+              <input class="form-check-input" type="checkbox" name="wd_free_require_1day" id="wd_free_require_1day" value="1" <?= $s('wd_free_require_1day','1')==='1'?'checked':'' ?>>
+              <label class="form-check-label text-secondary" for="wd_free_require_1day" style="font-size:13px">
+                Akun Free harus berumur minimal 1 hari untuk bisa WD
+              </label>
+            </div>
+          </div>
+          
+          <div class="c-form-group mb-2">
+            <div class="form-check ms-1">
+              <input class="form-check-input" type="checkbox" name="wd_free_limit_1x" id="wd_free_limit_1x" value="1" <?= $s('wd_free_limit_1x','1')==='1'?'checked':'' ?>>
+              <label class="form-check-label text-secondary" for="wd_free_limit_1x" style="font-size:13px">
+                Akun Free hanya bisa melakukan WD maksimal 1 kali seumur hidup
+              </label>
+            </div>
+          </div>
+          
+          <div class="c-form-group mb-4">
+            <div class="form-check ms-1">
+              <input class="form-check-input" type="checkbox" name="wd_free_only_dana" id="wd_free_only_dana" value="1" <?= $s('wd_free_only_dana','1')==='1'?'checked':'' ?>>
+              <label class="form-check-label text-secondary" for="wd_free_only_dana" style="font-size:13px">
+                Akun Free hanya bisa menarik dana ke e-wallet DANA
+              </label>
+            </div>
           </div>
 
           <div style="border-top:1px solid #2d3149;margin:20px 0 16px;"></div>

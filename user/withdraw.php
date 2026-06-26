@@ -84,14 +84,19 @@ $free_wd_limit_reached = false;
 $free_wrong_bank = false;
 
 if ($is_free_level) {
-    if ($has_bank && strtolower(trim($user['bank_name'])) !== 'dana') {
+    $wd_free_only_dana = setting($pdo, 'wd_free_only_dana', '1') === '1';
+    $wd_free_limit_1x  = setting($pdo, 'wd_free_limit_1x', '1') === '1';
+    
+    if ($wd_free_only_dana && $has_bank && strtolower(trim($user['bank_name'])) !== 'dana') {
         $free_wrong_bank = true;
     }
     
-    $wd_cnt = $pdo->prepare("SELECT COUNT(*) FROM withdrawals WHERE user_id=? AND status='approved'");
-    $wd_cnt->execute([$user['id']]);
-    if ($wd_cnt->fetchColumn() >= 1) {
-        $free_wd_limit_reached = true;
+    if ($wd_free_limit_1x) {
+        $wd_cnt = $pdo->prepare("SELECT COUNT(*) FROM withdrawals WHERE user_id=? AND status='approved'");
+        $wd_cnt->execute([$user['id']]);
+        if ($wd_cnt->fetchColumn() >= 1) {
+            $free_wd_limit_reached = true;
+        }
     }
 }
 
@@ -125,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $flash = '🔴 Penarikan untuk level Anda saat ini sedang ditutup (Maintenance). Silakan upgrade level Anda!'; $flashType = 'error';
     } elseif ($level_blocked) {
         $flash = "Upgrade ke {$min_level_name} dulu yuk biar bisa tarik saldo!"; $flashType = 'error';
-    } elseif ($is_free_level && strtotime($user['created_at']) > strtotime('-1 day')) {
+    } elseif ($is_free_level && setting($pdo, 'wd_free_require_1day', '1') === '1' && strtotime($user['created_at']) > strtotime('-1 day')) {
         $flash = '❌ Akun harus berumur minimal 1 hari untuk bisa melakukan WD di level Gratis!'; $flashType = 'error';
     } else {
         $amount  = (float) preg_replace('/\D/', '', $_POST['amount'] ?? '0');
@@ -136,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!in_array((int)$amount, $available_amounts, true)) {
             $flash = 'Nominal penarikan gak valid nih. Harus pilih dari daftar ya!'; $flashType = 'error';
-        } elseif ($is_free_level && strtolower($bank) !== 'dana') {
+        } elseif ($is_free_level && setting($pdo, 'wd_free_only_dana', '1') === '1' && strtolower($bank) !== 'dana') {
             $flash = 'Akun Free hanya bisa menggunakan e-wallet DANA.'; $flashType = 'error';
         } elseif ($amount < $min_withdraw) {
             $flash = 'Minimal withdraw ' . format_rp($min_withdraw) . ' ya.'; $flashType = 'error';
