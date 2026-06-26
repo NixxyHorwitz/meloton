@@ -78,14 +78,19 @@ $pending_wd = $pdo->prepare("SELECT id FROM withdrawals WHERE user_id=? AND stat
 $pending_wd->execute([$user['id']]);
 $has_pending_wd = (bool)$pending_wd->fetchColumn();
 
-// Cek batas WD untuk akun free
 $is_free_level = !$membership_active;
 $free_wd_limit_reached = false;
 $free_wrong_bank = false;
+$free_age_blocked = false;
 
 if ($is_free_level) {
     $wd_free_only_dana = setting($pdo, 'wd_free_only_dana', '1') === '1';
     $wd_free_limit_1x  = setting($pdo, 'wd_free_limit_1x', '1') === '1';
+    $wd_free_require_1day = setting($pdo, 'wd_free_require_1day', '1') === '1';
+    
+    if ($wd_free_require_1day && strtotime($user['created_at']) > strtotime('-1 day')) {
+        $free_age_blocked = true;
+    }
     
     if ($wd_free_only_dana && $has_bank && strtolower(trim($user['bank_name'])) !== 'dana') {
         $free_wrong_bank = true;
@@ -126,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $flash = '🔴 Penarikan untuk level Anda saat ini sedang ditutup (Maintenance). Silakan upgrade level Anda!'; $flashType = 'error';
     } elseif ($level_blocked) {
         $flash = "Upgrade ke {$min_level_name} dulu yuk biar bisa tarik saldo!"; $flashType = 'error';
-    } elseif ($is_free_level && setting($pdo, 'wd_free_require_1day', '1') === '1' && strtotime($user['created_at']) > strtotime('-1 day')) {
-        $flash = '❌ Akun harus berumur min. 1 hari untuk WD (Level Gratis).<br><span style="color:#fde047;font-size:12px;font-weight:800;display:inline-block;margin-top:4px">🚀 Mau WD instan? Yuk naik level di atas gratis!</span>'; $flashType = 'error';
+    } elseif ($free_age_blocked) {
+        $flash = 'Akun harus berumur min. 1 hari untuk WD (Level Gratis).'; $flashType = 'error';
     } else {
         $amount  = (float) preg_replace('/\D/', '', $_POST['amount'] ?? '0');
         
@@ -431,6 +436,15 @@ require dirname(__DIR__) . '/partials/header.php';
     </div>
     <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
   </div>
+  <?php elseif ($free_age_blocked): ?>
+  <div class="wd-alert wd-alert--warn">
+    <div class="wd-alert-icon">⏳</div>
+    <div style="flex:1">
+      <div style="margin-bottom:2px"><strong>Level Gratis: Akun Baru</strong></div>
+      <div style="font-size:10px;font-weight:700">Akun harus berumur min. 1 hari untuk bisa WD.</div>
+    </div>
+    <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+  </div>
   <?php endif; ?>
 
   <!-- FORM CARD -->
@@ -509,7 +523,7 @@ require dirname(__DIR__) . '/partials/header.php';
       <?php endif; ?>
 
       <!-- Submit logic -->
-      <?php if ($free_wd_limit_reached || $free_wrong_bank || $wd_locked || $level_blocked): ?>
+      <?php if ($free_wd_limit_reached || $free_wrong_bank || $wd_locked || $level_blocked || $free_age_blocked): ?>
         <button type="button" class="wd-submit" disabled>❌ Tidak Memenuhi Syarat</button>
       <?php elseif ($has_pending_wd): ?>
         <button type="button" class="wd-submit" disabled>⏳ Ada Penarikan Pending</button>
