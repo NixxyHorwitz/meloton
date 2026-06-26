@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $can_wd    = (int)($_POST['can_withdraw'] ?? 1);
         $can_chat  = (int)($_POST['can_chat'] ?? 1);
         $new_pass  = trim($_POST['new_password'] ?? '');
+        $spin_tickets = (int)($_POST['spin_tickets'] ?? 0);
 
         $errors = [];
         if (strlen($username) < 3) $errors[] = 'Username minimal 3 karakter.';
@@ -67,11 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $is_promo  = (int)($_POST['is_promotor'] ?? 0);
             $sql = "UPDATE users SET username=?, email=?, whatsapp=?, membership_id=?, membership_expires_at=?,
                     balance_wd=?, balance_dep=?, total_earned=?, is_active=?, can_withdraw=?, can_chat=?,
-                    bank_name=?, account_number=?, account_name=?, refund_cut_percent=?, is_refund_enabled=?, is_promotor=? WHERE id=?";
+                    bank_name=?, account_number=?, account_name=?, refund_cut_percent=?, is_refund_enabled=?, is_promotor=?, spin_tickets=? WHERE id=?";
             $pdo->prepare($sql)->execute([
                 $username, $email, $whatsapp, $mem_id, $mem_exp_val,
                 $bal_wd, $bal_dep, $total_e, $is_active, $can_wd, $can_chat,
-                $bank_name, $account_number, $account_name, $ref_cut, $ref_en, $is_promo, $uid
+                $bank_name, $account_number, $account_name, $ref_cut, $ref_en, $is_promo, $spin_tickets, $uid
             ]);
             if ($new_pass !== '') {
                 $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")
@@ -350,6 +351,10 @@ require __DIR__ . '/partials/header.php';
             <input type="number" name="total_earned" id="eu-total-earned" class="c-form-control" step="0.01" min="0">
           </div>
           <div class="c-form-group mb-3">
+            <label class="c-label">Spin Tickets 🎫</label>
+            <input type="number" name="spin_tickets" id="eu-spin-tickets" class="c-form-control" min="0">
+          </div>
+          <div class="c-form-group mb-3">
             <label class="c-label">Refund Cut (%)</label>
             <input type="number" name="refund_cut_percent" id="eu-ref-cut" class="c-form-control" step="0.01" min="0" max="100" placeholder="Cut %">
           </div>
@@ -478,6 +483,7 @@ function editUser(u) {
   document.getElementById('eu-bal-wd').value      = u.balance_wd;
   document.getElementById('eu-bal-dep').value     = u.balance_dep;
   document.getElementById('eu-total-earned').value= u.total_earned;
+  document.getElementById('eu-spin-tickets').value= u.spin_tickets !== undefined ? u.spin_tickets : 0;
 
   document.getElementById('eu-is-active').value   = u.is_active;
   document.getElementById('eu-can-wd').value      = u.can_withdraw !== undefined ? u.can_withdraw : 1;
