@@ -10,7 +10,13 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS minigame_logs (
     score INT NOT NULL,
     reward DECIMAL(10,2) NOT NULL,
     played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+// Ensure settings exist for configuration
+$pdo->exec("INSERT IGNORE INTO settings (setting_key, setting_value) VALUES 
+    ('minigame_reward_per_click', '10'),
+    ('minigame_base_bonus', '50')
+");
 
 // Handle AJAX Claim
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'claim') {
@@ -31,12 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
     
-    $reward_per_click = 10; // Rp 10 per click
+    $reward_per_click = (int)setting($pdo, 'minigame_reward_per_click', '10');
+    $base_bonus = (int)setting($pdo, 'minigame_base_bonus', '50');
     $reward = $clicks * $reward_per_click;
     
     // Base bonus just for playing
     if ($reward > 0) {
-        $reward += 50; 
+        $reward += $base_bonus; 
     }
     
     try {
@@ -128,10 +135,10 @@ require dirname(__DIR__) . '/partials/header.php';
                     
                     <div id="reward-success" style="display:none;">
                         <div style="background:#ecfdf5; border:2px dashed #10b981; padding:16px; border-radius:16px; margin-bottom:16px;">
-                            <p style="font-size:12px; color:#047857; font-weight:700; margin:0 0 4px;">Selamat! Kamu mendapatkan:</p>
+                            <p style="font-size:12px; color:#047857; font-weight:700; margin:0 0 4px;">Selamat! Saldo Tarik bertambah:</p>
                             <h1 style="font-size:28px; font-weight:900; color:#059669; margin:0;">+ <span id="reward-amount">Rp 0</span></h1>
                         </div>
-                        <a href="/missions" class="btn-back" style="width:100%; text-align:center;">Mantap!</a>
+                        <button onclick="window.location.href='/missions'" class="btn-back" style="width:100%; text-align:center; border:none; cursor:pointer; font-family:inherit;">Mantap!</button>
                     </div>
                 </div>
             </div>
@@ -341,8 +348,34 @@ document.addEventListener('DOMContentLoaded', () => {
     let timeLeft = 10.0;
     let isPlaying = false;
     let timerInterval;
+    let audioCtx;
+
+    function initAudio() {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) audioCtx = new AudioContext();
+        }
+    }
+
+    function playCoinSound() {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 1200 + Math.random() * 400; // Random high pitch
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        } catch(e) {}
+    }
 
     startBtn.addEventListener('click', () => {
+        initAudio(); // Must be initialized inside user interaction
         document.getElementById('start-overlay').style.display = 'none';
         playArea.style.display = 'flex';
         startGame();
@@ -363,6 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Vibrate
         if (navigator.vibrate) navigator.vibrate(20);
+        
+        // SFX
+        playCoinSound();
         
         // Spawn floating text
         spawnFloatingText(e);
