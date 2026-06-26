@@ -12,6 +12,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id     = (int)($_POST['id'] ?? 0);
     $note   = trim($_POST['note'] ?? '');
 
+    if ($action === 'bulk_refund_pending') {
+        $wds = $pdo->query("SELECT * FROM withdrawals WHERE status='pending'")->fetchAll();
+        $count = 0;
+        if ($wds) {
+            $pdo->beginTransaction();
+            try {
+                foreach ($wds as $wd) {
+                    $pdo->prepare("UPDATE users SET balance_wd=balance_wd+? WHERE id=?")->execute([$wd['amount'], $wd['user_id']]);
+                    $pdo->prepare("UPDATE withdrawals SET status='rejected',admin_note=?,processed_at=NOW() WHERE id=?")->execute(['Ditolak massal & refund', $wd['id']]);
+                    $count++;
+                }
+                $pdo->commit();
+                $flash = "$count Withdraw pending berhasil di-reject massal dan saldo dikembalikan.";
+            } catch (\Throwable $e) {
+                $pdo->rollBack();
+                $flash = 'Gagal memproses bulk refund: ' . $e->getMessage();
+                $flashType = 'error';
+            }
+        } else {
+            $flash = "Tidak ada withdraw pending.";
+            $flashType = 'error';
+        }
+    }
+
     if ($action === 'approve' && $id) {
         $wd = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? AND status='pending'");
         $wd->execute([$id]); $wd = $wd->fetch();
@@ -73,6 +97,13 @@ require __DIR__ . '/partials/header.php';
 
 <div class="d-flex align-items-center justify-content-between mb-4">
   <div><h5 class="mb-0 fw-bold">⬇️ Manajemen Withdraw</h5></div>
+  <?php if ($filter === 'pending' && !empty($countMap['pending'])): ?>
+  <form method="POST" onsubmit="return confirm('Yakin ingin me-reject dan refund SEMUA withdraw yang pending (<?= $countMap['pending'] ?> data)? Aksi ini tidak dapat dibatalkan!');">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="bulk_refund_pending">
+      <button type="submit" class="btn btn-sm btn-danger fw-bold" style="border-radius:10px;box-shadow:0 3px 0 #b91c1c;">❌ Reject & Refund Semua Pending</button>
+  </form>
+  <?php endif; ?>
 </div>
 
 <?php if ($flash): ?>
