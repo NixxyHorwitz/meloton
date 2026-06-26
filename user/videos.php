@@ -122,8 +122,8 @@ $activePage = 'videos';
 /* Casual Game Grid & Cards (Compact) */
 .vgrid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-    gap: 10px; 
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+    gap: 12px; 
     margin-bottom: 20px; 
 }
 .vcard { 
@@ -211,7 +211,7 @@ $activePage = 'videos';
     gap: 4px; 
 }
 .vcard__title { 
-    font-size: 11px; 
+    font-size: 13px; 
     font-weight: 800; 
     color: #0f172a; 
     display: -webkit-box; 
@@ -219,13 +219,13 @@ $activePage = 'videos';
     -webkit-box-orient: vertical; 
     overflow: hidden; 
     line-height: 1.35; 
-    height: 30px; 
+    height: 36px; 
 }
 .vcard__meta { 
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
-    font-size: 10px; 
+    font-size: 11px; 
     font-weight: 800; 
     color: #64748b; 
     border-top: 1.5px dashed #e2e8f0;
@@ -241,7 +241,7 @@ $activePage = 'videos';
 .vcard__reward--done { 
     color: #10b981; 
 }
-</style>style>
+</style>
 
 <div class="vgrid" id="vgrid">
 <?php foreach ($videos as $v):
