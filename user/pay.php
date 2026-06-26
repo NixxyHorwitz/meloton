@@ -125,242 +125,167 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 <link rel="apple-touch-icon" href="<?= htmlspecialchars($fav_url) ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="/assets/css/app.css?v=<?= @filemtime($_SERVER['DOCUMENT_ROOT'].'/assets/css/app.css') ?: time() ?>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-* { box-sizing: border-box; }
-.pay-wrap { min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); }
+/* Scoped overrides */
+.exp-pill {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg, #fef08a, #fde047); border: 2.5px solid #ca8a04;
+  border-radius: 20px; padding: 10px 16px; margin-bottom: 16px;
+  box-shadow: 0 5px 0 #ca8a04; color: #854d0e; font-weight: 900; font-size: 14px;
+}
+.exp-pill__dot {
+  width: 12px; height: 12px; border-radius: 50%; background: #ef4444;
+  animation: blink 1s infinite; border: 2.5px solid #b91c1c;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.exp-pill__time { font-variant-numeric: tabular-nums; letter-spacing: 1px; }
 
-/* Topbar */
-.pay-topbar {
-  background:var(--white); border-bottom:2.5px solid var(--ink);
-  padding:0 16px; height:52px;
-  display:flex; align-items:center; justify-content:space-between;
-  position:sticky; top:0; z-index:100;
+.qr-wrapper {
+  background: #fff; padding: 12px; border-radius: 24px;
+  border: 4px dashed var(--brand); display: inline-block; margin-bottom: 16px;
+  box-shadow: 0 12px 24px rgba(8,145,178,0.15); position: relative;
 }
-.pay-topbar__back {
-  display:flex; align-items:center; gap:6px;
-  color:var(--ink); text-decoration:none; font-weight:800; font-size:14px;
+.qr-wrapper img { width: 240px; height: 240px; display: block; border-radius: 12px; }
+.qr-wrapper::before, .qr-wrapper::after {
+  content: ''; position: absolute; width: 28px; height: 28px; border: 5px solid var(--brand);
 }
-.pay-topbar__title { font-size:14px; font-weight:900; }
-.pay-topbar__amt {
-  font-size:13px; font-weight:900;
-  background:var(--yellow); border:2px solid var(--ink);
-  border-radius:8px; padding:4px 10px;
-}
+.qr-wrapper::before { top: -5px; left: -5px; border-right: none; border-bottom: none; border-radius: 16px 0 0 0; }
+.qr-wrapper::after { bottom: -5px; right: -5px; border-left: none; border-top: none; border-radius: 0 0 16px 0; }
 
-/* Body */
-.pay-body { padding:16px; flex:1; display:flex; flex-direction:column; gap:14px; }
-
-/* Expiry strip */
-.exp-strip {
-  display:flex; align-items:center; gap:10px;
-  background:#fff7ed; border:2px solid #fb923c;
-  border-radius:10px; padding:10px 14px;
+.step-bubble {
+  width: 28px; height: 28px; background: #fff; border: 2.5px solid #d97706;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #b45309; flex-shrink: 0;
+  box-shadow: 0 3px 0 #d97706; margin-top: 2px;
 }
-.exp-strip__dot {
-  width:9px; height:9px; border-radius:50%;
-  background:#f97316; flex-shrink:0;
-  animation:blink .9s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-.exp-strip__lbl  { font-size:13px; font-weight:700; flex:1; color:#9a3412; }
-.exp-strip__time { font-size:15px; font-weight:900; color:#9a3412; font-variant-numeric:tabular-nums; }
-
-/* QR Block */
-.qr-block {
-  background:#fff; border:2.5px solid var(--ink);
-  border-radius:16px; box-shadow:4px 4px 0 var(--ink);
-  padding:20px 16px 16px; text-align:center;
-}
-.qr-block img {
-  width:240px; height:240px;
-  border:2.5px solid var(--ink); border-radius:12px;
-  display:block; margin:0 auto 14px;
-  padding:10px; background:#fff;
-}
-.qr-block__amt  { font-size:24px; font-weight:900; letter-spacing:-1px; margin-bottom:2px; }
-.qr-block__id   { font-size:12px; font-weight:700; color:#aaa; margin-bottom:6px; }
-.qr-block__note { font-size:12px; color:#888; font-weight:600; margin-bottom:14px; }
-.qr-block__row  { display:flex; gap:10px; }
-.qr-btn {
-  flex:1; display:inline-flex; align-items:center; justify-content:center; gap:5px;
-  padding:10px 8px; font-size:13px; font-weight:800;
-  border:2px solid var(--ink); border-radius:9px; cursor:pointer;
-  text-decoration:none; color:var(--ink); transition:opacity .15s;
-}
-.qr-btn:active { opacity:.65; }
-.qr-btn--dl   { background:var(--yellow); box-shadow:3px 3px 0 var(--ink); }
-.qr-btn--open { background:var(--white); }
-
-/* Steps */
-.steps-card {
-  background:var(--yellow); border:2px solid var(--ink);
-  border-radius:12px; padding:14px 16px;
-  display:flex; flex-direction:column; gap:10px;
-}
-.steps-card__title { font-size:13px; font-weight:900; }
-.step-row  { display:flex; align-items:flex-start; gap:10px; }
-.step-num  {
-  width:24px; height:24px; flex-shrink:0;
-  background:#fff; border:2px solid var(--ink); border-radius:50%;
-  font-size:11px; font-weight:900;
-  display:flex; align-items:center; justify-content:center; margin-top:1px;
-}
-.step-txt  { font-size:13px; font-weight:700; line-height:1.4; }
-
-/* Upload */
-.upload-card {
-  background:#fff; border:2px solid var(--ink);
-  border-radius:12px; padding:16px;
-}
-.upload-card__title { font-size:14px; font-weight:900; margin-bottom:12px; }
-
-/* Actions */
-.pay-actions { display:flex; flex-direction:column; gap:10px; }
-
-/* Confirmed */
-.pay-confirmed {
-  text-align:center; padding:32px 16px;
-  background:var(--lime); border:2.5px solid var(--ink);
-  border-radius:16px; box-shadow:4px 4px 0 var(--ink);
-}
+.step-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.step-item:last-child { margin-bottom: 0; }
+.step-text { font-size: 13px; font-weight: 700; color: #78350f; line-height: 1.4; padding-top: 4px; }
 
 /* Toast */
-#toast-container {
-  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-  z-index:9999; display:flex; flex-direction:column; gap:8px;
-  pointer-events:none; width:calc(100% - 32px); max-width:380px;
-}
-.nb-toast {
-  display:flex; align-items:center; gap:10px;
-  padding:12px 16px; border:2.5px solid var(--ink); border-radius:11px;
-  box-shadow:3px 3px 0 var(--ink); font-size:14px; font-weight:800; color:var(--ink);
-  pointer-events:auto; width:100%;
-  animation:toastIn .22s cubic-bezier(.2,.8,.4,1.2) both;
-}
+#toast-container { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; width:calc(100% - 32px); max-width:380px; }
+.nb-toast { display:flex; align-items:center; gap:10px; padding:12px 16px; border:2.5px solid var(--ink); border-radius:14px; box-shadow:0 5px 0 var(--ink); font-size:14px; font-weight:800; color:var(--ink); pointer-events:auto; width:100%; animation:toastIn .22s cubic-bezier(.2,.8,.4,1.2) both; background: var(--white); }
 .nb-toast.out { animation:toastOut .18s ease forwards; }
 .nb-toast--success { background:#d1fae5; }
 .nb-toast--error   { background:#fee2e2; }
 .nb-toast--warn    { background:#fff3cd; }
-.nb-toast__icon { font-size:18px; flex-shrink:0; }
-.nb-toast__msg  { flex:1; line-height:1.3; }
-@keyframes toastIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-@keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(6px)} }
+@keyframes toastIn  { from{opacity:0;transform:translateY(12px) scale(0.9)} to{opacity:1;transform:none scale(1)} }
+@keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(6px) scale(0.95)} }
 </style>
 </head>
 <body>
 <div id="toast-container"></div>
-<div class="pay-wrap">
+<div class="app-shell" style="background:var(--bg); margin:0 auto; padding-bottom:40px; min-height:100dvh;">
 
-  <div class="pay-topbar">
-    <a href="/deposit" class="pay-topbar__back">
-      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      Kembali
+  <div class="topbar">
+    <a href="/deposit" style="color:#fff; text-decoration:none; font-weight:800; display:flex; align-items:center; gap:6px;">
+      <i class="fas fa-chevron-left"></i> Kembali
     </a>
-    <div class="pay-topbar__title">📱 Bayar QRIS</div>
-    <div class="pay-topbar__amt"><?= format_rp($amount) ?></div>
+    <div style="color:#fff; font-weight:900; font-size:16px; text-shadow:0 1px 0 #075985;">Bayar QRIS</div>
+    <div style="background:#fde68a; color:#0e7490; font-weight:900; font-size:12px; padding:4px 10px; border-radius:12px; box-shadow:0 2px 0 #0c4a6e; border:1.5px solid #fff;"><?= format_rp($amount) ?></div>
   </div>
 
-  <div class="pay-body">
+  <div style="padding:16px 14px; display:flex; flex-direction:column; gap:16px;">
     <?php if ($flash): ?>
-    <div class="alert alert--<?= $flashType==='error'?'error':'success' ?>"><?= htmlspecialchars($flash) ?></div>
+    <div class="alert alert--<?= $flashType==='error'?'error':'success' ?>" style="box-shadow:var(--shadow-sm);"><i class="fas fa-<?= $flashType==='error'?'exclamation-circle':'check-circle' ?>"></i> <?= htmlspecialchars($flash) ?></div>
     <?php endif; ?>
 
     <?php if ($dep['status'] === 'confirmed'): ?>
-    <div class="pay-confirmed">
-      <div style="font-size:48px;margin-bottom:10px">✅</div>
-      <div style="font-size:20px;font-weight:900;margin-bottom:6px">Pembayaran Dikonfirmasi!</div>
-      <div style="font-size:13px;color:#555;margin-bottom:18px">Saldo beli kamu sudah ditambahkan.</div>
-      <a href="/home" class="btn btn--primary btn--full">🏠 Ke Beranda</a>
+    <div class="card card--lime" style="text-align:center; padding:32px 16px; border-color:#22c55e; box-shadow:0 6px 0 #16a34a;">
+      <div style="font-size:56px; margin-bottom:10px; text-shadow:0 4px 0 rgba(0,0,0,0.1)">🎉</div>
+      <div style="font-size:22px; font-weight:900; margin-bottom:6px; color:#14532d;">Pembayaran Sukses!</div>
+      <div style="font-size:13px; color:#166534; font-weight:700; margin-bottom:24px;">Saldo belimu sudah otomatis ditambahkan.</div>
+      <a href="/home" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #22c55e, #16a34a); border-color:#86efac; box-shadow:0 5px 0 #15803d;"><i class="fas fa-home"></i> Ke Beranda</a>
     </div>
 
     <?php elseif ($dep['proof_image']): ?>
-    <div style="text-align:center;padding:32px 0">
-      <div style="font-size:48px;margin-bottom:10px">⏳</div>
-      <div style="font-size:16px;font-weight:900;margin-bottom:6px">Bukti Sudah Diupload</div>
-      <div style="font-size:13px;color:#777;margin-bottom:20px">Menunggu konfirmasi admin. Biasanya 1–24 jam.</div>
-      <a href="/history" class="btn btn--ghost btn--full">📜 Lihat Riwayat</a>
+    <div class="card card--sky" style="text-align:center; padding:32px 16px; border-color:#3b82f6; box-shadow:0 6px 0 #2563eb;">
+      <div style="font-size:56px; margin-bottom:10px; text-shadow:0 4px 0 rgba(0,0,0,0.1)">⏳</div>
+      <div style="font-size:20px; font-weight:900; margin-bottom:6px; color:#1e3a8a;">Bukti Diterima</div>
+      <div style="font-size:13px; color:#1e40af; font-weight:700; margin-bottom:24px;">Tim admin sedang mengecek pembayaranmu.<br>Biasanya proses memakan waktu 1–15 menit.</div>
+      <a href="/history" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #3b82f6, #2563eb); border-color:#93c5fd; box-shadow:0 5px 0 #1d4ed8;"><i class="fas fa-history"></i> Lihat Riwayat</a>
     </div>
 
     <?php else: ?>
 
-    <!-- Expiry strip — 1 jam dari created_at, persistent across refresh -->
-    <div class="exp-strip" id="exp-strip">
-      <div class="exp-strip__dot" id="exp-dot"></div>
-      <div class="exp-strip__lbl" id="exp-lbl">⏳ Menunggu pembayaran</div>
-      <div class="exp-strip__time" id="exp-timer">--:--</div>
+    <div class="exp-pill" id="exp-strip">
+      <div class="exp-pill__dot" id="exp-dot"></div>
+      <div style="flex:1;" id="exp-lbl">Menunggu Pembayaran</div>
+      <div class="exp-pill__time" id="exp-timer">--:--</div>
     </div>
 
-    <!-- QR Block -->
     <?php if ($qr_url): ?>
-    <div class="qr-block">
-      <img id="qr-img" src="<?= htmlspecialchars($qr_url) ?>" alt="QRIS">
-      <div class="qr-block__amt"><?= format_rp($amount) ?></div>
-      <div class="qr-block__id">Deposit #<?= $dep_id ?></div>
-      <div class="qr-block__note">Scan dengan app bank / dompet digital manapun</div>
-      <div class="qr-block__row">
-        <a href="<?= htmlspecialchars($qr_dl_url) ?>" class="qr-btn qr-btn--dl">⬇ Unduh QR</a>
-        <a href="<?= htmlspecialchars($qr_url) ?>" target="_blank" class="qr-btn qr-btn--open">↗ Buka</a>
+    <div class="card" style="text-align:center; padding:28px 16px 20px;">
+      <div class="qr-wrapper">
+        <img id="qr-img" src="<?= htmlspecialchars($qr_url) ?>" alt="QRIS">
+      </div>
+      <div style="font-size:32px; font-weight:900; color:var(--ink); letter-spacing:-1px; text-shadow:0 2px 0 var(--brand-light); line-height:1; margin-bottom:8px;"><?= format_rp($amount) ?></div>
+      <div style="margin-bottom:20px;"><span style="font-size:12px; font-weight:800; color:var(--brand); background:var(--brand-light); padding:4px 12px; border-radius:20px; border:1.5px solid var(--accent-2);">ID Depo: #<?= $dep_id ?></span></div>
+      
+      <div style="font-size:13px; color:var(--text-muted); font-weight:700; margin-bottom:20px; line-height:1.4;">Scan menggunakan aplikasi Bank atau E-Wallet<br>(OVO, Dana, GoPay, dll)</div>
+      
+      <div style="display:flex; gap:10px; width:100%;">
+        <a href="<?= htmlspecialchars($qr_dl_url) ?>" class="btn btn--primary" style="flex:1; background:linear-gradient(135deg, #f59e0b, #d97706); border-color:#fde68a; box-shadow:0 5px 0 #b45309;"><i class="fas fa-download"></i> Unduh QR</a>
+        <a href="<?= htmlspecialchars($qr_url) ?>" target="_blank" class="btn btn--ghost" style="flex:1; background:#fff; color:var(--brand); border-color:var(--brand-light); box-shadow:0 5px 0 var(--brand-light); text-shadow:none;"><i class="fas fa-external-link-alt"></i> Buka QR</a>
       </div>
     </div>
     <?php else: ?>
-    <div class="alert alert--warn">QRIS belum dikonfigurasi. Hubungi admin.</div>
+    <div class="alert alert--warn" style="box-shadow:var(--shadow-sm);"><i class="fas fa-exclamation-triangle"></i> QRIS belum dikonfigurasi. Hubungi admin.</div>
     <?php endif; ?>
 
-    <!-- Info Unique Nominal -->
-    <div style="font-size:12px;margin-bottom:14px;background:#fff3cd;border:2px dashed #f59e0b;color:#b45309;border-radius:12px;padding:12px;display:flex;gap:8px;align-items:flex-start">
-      <div style="font-size:20px;line-height:1">💡</div>
+    <div class="alert alert--warn" style="align-items:flex-start; box-shadow:var(--shadow-sm); border-style:dashed;">
+      <i class="fas fa-lightbulb" style="font-size:20px; color:#d97706; margin-top:2px;"></i>
       <div>
-        <div style="font-weight:900;margin-bottom:3px">Keberatan dengan nominal unik?</div>
-        Jika saldo Anda pas-pasan dan tidak bisa mentransfer nominal persis di atas, silakan hubungi <strong>Admin via LiveChat</strong> (ikon di pojok kanan bawah) untuk bantuan.
+        <div style="font-weight:900; margin-bottom:4px; font-size:14px;">Keberatan nominal unik?</div>
+        <div style="font-size:12px; font-weight:600; line-height:1.4;">Jika saldo e-wallet tidak pas, hubungi <strong>LiveChat Admin</strong> untuk bantuan transfer nominal bulat.</div>
       </div>
     </div>
 
-    <!-- Steps -->
-    <div class="steps-card">
-      <div class="steps-card__title">📋 Cara Bayar</div>
-      <div class="step-row"><div class="step-num">1</div><div class="step-txt">Buka app bank atau e-wallet (GoPay, OVO, DANA, dll)</div></div>
-      <div class="step-row"><div class="step-num">2</div><div class="step-txt">Scan QR di atas — nominal sudah otomatis terisi</div></div>
-      <div class="step-row"><div class="step-num">3</div><div class="step-txt">Konfirmasi pembayaran di aplikasi kamu</div></div>
-      <?php if ($confirm_mode === 'manual'): ?>
-      <div class="step-row"><div class="step-num">4</div><div class="step-txt">Screenshot bukti &amp; upload di bawah ini</div></div>
-      <?php else: ?>
-      <div class="step-row"><div class="step-num">4</div><div class="step-txt">Tunggu — saldo otomatis masuk dalam hitungan detik ⚡</div></div>
-      <?php endif; ?>
+    <div class="card card--yellow" style="border-color:#ca8a04; box-shadow:0 6px 0 #ca8a04;">
+      <div class="card__body" style="background:transparent; padding:16px;">
+        <div style="font-weight:900; font-size:15px; color:#9a3412; margin-bottom:18px; display:flex; align-items:center; gap:8px;"><i class="fas fa-list-ol"></i> Cara Bayar Praktis</div>
+        <div class="step-item"><div class="step-bubble">1</div><div class="step-text">Buka aplikasi E-Wallet (OVO, Dana, GoPay, LinkAja) atau m-Banking kamu.</div></div>
+        <div class="step-item"><div class="step-bubble">2</div><div class="step-text">Pilih menu Scan QR / Bayar, lalu arahkan kamera ke QR Code di atas.</div></div>
+        <div class="step-item"><div class="step-bubble">3</div><div class="step-text">Nominal akan terisi otomatis. Cek kesesuaian dan Konfirmasi pembayaran.</div></div>
+        <?php if ($confirm_mode === 'manual'): ?>
+        <div class="step-item"><div class="step-bubble">4</div><div class="step-text">Screenshot bukti berhasil dan upload di kolom bawah ini.</div></div>
+        <?php else: ?>
+        <div class="step-item"><div class="step-bubble">4</div><div class="step-text">Selesai! Tunggu beberapa detik dan saldomu akan otomatis masuk.</div></div>
+        <?php endif; ?>
+      </div>
     </div>
 
-    <!-- Upload bukti -->
     <?php 
     $pending_secs = time() - $created_ts;
-    // Tampilkan jika manual, ATAU jika sudah lewat 5 menit (300 detik)
     $show_upload = ($confirm_mode !== 'auto' || $pending_secs >= 300);
     ?>
-    <div class="upload-card" id="upload-proof-card" style="display: <?= $show_upload ? 'block' : 'none' ?>;">
-      <div class="upload-card__title">📸 Upload Bukti Pembayaran</div>
-      <form method="POST" enctype="multipart/form-data">
-        <?= csrf_field() ?>
-        <input type="hidden" name="action" value="upload_proof">
-        <div class="form-group">
-          <input class="form-control" type="file" name="proof" accept="image/*" required>
-          <div class="form-hint">Screenshot notifikasi / struk pembayaran QRIS</div>
-        </div>
-        <button type="submit" class="btn btn--primary btn--full">📤 Upload &amp; Konfirmasi</button>
-      </form>
-      <div style="text-align:center;margin-top:12px">
-        <a href="/history" style="font-size:13px;color:#aaa;font-weight:700">Nanti saja → Lihat Riwayat</a>
+    <div class="card" id="upload-proof-card" style="display: <?= $show_upload ? 'block' : 'none' ?>; border-color:#8b5cf6; box-shadow:0 6px 0 #7c3aed;">
+      <div class="card__header" style="background:linear-gradient(135deg, #a78bfa, #8b5cf6); border-bottom-color:#ddd6fe;">
+        <div class="card__title"><i class="fas fa-camera-retro"></i> Upload Bukti Transfer</div>
+      </div>
+      <div class="card__body">
+        <form method="POST" enctype="multipart/form-data">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="upload_proof">
+          <div class="form-group">
+            <label class="form-label" style="font-weight:800; color:#4c1d95;">Pilih Screenshot Bukti</label>
+            <input class="form-control" type="file" name="proof" accept="image/*" required style="border-color:#c4b5fd; background:#f5f3ff;">
+          </div>
+          <button type="submit" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #8b5cf6, #7c3aed); border-color:#c4b5fd; box-shadow:0 5px 0 #5b21b6;"><i class="fas fa-cloud-upload-alt"></i> Kirim Bukti</button>
+        </form>
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="pay-actions">
-      <button id="btn-check-status" onclick="manualCheckStatus()" class="btn btn--primary btn--full">
-        🔄 Cek Status Pembayaran
+    <div style="display:flex; flex-direction:column; gap:14px; margin-top:8px;">
+      <button id="btn-check-status" onclick="manualCheckStatus()" class="btn btn--primary btn--full" style="padding:14px; font-size:15px; border-radius:16px;">
+        <i class="fas fa-sync-alt"></i> Cek Status Pembayaran
       </button>
       <form method="POST" style="margin:0">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="cancel_deposit">
-        <button id="btn-cancel-dep" type="submit" class="btn btn--ghost btn--full"
-                style="border-color:#ef4444;color:#ef4444;width:100%;font-size:13px">
-          ❌ Batalkan Deposit
+        <button id="btn-cancel-dep" type="submit" class="btn" style="width:100%; padding:14px; font-size:14px; font-weight:800; border-radius:16px; background:transparent; border:2px solid #fca5a5; color:#ef4444; box-shadow:0 4px 0 #fca5a5;">
+          <i class="fas fa-times-circle"></i> Batalkan Deposit
         </button>
       </form>
     </div>
@@ -368,12 +293,11 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
     <script>
     const DEP_ID      = <?= $dep_id ?>;
     const CSRF_TOK    = '<?= csrf_token() ?>';
-    const EXPIRE_SECS = <?= $expire_secs ?>; // sisa detik dari PHP (tidak reset saat refresh)
+    const EXPIRE_SECS = <?= $expire_secs ?>;
     let isChecking    = false;
 
-    // ── Toast ──
     function toast(msg, type = 'success', duration = 3200) {
-      const icons = { success:'✅', error:'❌', warn:'⚠️' };
+      const icons = { success:'<i class="fas fa-check-circle" style="color:#10b981"></i>', error:'<i class="fas fa-times-circle" style="color:#ef4444"></i>', warn:'<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i>' };
       const c  = document.getElementById('toast-container');
       const el = document.createElement('div');
       el.className = 'nb-toast nb-toast--' + type;
@@ -384,17 +308,18 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
       setTimeout(dismiss, duration);
     }
 
-    // ── Expiry countdown (dari PHP, persistent) ──
     let expSecs = EXPIRE_SECS;
     const timerEl = document.getElementById('exp-timer');
     const lblEl   = document.getElementById('exp-lbl');
     const dotEl   = document.getElementById('exp-dot');
+    const stripEl = document.getElementById('exp-strip');
 
     function updateExpTimer() {
       if (expSecs <= 0) {
         if (timerEl) timerEl.textContent = '00:00';
-        if (lblEl)   lblEl.textContent   = '⚠️ Deposit kedaluwarsa — hubungi admin';
-        if (dotEl)   { dotEl.style.background = '#ef4444'; dotEl.style.animation = 'none'; }
+        if (lblEl)   lblEl.textContent   = 'Deposit kedaluwarsa';
+        if (dotEl)   { dotEl.style.background = '#ef4444'; dotEl.style.animation = 'none'; dotEl.style.borderColor = '#991b1b'; }
+        if (stripEl) { stripEl.style.background = '#fef2f2'; stripEl.style.borderColor = '#fca5a5'; stripEl.style.color = '#b91c1c'; stripEl.style.boxShadow = '0 4px 0 #fca5a5'; }
         return;
       }
       const m = Math.floor(expSecs / 60), s = expSecs % 60;
@@ -405,20 +330,18 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
       expSecs--;
       updateExpTimer();
       
-      // Munculkan form upload otomatis setelah 5 menit (300 detik) berjalan
       const elapsed = 3600 - expSecs;
       if (elapsed >= 300) {
         const upCard = document.getElementById('upload-proof-card');
         if (upCard && upCard.style.display === 'none') {
             upCard.style.display = 'block';
-            upCard.style.animation = 'toastIn 0.3s ease forwards';
+            upCard.style.animation = 'toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
         }
       }
 
       if (expSecs <= 0) clearInterval(expTimer);
     }, 1000);
 
-    // ── Polling (5s) ──
     const pollStatus = () => {
       if (isChecking) return;
       fetch('?id=' + DEP_ID, {
@@ -430,21 +353,19 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 
     function confirmAndRedirect() {
       clearInterval(pollTimer); clearInterval(expTimer);
-      if (lblEl) lblEl.textContent = '✅ Dikonfirmasi! Mengalihkan...';
+      if (lblEl) lblEl.textContent = 'Dikonfirmasi! Mengalihkan...';
       if (timerEl) timerEl.textContent = '✓';
-      if (dotEl) { dotEl.style.background='#22c55e'; dotEl.style.animation='none'; }
-      const strip = document.getElementById('exp-strip');
-      if (strip) { strip.style.background='#f0fdf4'; strip.style.borderColor='#4ade80'; }
+      if (dotEl) { dotEl.style.background='#22c55e'; dotEl.style.animation='none'; dotEl.style.borderColor='#166534'; }
+      if (stripEl) { stripEl.style.background='#f0fdf4'; stripEl.style.borderColor='#4ade80'; stripEl.style.color='#15803d'; stripEl.style.boxShadow='0 4px 0 #4ade80'; }
       setTimeout(()=>location.href='/history?tab=deposit', 1500);
     }
 
-    // ── Manual check ──
     const manualCheckStatus = () => {
       if (isChecking) return;
       isChecking = true;
       const btn  = document.getElementById('btn-check-status');
       const orig = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = '⏳ Mengecek...';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
       fetch('?id=' + DEP_ID, {
         method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:'_csrf=' + CSRF_TOK + '&action=check_status'
@@ -458,15 +379,14 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
       });
     };
 
-    // ── Cancel cooldown ──
     let cancelSecs = <?= $cancel_secs_left ?>;
     const cancelBtn = document.getElementById('btn-cancel-dep');
     if (cancelBtn && cancelSecs > 0) {
-      cancelBtn.disabled=true; cancelBtn.style.opacity='0.4'; cancelBtn.style.cursor='not-allowed';
-      cancelBtn.textContent='❌ Batalkan (Tunggu '+cancelSecs+'s)';
+      cancelBtn.disabled=true; cancelBtn.style.opacity='0.6'; cancelBtn.style.cursor='not-allowed';
+      cancelBtn.innerHTML='<i class="fas fa-hourglass-half"></i> Batalkan (Tunggu '+cancelSecs+'s)';
       const ci = setInterval(()=>{
         cancelSecs--;
-        cancelBtn.textContent = cancelSecs>0 ? '❌ Batalkan (Tunggu '+cancelSecs+'s)' : '❌ Batalkan Deposit';
+        cancelBtn.innerHTML = cancelSecs>0 ? '<i class="fas fa-hourglass-half"></i> Batalkan (Tunggu '+cancelSecs+'s)' : '<i class="fas fa-times-circle"></i> Batalkan Deposit';
         if(cancelSecs<=0){ clearInterval(ci); cancelBtn.disabled=false; cancelBtn.style.opacity='1'; cancelBtn.style.cursor='pointer'; }
       },1000);
     }
