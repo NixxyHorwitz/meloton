@@ -441,7 +441,7 @@ require dirname(__DIR__) . '/partials/header.php';
     <div class="wd-alert-icon">⏳</div>
     <div style="flex:1">
       <div style="margin-bottom:2px"><strong>Level Gratis: Akun Baru</strong></div>
-      <div style="font-size:10px;font-weight:700">Akun harus berumur min. 1 hari untuk bisa WD.</div>
+      <div style="font-size:10px;font-weight:700">Level Gratis minimal harus berumur 1 hari untuk narik. Yuk Upgrade biar bisa langsung WD tanpa nunggu!</div>
     </div>
     <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
   </div>
