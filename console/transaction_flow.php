@@ -40,126 +40,119 @@ require __DIR__ . '/partials/header.php';
 ?>
 
 <style>
-.tf-container {
-    display: flex; flex-direction: column; gap: 20px; margin-top: 20px;
-}
-.tf-row {
-    display: flex; align-items: center; justify-content: center;
+.tf-container { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.tf-group {
+    display: flex; align-items: stretch;
     background: #1a1d27; border: 1px solid #2d3149;
-    border-radius: 16px; padding: 20px;
-    position: relative; overflow: hidden;
+    border-radius: 12px; padding: 12px;
 }
-.tf-card {
-    background: #232736; border: 2px solid #363b57;
-    border-radius: 12px; padding: 16px; min-width: 200px;
-    text-align: center; position: relative; z-index: 2;
-    box-shadow: 0 4px 0 #161822;
+.tf-depositors {
+    display: flex; flex-direction: column; gap: 6px; flex: 1;
+    border-right: 2px solid #363b57; padding-right: 16px;
+    justify-content: center; position: relative;
 }
-.tf-card.tf-depositor { border-color: #06b6d4; }
-.tf-card.tf-upline { border-color: #f59e0b; }
-.tf-card.tf-promotor { border-color: #8b5cf6; }
-
-.tf-name { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 4px; }
-.tf-role { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-bottom: 10px; }
-.tf-role-dep { background: rgba(6,182,212,0.15); color: #22d3ee; }
-.tf-role-upl { background: rgba(245,158,11,0.15); color: #fbbf24; }
-.tf-role-pro { background: rgba(139,92,246,0.15); color: #a78bfa; }
-
-.tf-amount { font-size: 18px; font-weight: 900; color: #4CAF82; }
-.tf-date { font-size: 11px; color: #888; margin-top: 8px; }
-
-.tf-connector {
-    flex: 1; min-width: 60px; max-width: 150px;
-    height: 4px; background: #363b57;
-    position: relative; margin: 0 10px; z-index: 1;
+.tf-upline-wrapper {
+    display: flex; align-items: center; justify-content: center;
+    padding-left: 20px; min-width: 140px; position: relative;
 }
-.tf-connector::after {
-    content: ''; position: absolute; right: -10px; top: -8px;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-left: 12px solid #363b57;
+.tf-upline-wrapper::before {
+    content: ''; position: absolute; left: 0; top: 50%;
+    width: 20px; height: 2px; background: #363b57;
 }
-.tf-comm {
-    position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-    background: #FF6B35; color: #fff; font-size: 11px; font-weight: 800;
-    padding: 4px 10px; border-radius: 20px; white-space: nowrap;
-    box-shadow: 0 2px 0 #c2410c;
+.tf-upline-wrapper::after {
+    content: ''; position: absolute; left: 16px; top: calc(50% - 4px);
+    border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 5px solid #363b57;
 }
 
-@media (max-width: 768px) {
-    .tf-row { flex-direction: column; gap: 30px; }
-    .tf-connector { 
-        width: 4px; height: 40px; min-height: 40px; max-height: 40px; min-width: 4px; max-width: 4px; margin: 0;
-    }
-    .tf-connector::after {
-        right: -8px; top: auto; bottom: -10px;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 12px solid #363b57;
-        border-bottom: none;
-    }
-    .tf-comm { top: 50%; left: 30px; transform: translateY(-50%); }
+.tf-dep-node {
+    background: #232736; border: 1px solid #06b6d4; padding: 6px 10px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
+    position: relative; font-size: 11px; color: #ccc;
+}
+.tf-dep-node::after {
+    content: ''; position: absolute; right: -16px; top: 50%;
+    width: 16px; height: 2px; background: #363b57;
+}
+.tf-dep-name { font-weight: 800; color: #fff; font-size: 12px; }
+.tf-dep-amt { color: #4CAF82; font-weight: 800; font-size: 12px; }
+.tf-dep-time { font-size: 9px; color: #666; margin-left: 8px; }
+
+.tf-up-node {
+    background: #232736; border: 1.5px solid #f59e0b; padding: 8px 12px;
+    border-radius: 10px; text-align: center; box-shadow: 0 3px 0 #161822;
+}
+.tf-up-node.pro { border-color: #8b5cf6; }
+.tf-up-role { font-size: 9px; font-weight: 700; text-transform: uppercase; background: rgba(245,158,11,0.15); color: #fbbf24; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+.tf-up-node.pro .tf-up-role { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.tf-up-name { font-weight: 800; color: #fff; font-size: 13px; }
+
+@media (max-width: 600px) {
+    .tf-group { flex-direction: column; padding: 10px; }
+    .tf-depositors { border-right: none; border-bottom: 2px solid #363b57; padding-right: 0; padding-bottom: 16px; }
+    .tf-dep-node::after { right: 50%; top: 100%; width: 2px; height: 16px; }
+    .tf-upline-wrapper { padding-left: 0; padding-top: 20px; }
+    .tf-upline-wrapper::before { left: 50%; top: 0; width: 2px; height: 20px; }
+    .tf-upline-wrapper::after { left: calc(50% - 4px); top: 16px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #363b57; border-bottom: none; }
 }
 </style>
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-  <div><h5 class="mb-0 fw-bold">🔄 Transaction Flow</h5></div>
-</div>
-
-<div class="alert alert-secondary py-2" style="background:#1a1d27;border-color:#2d3149;color:#ccc;border-radius:10px;font-size:13px;">
-  <i class="fw-bold">Info:</i> Halaman ini memvisualisasikan aliran Deposit yang sukses (Confirmed) dari User ke Upline/Promotor mereka.
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div><h6 class="mb-0 fw-bold">🔄 Transaction Flow</h6></div>
 </div>
 
 <div class="tf-container">
     <?php if (empty($rows)): ?>
-        <div style="padding:40px;text-align:center;color:#555">Belum ada transaksi deposit berafiliasi.</div>
-    <?php endif; ?>
-    
-    <?php foreach ($rows as $row): ?>
-        <?php 
-            $is_pro = (int)$row['is_promotor'] === 1;
-            $upline_class = $is_pro ? 'tf-promotor' : 'tf-upline';
-            $upline_role_class = $is_pro ? 'tf-role-pro' : 'tf-role-upl';
-            $upline_label = $is_pro ? 'Promotor' : 'Upline';
+        <div style="padding:40px;text-align:center;color:#555;font-size:12px;">Belum ada transaksi deposit berafiliasi.</div>
+    <?php else: ?>
+        <?php
+            // Group by upline
+            $groups = [];
+            foreach ($rows as $row) {
+                $uid = $row['upline_id'];
+                if (!isset($groups[$uid])) {
+                    $groups[$uid] = [
+                        'upline_name' => $row['upline_name'],
+                        'is_promotor' => $row['is_promotor'],
+                        'deposits' => []
+                    ];
+                }
+                $groups[$uid]['deposits'][] = $row;
+            }
         ?>
-        <div class="tf-row">
-            <!-- Depositor -->
-            <div class="tf-card tf-depositor">
-                <div class="tf-role tf-role-dep">Depositor</div>
-                <div class="tf-name"><?= htmlspecialchars($row['depositor_name']) ?></div>
-                <div class="tf-amount"><?= format_rp((float)$row['amount']) ?></div>
-                <div class="tf-date">Tgl: <?= date('d M Y H:i', strtotime($row['confirmed_at'])) ?></div>
+        <?php foreach ($groups as $g): ?>
+            <div class="tf-group">
+                <div class="tf-depositors">
+                    <?php foreach ($g['deposits'] as $d): ?>
+                        <div class="tf-dep-node">
+                            <div>
+                                <span class="tf-dep-name"><?= htmlspecialchars($d['depositor_name']) ?></span>
+                                <span class="tf-dep-time"><?= date('H:i', strtotime($d['confirmed_at'])) ?></span>
+                            </div>
+                            <div class="tf-dep-amt"><?= format_rp((float)$d['amount']) ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <div class="tf-upline-wrapper">
+                    <div class="tf-up-node <?= $g['is_promotor'] ? 'pro' : '' ?>">
+                        <div class="tf-up-role"><?= $g['is_promotor'] ? 'Promotor' : 'Upline' ?></div>
+                        <div class="tf-up-name"><?= htmlspecialchars($g['upline_name']) ?></div>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Connection Line -->
-            <div class="tf-connector">
-                <?php if ($row['commission_amount'] > 0): ?>
-                    <div class="tf-comm">+ <?= format_rp((float)$row['commission_amount']) ?> Komisi</div>
-                <?php elseif ($is_pro): ?>
-                    <div class="tf-comm" style="background:#8b5cf6;box-shadow:0 2px 0 #5b21b6;">Target Harian</div>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Upline -->
-            <div class="tf-card <?= $upline_class ?>">
-                <div class="tf-role <?= $upline_role_class ?>"><?= $upline_label ?></div>
-                <div class="tf-name"><?= htmlspecialchars($row['upline_name']) ?></div>
-                <div style="font-size:12px;color:#888;margin-top:8px">Penerima Manfaat</div>
-            </div>
-        </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
 
 <!-- Pagination -->
 <?php if ($totalPages > 1): ?>
-<div class="d-flex justify-content-center mt-4">
+<div class="d-flex justify-content-center mt-3">
   <div class="btn-group">
     <?php if ($page > 1): ?>
-      <a href="?page=<?= $page-1 ?>" class="btn btn-sm btn-secondary">Prev</a>
+      <a href="?page=<?= $page-1 ?>" class="btn btn-sm btn-secondary" style="font-size:11px;">Prev</a>
     <?php endif; ?>
-    <button class="btn btn-sm btn-dark" disabled>Hal <?= $page ?> / <?= $totalPages ?></button>
+    <button class="btn btn-sm btn-dark" disabled style="font-size:11px;">Hal <?= $page ?> / <?= $totalPages ?></button>
     <?php if ($page < $totalPages): ?>
-      <a href="?page=<?= $page+1 ?>" class="btn btn-sm btn-secondary">Next</a>
+      <a href="?page=<?= $page+1 ?>" class="btn btn-sm btn-secondary" style="font-size:11px;">Next</a>
     <?php endif; ?>
   </div>
 </div>
