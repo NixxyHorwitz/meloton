@@ -553,22 +553,22 @@ require dirname(__DIR__) . '/partials/header.php';
 <!-- 2. BALANCE + REF ROW                   -->
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 <div class="dash-row">
-  <div class="bal-tile bal-tile--wd">
+  <a href="/withdraw" class="bal-tile bal-tile--wd" style="text-decoration:none;color:inherit;display:block">
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
       <div class="bal-tile__icon" style="width:26px;height:26px;border-radius:8px"><i class="ph-fill ph-arrow-circle-up" style="color:#10b981;font-size:14px"></i></div>
       <div class="bal-tile__lbl" style="font-size:9px">Saldo Dapat Dicairkan</div>
     </div>
     <div class="bal-tile__val" style="font-size:14px;margin-bottom:6px"><?= format_rp((float)$user['balance_wd']) ?></div>
-    <a href="/withdraw" class="bal-tile__btn"><i class="ph-bold ph-upload-simple" style="font-size:10px"></i> Tarik</a>
-  </div>
-  <div class="bal-tile bal-tile--dep">
+    <div class="bal-tile__btn"><i class="ph-bold ph-upload-simple" style="font-size:10px"></i> Cairkan</div>
+  </a>
+  <a href="/deposit" class="bal-tile bal-tile--dep" style="text-decoration:none;color:inherit;display:block">
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
       <div class="bal-tile__icon" style="width:26px;height:26px;border-radius:8px"><i class="ph-fill ph-bank" style="color:#3b82f6;font-size:14px"></i></div>
       <div class="bal-tile__lbl" style="font-size:9px">Saldo Beli</div>
     </div>
     <div class="bal-tile__val" style="font-size:14px;margin-bottom:6px"><?= format_rp((float)$user['balance_dep']) ?></div>
-    <a href="/deposit" class="bal-tile__btn"><i class="ph-bold ph-plus-circle" style="font-size:10px"></i> Top Up</a>
-  </div>
+    <div class="bal-tile__btn"><i class="ph-bold ph-plus-circle" style="font-size:10px"></i> Top Up</div>
+  </a>
 </div>
 
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
