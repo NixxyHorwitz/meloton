@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
 
         // SET TINGKAT KESULITAN (WEIGHT / PELUANG) DI SINI
         // Semakin besar angka, semakin mudah/sering muncul
-        $rate_silver = 2;   // Sangat Sulit
+        $rate_silver = 1;   // Sangat Sulit
         $rate_100k   = 3;   // Sangat Sulit
         $rate_50k    = 5;   // Sulit
         $rate_diskon = 20;  // Sedang
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
         ];
 
         $totalWeight = array_sum(array_column($prizes, 'weight'));
-        $rand = mt_rand(1, $totalWeight);
+        $rand = random_int(1, $totalWeight);
         $winner = $prizes[count($prizes)-1];
         $current = 0;
         foreach ($prizes as $p) {
@@ -709,15 +709,19 @@ function spinWheel() {
             const startTime = Date.now();
             let isTickingActive = true;
             
+            let actx = null;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) actx = new AudioCtx();
+            } catch(e) {}
+            
             function playTick() {
                 if (!window.isSpinning || !isTickingActive) return;
                 const elapsed = Date.now() - startTime;
                 if (elapsed >= totalDuration) return;
                 
-                try {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) {
-                        const actx = new AudioCtx();
+                if (actx && actx.state !== 'closed') {
+                    try {
                         const osc = actx.createOscillator();
                         const gain = actx.createGain();
                         osc.connect(gain); gain.connect(actx.destination);
@@ -726,8 +730,8 @@ function spinWheel() {
                         gain.gain.linearRampToValueAtTime(0.1, actx.currentTime + 0.01);
                         gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.05);
                         osc.start(); osc.stop(actx.currentTime + 0.05);
-                    }
-                } catch(e) {}
+                    } catch(e) {}
+                }
                 
                 const progress = elapsed / totalDuration;
                 const currentDelay = 50 + (Math.pow(progress, 3) * 450); 
@@ -747,10 +751,8 @@ function spinWheel() {
                     btn.style.opacity = '0.5';
                 }
                 
-                try {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) {
-                        const actx = new AudioCtx();
+                if (actx && actx.state !== 'closed') {
+                    try {
                         const osc = actx.createOscillator();
                         const gain = actx.createGain();
                         osc.connect(gain); gain.connect(actx.destination);
@@ -762,18 +764,20 @@ function spinWheel() {
                         
                         [800, 1000, 1200].forEach((freq, i) => {
                             setTimeout(() => {
-                                const o = actx.createOscillator();
-                                const g = actx.createGain();
-                                o.connect(g); g.connect(actx.destination);
-                                o.frequency.value = freq;
-                                g.gain.setValueAtTime(0, actx.currentTime);
-                                g.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
-                                g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.8);
-                                o.start(); o.stop(actx.currentTime + 0.8);
+                                try {
+                                    const o = actx.createOscillator();
+                                    const g = actx.createGain();
+                                    o.connect(g); g.connect(actx.destination);
+                                    o.frequency.value = freq;
+                                    g.gain.setValueAtTime(0, actx.currentTime);
+                                    g.gain.linearRampToValueAtTime(0.2, actx.currentTime + 0.05);
+                                    g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.8);
+                                    o.start(); o.stop(actx.currentTime + 0.8);
+                                } catch(e) {}
                             }, i * 150);
                         });
-                    }
-                } catch(e) {}
+                    } catch(e) {}
+                }
                 
                 const icons = {
                     0: '👑',
