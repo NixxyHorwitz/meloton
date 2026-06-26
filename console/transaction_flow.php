@@ -14,11 +14,10 @@ $sql = "
         d.id AS deposit_id, d.amount, d.confirmed_at,
         u1.id AS depositor_id, u1.username AS depositor_name, u1.email AS depositor_email,
         u2.id AS upline_id, u2.username AS upline_name, u2.is_promotor,
-        rc.amount AS commission_amount
+        0 AS commission_amount
     FROM deposits d
     JOIN users u1 ON u1.id = d.user_id
     JOIN users u2 ON u2.referral_code = u1.referred_by
-    LEFT JOIN referral_commissions rc ON rc.deposit_id = d.id
     WHERE d.status = 'confirmed'
     ORDER BY d.confirmed_at DESC
     LIMIT $limit OFFSET $offset
