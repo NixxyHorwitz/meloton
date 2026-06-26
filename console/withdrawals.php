@@ -20,11 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 foreach ($wds as $wd) {
                     $pdo->prepare("UPDATE users SET balance_wd=balance_wd+? WHERE id=?")->execute([$wd['amount'], $wd['user_id']]);
-                    $pdo->prepare("UPDATE withdrawals SET status='rejected',admin_note=?,processed_at=NOW() WHERE id=?")->execute(['Ditolak massal & refund', $wd['id']]);
+                    $pdo->prepare("DELETE FROM withdrawals WHERE id=?")->execute([$wd['id']]);
                     $count++;
                 }
                 $pdo->commit();
-                $flash = "$count Withdraw pending berhasil di-reject massal dan saldo dikembalikan.";
+                $flash = "$count Withdraw pending berhasil dihapus massal dan saldo dikembalikan.";
             } catch (\Throwable $e) {
                 $pdo->rollBack();
                 $flash = 'Gagal memproses bulk refund: ' . $e->getMessage();
@@ -98,10 +98,10 @@ require __DIR__ . '/partials/header.php';
 <div class="d-flex align-items-center justify-content-between mb-4">
   <div><h5 class="mb-0 fw-bold">⬇️ Manajemen Withdraw</h5></div>
   <?php if ($filter === 'pending' && !empty($countMap['pending'])): ?>
-  <form method="POST" onsubmit="return confirm('Yakin ingin me-reject dan refund SEMUA withdraw yang pending (<?= $countMap['pending'] ?> data)? Aksi ini tidak dapat dibatalkan!');">
+  <form method="POST" onsubmit="return confirm('Yakin ingin MENGHAPUS dan refund SEMUA withdraw yang pending (<?= $countMap['pending'] ?> data)? Aksi ini tidak dapat dibatalkan!');">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="bulk_refund_pending">
-      <button type="submit" class="btn btn-sm btn-danger fw-bold" style="border-radius:10px;box-shadow:0 3px 0 #b91c1c;">❌ Reject & Refund Semua Pending</button>
+      <button type="submit" class="btn btn-sm btn-danger fw-bold" style="border-radius:10px;box-shadow:0 3px 0 #b91c1c;">🗑️ Hapus & Refund Semua Pending</button>
   </form>
   <?php endif; ?>
 </div>
