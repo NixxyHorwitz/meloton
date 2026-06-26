@@ -64,6 +64,8 @@ if ($user['membership_id'] && $user['membership_expires_at'] && strtotime($user[
     $membership_name = $ms->fetchColumn() ?: 'Free';
 }
 
+$showcase_memberships = $pdo->query("SELECT * FROM memberships WHERE is_active=1 AND price > 0 ORDER BY sort_order ASC")->fetchAll();
+
 $wd_require_level = setting($pdo, 'wd_require_level', '0') === '1';
 $wd_min_level  = (int) setting($pdo, 'wd_min_level', '0');
 $user_level    = user_membership_level($pdo, $user);
@@ -502,6 +504,26 @@ require dirname(__DIR__) . '/partials/header.php';
   font-size: 11px; font-weight: 700; color: #92400e;
 }
 .limit-warn a { color: #0891b2; font-weight: 900; text-decoration: none; margin-left: 2px; }
+
+/* ── Membership Showcase ── */
+.m-card { background: #fff; border: 3px solid #0f172a; border-radius: 20px; box-shadow: 0 6px 0 #0f172a; padding: 14px; margin-bottom: 12px; position: relative; text-decoration: none; display: block; transition: transform 0.1s; }
+.m-card:active { transform: translateY(2px); box-shadow: 0 4px 0 #0f172a; }
+.m-card--0 { border-color: #64748b; box-shadow: 0 6px 0 #64748b; }
+.m-card--1 { border-color: #0ea5e9; box-shadow: 0 6px 0 #0369a1; }
+.m-card--2 { border-color: #f59e0b; box-shadow: 0 6px 0 #d97706; }
+.m-card--3 { border-color: #8b5cf6; box-shadow: 0 6px 0 #6d28d9; }
+.m-card--4 { border-color: #ef4444; box-shadow: 0 6px 0 #b91c1c; }
+.m-badge-pop { position:absolute; top:-10px; right:-8px; background:linear-gradient(135deg, #ef4444, #b91c1c); color:#fff; font-size:9px; font-weight:900; padding:3px 8px; border-radius:12px; border:2px solid #fff; box-shadow:0 3px 0 #7f1d1d; transform:rotate(5deg); z-index:2; text-shadow:0 1px 1px rgba(0,0,0,0.3); }
+.m-badge-pro { position:absolute; top:-10px; left:-8px; background:linear-gradient(135deg, #34d399, #10b981); color:#fff; font-size:9px; font-weight:900; padding:3px 8px; border-radius:12px; border:2px solid #fff; box-shadow:0 3px 0 #059669; transform:rotate(-5deg); z-index:2; text-shadow:0 1px 1px rgba(0,0,0,0.3); }
+.m-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.m-ico-box { width: 40px; height: 40px; border-radius: 10px; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+.m-name { font-size: 14px; font-weight: 900; line-height: 1.1; margin-bottom: 2px; }
+.m-dur { font-size: 10px; font-weight: 800; color: #64748b; display:flex; align-items:center; gap:4px; }
+.m-price-box { text-align: right; }
+.m-price-old { font-size: 10px; font-weight: 800; color: #94a3b8; text-decoration: line-through; margin-bottom: -2px; }
+.m-price { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; }
+.m-specs { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px; font-weight: 800; color: #475569; }
+.m-spec-full { grid-column: 1 / -1; }
 </style>
 
 <?php if (!empty($_SESSION['flash_home_err'])): ?>
@@ -689,6 +711,52 @@ $notif_dot_colors = [
         <span style="color:#10b981;display:flex;align-items:center;gap:2px"><i class="ph-bold ph-coins"></i> <?= format_rp((float)$v['reward_amount']) ?></span>
         <span style="display:flex;align-items:center;gap:2px"><i class="ph-bold ph-clock"></i> <?= $v['watch_duration'] ?>s</span>
       </div>
+    </div>
+  </a>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<!-- ━━ 5B. UPGRADE SHOWCASE ━━━━━━━━━━━━━━━━━━━━ -->
+<?php if (!empty($showcase_memberships)): ?>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:8px">
+  <div class="sh__title"><i class="ph-fill ph-crown" style="color:#f59e0b"></i> Upgrade Level</div>
+  <a href="/upgrade" class="sh__link">Semua Level →</a>
+</div>
+<div>
+  <?php 
+  foreach ($showcase_memberships as $i => $m):
+    $m_class = "m-card--" . ($i % 5);
+    $bg_color = ['#f8fafc','#f0f9ff','#fefce8','#faf5ff','#fef2f2'][$i % 5];
+    $txt_color = ['#0f172a','#0369a1','#b45309','#6b21a8','#b91c1c'][$i % 5];
+  ?>
+  <a href="/upgrade" class="m-card <?= $m_class ?>">
+    <?php if ($i === 2): ?>
+      <div class="m-badge-pop">🔥 TERPOPULER</div>
+    <?php elseif ((float)$m['original_price'] > 0): ?>
+      <div class="m-badge-pro">🎉 PROMO DISKON!</div>
+    <?php endif; ?>
+    
+    <div class="m-hdr">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="m-ico-box" style="background:<?= $bg_color ?>;color:<?= $txt_color ?>;border-color:<?= $txt_color ?>">
+          <?= htmlspecialchars($m['icon'] ?: '⭐') ?>
+        </div>
+        <div>
+          <div class="m-name" style="color:<?= $txt_color ?>"><?= htmlspecialchars($m['name']) ?></div>
+          <div class="m-dur"><i class="ph-bold ph-hourglass"></i> <?= $m['duration_days'] ?> Hari</div>
+        </div>
+      </div>
+      <div class="m-price-box">
+        <?php if ((float)$m['original_price'] > 0): ?>
+        <div class="m-price-old"><?= format_rp((float)$m['original_price']) ?></div>
+        <?php endif; ?>
+        <div class="m-price" style="color:<?= $txt_color ?>"><?= format_rp((float)$m['price']) ?></div>
+      </div>
+    </div>
+    <div class="m-specs">
+      <div><i class="ph-bold ph-video-camera"></i> <?= $m['watch_limit'] ?>× Tonton / hari</div>
+      <div><i class="ph-bold ph-trend-up"></i> Max. WD: <?= (float)$m['max_wd'] > 0 ? format_rp((float)$m['max_wd']) : '<span style="color:#10b981">Tanpa batas</span>' ?></div>
     </div>
   </a>
   <?php endforeach; ?>

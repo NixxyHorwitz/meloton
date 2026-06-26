@@ -100,21 +100,21 @@ require dirname(__DIR__) . '/partials/header.php';
 
 /* ── Hero Balance (Compact & Ornamented) ── */
 .wd-hero {
-  background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
-  border: 3px solid #0f172a;
+  background: linear-gradient(135deg, #4c1d95, #6d28d9, #a78bfa);
+  border: 3px solid #4c1d95;
   border-radius: 18px;
-  box-shadow: 0 6px 0 #0f172a;
+  box-shadow: 0 6px 0 #4c1d95;
   padding: 16px;
   text-align: center;
   position: relative;
   overflow: hidden;
   margin-bottom: 12px;
 }
-.wd-hero::before { content:''; position:absolute; top:-20px; left:-20px; width:80px; height:80px; background:url('/assets/dollar.png') no-repeat center/contain; opacity:0.05; transform:rotate(-15deg); pointer-events:none; filter:grayscale(1); }
-.wd-hero::after { content:''; position:absolute; bottom:-20px; right:-20px; width:100px; height:100px; background:rgba(255,255,255,0.03); border-radius:50%; pointer-events:none; }
+.wd-hero::before { content:''; position:absolute; top:-20px; left:-20px; width:80px; height:80px; background:url('/assets/dollar.png') no-repeat center/contain; opacity:0.1; transform:rotate(-15deg); pointer-events:none; }
+.wd-hero::after { content:''; position:absolute; bottom:-20px; right:-20px; width:100px; height:100px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
 .wd-hero-dot { position:absolute; bottom:15px; left:40px; width:8px; height:8px; background:#fde68a; border-radius:50%; opacity:0.2; pointer-events:none; }
 
-.wd-hero__lbl { font-size:11px; font-weight:900; color:rgba(255,255,255,0.5); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; position:relative; z-index:1; }
+.wd-hero__lbl { font-size:11px; font-weight:900; color:rgba(255,255,255,0.7); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; position:relative; z-index:1; }
 .wd-hero__val { font-size:24px; font-weight:900; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.4); letter-spacing:1px; position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:8px; }
 
 /* ── Alerts ── */
@@ -131,10 +131,10 @@ require dirname(__DIR__) . '/partials/header.php';
 
 /* ── Form Card ── */
 .wd-card {
-  background: #fff; border: 2.5px solid #cbd5e1; border-radius: 16px;
-  box-shadow: 0 5px 0 #cbd5e1; padding: 16px; margin-bottom: 12px;
+  background: #fff; border: 2.5px solid #a78bfa; border-radius: 16px;
+  box-shadow: 0 5px 0 #a78bfa; padding: 16px; margin-bottom: 12px;
 }
-.wd-card-title { font-size: 14px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+.wd-card-title { font-size: 14px; font-weight: 900; color: #4c1d95; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; border-bottom: 2px solid #f5f3ff; padding-bottom: 10px; }
 
 /* ── Inputs ── */
 .wd-group { margin-bottom: 10px; }
