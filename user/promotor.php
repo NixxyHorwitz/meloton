@@ -166,50 +166,98 @@ require dirname(__DIR__) . '/partials/header.php';
 ?>
 
 <style>
-/* ── Compact Neo-Brutalism Overrides ── */
-.ref-card { border: 2.5px solid var(--ink); border-radius: 10px; background: #fff; box-shadow: 3px 3px 0 var(--ink); margin-bottom: 12px; overflow: hidden; }
-.ref-card__hd { padding: 8px 12px; font-size: 13px; font-weight: 900; border-bottom: 2px solid var(--ink); background: var(--yellow); display: flex; align-items: center; justify-content: space-between; }
-.ref-card__bd { padding: 10px 12px; }
+/* ── Casual Game Style Overrides ── */
+.dep-hero {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa);
+  border: 3px solid #1e40af;
+  border-radius: 16px;
+  box-shadow: 0 5px 0 #1e3a8a;
+  padding: 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.dep-hero::before { content:''; position:absolute; top:-20px; left:-20px; width:80px; height:80px; background:url('/assets/dollar.png') no-repeat center/contain; opacity:0.1; transform:rotate(-15deg); pointer-events:none; }
+.dep-hero::after { content:''; position:absolute; bottom:-20px; right:-20px; width:100px; height:100px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
+.dep-hero-star { position:absolute; top:10px; right:30px; color:#fde68a; font-size:20px; opacity:0.3; transform:rotate(20deg); pointer-events:none; }
+.dep-hero-dot { position:absolute; bottom:15px; left:40px; width:6px; height:6px; background:#fde68a; border-radius:50%; opacity:0.4; pointer-events:none; }
+
+.dep-hero__lbl { font-size:11px; font-weight:900; color:rgba(255,255,255,0.7); margin-bottom:2px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:4px; position:relative; z-index:1; }
+.dep-hero__val { font-size:14px; font-weight:800; color:#eff6ff; text-shadow:0 1px 2px rgba(0,0,0,0.2); position:relative; z-index:1; margin-top:2px; }
+
+.ref-card { 
+  border: 2px solid #93c5fd; 
+  border-radius: 14px; 
+  background: #fff; 
+  box-shadow: 0 4px 0 #93c5fd; 
+  margin-bottom: 12px; 
+  overflow: hidden; 
+}
+.ref-card__hd { 
+  padding: 10px 12px; 
+  font-size: 13px; 
+  font-weight: 900; 
+  border-bottom: 2px dashed #bfdbfe; 
+  background: #eff6ff; 
+  color: #1e3a8a;
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+}
+.ref-card__bd { padding: 12px; }
 
 /* Stats mini */
 .ref-stats { display: flex; gap: 8px; margin-bottom: 12px; }
-.ref-stat { flex: 1; border: 2.5px solid var(--ink); border-radius: 10px; background: #fff; box-shadow: 3px 3px 0 var(--ink); padding: 8px; text-align: center; }
-.ref-stat__val { font-size: 15px; font-weight: 900; color: var(--ink); line-height: 1.1; }
-.ref-stat__lbl { font-size: 10px; font-weight: 800; color: #666; margin-top: 3px; }
+.ref-stat { 
+  flex: 1; 
+  border: 2px solid #cbd5e1; 
+  border-radius: 12px; 
+  background: #fff; 
+  box-shadow: 0 3px 0 #cbd5e1; 
+  padding: 10px 4px; 
+  text-align: center; 
+  transition: transform 0.1s;
+}
+.ref-stat:active { transform: translateY(2px); box-shadow: 0 1px 0 #cbd5e1; }
+.ref-stat__val { font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1; }
+.ref-stat__lbl { font-size: 9px; font-weight: 800; color: #64748b; margin-top: 4px; }
 </style>
 
-<div class="page-title-bar">
-  <h1>🚀 Promotor Dashboard</h1>
-  <p>Analisis traffic, pencapaian target harian, &amp; info gaji</p>
+<div class="dep-hero" style="background: linear-gradient(135deg, #0c4a6e, #0284c7, #38bdf8); border-color: #0c4a6e; box-shadow: 0 5px 0 #0c4a6e;">
+  <i class="ph-fill ph-rocket dep-hero-star" style="color: #bae6fd;"></i>
+  <div class="dep-hero-dot" style="background: #bae6fd;"></div>
+  <div class="dep-hero__lbl" style="color: #e0f2fe;"><i class="ph-bold ph-chart-line-up"></i> Promotor Dashboard</div>
+  <div class="dep-hero__val">Analisis traffic, target harian & info gaji</div>
 </div>
 
 <!-- Target progress card -->
-<div class="ref-card" style="background:var(--yellow)">
+<div class="ref-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b; box-shadow: 0 4px 0 #f59e0b;">
   <div class="ref-card__bd">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1" style="margin-bottom:8px">
-      <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:#555">💰 Pendapatan Hari Ini</span>
-      <span class="badge badge--success" style="font-size:10px;padding:3px 8px;border-radius:6px;background:var(--lime);color:var(--ink);border:1.5px solid var(--ink)">
+      <span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.5px;color:#92400e">💰 Pendapatan Hari Ini</span>
+      <span class="badge" style="font-size:10px;padding:3px 8px;border-radius:8px;background:#34d399;color:#064e3b;border:1.5px solid #10b981;font-weight:900;box-shadow:0 2px 0 #10b981">
         Total: <?= format_rp((float)$today_target['salary_rate']) ?>
       </span>
     </div>
 
     <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px">
-      <span style="font-size:36px;font-weight:900;letter-spacing:-1px;line-height:1"><?= format_rp((float)$today_target['salary_rate']) ?></span>
+      <span style="font-size:32px;font-weight:900;letter-spacing:-1px;line-height:1;color:#b45309;text-shadow:0 1px 0 rgba(255,255,255,0.5)"><?= format_rp((float)$today_target['salary_rate']) ?></span>
     </div>
 
     <!-- Metrics splits (Flat Rate Breakdown) -->
-    <div style="margin-top:12px;border-top:1.5px dashed var(--ink);padding-top:12px;display:flex;gap:12px;text-align:center">
+    <div style="margin-top:12px;border-top:2px dashed #fcd34d;padding-top:12px;display:flex;gap:12px;text-align:center">
       <div style="flex:1">
-        <div style="font-size:10px;font-weight:800;color:#666;text-transform:uppercase">🧑‍🤝‍🧑 Member Baru</div>
-        <div style="font-size:14px;font-weight:900;color:var(--ink);margin-top:4px">
-          <?= number_format((int)$today_target['actual_regs']) ?> <span style="font-size:10px;color:#888;font-weight:700">(+<?= format_rp((float)$today_target['target_regs']) ?>)</span>
+        <div style="font-size:10px;font-weight:900;color:#92400e;text-transform:uppercase">🧑‍🤝‍🧑 Member Baru</div>
+        <div style="font-size:14px;font-weight:900;color:#78350f;margin-top:4px">
+          <?= number_format((int)$today_target['actual_regs']) ?> <span style="font-size:10px;color:#b45309;font-weight:800">(+<?= format_rp((float)$today_target['target_regs']) ?>)</span>
         </div>
       </div>
-      <div style="width:1.5px;background:var(--ink);opacity:0.2"></div>
+      <div style="width:2px;background:#fcd34d"></div>
       <div style="flex:1">
-        <div style="font-size:10px;font-weight:800;color:#666;text-transform:uppercase">💸 Deposit Downline</div>
-        <div style="font-size:14px;font-weight:900;color:var(--ink);margin-top:4px">
-          <?= number_format((int)$today_target['target_deposits']) ?>x Transaksi <span style="font-size:10px;color:var(--brand);font-weight:700">(+<?= format_rp((float)($today_target['salary_rate'] - $today_target['target_regs'])) ?>)</span>
+        <div style="font-size:10px;font-weight:900;color:#92400e;text-transform:uppercase">💸 Deposit Downline</div>
+        <div style="font-size:14px;font-weight:900;color:#78350f;margin-top:4px">
+          <?= number_format((int)$today_target['target_deposits']) ?>x Tx <span style="font-size:10px;color:#b45309;font-weight:800">(+<?= format_rp((float)($today_target['salary_rate'] - $today_target['target_regs'])) ?>)</span>
         </div>
       </div>
     </div>
@@ -218,34 +266,34 @@ require dirname(__DIR__) . '/partials/header.php';
 
 <!-- Click stats mini row -->
 <div class="ref-stats">
-  <div class="ref-stat" style="background:var(--sky)">
-    <div class="ref-stat__val"><?= number_format($today_clicks) ?></div>
-    <div class="ref-stat__lbl">Clicks Hari Ini</div>
+  <div class="ref-stat" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); border-color: #7dd3e8; box-shadow: 0 3px 0 #7dd3e8;">
+    <div class="ref-stat__val" style="color: #0369a1;"><?= number_format($today_clicks) ?></div>
+    <div class="ref-stat__lbl" style="color: #0284c7;">Clicks Hari Ini</div>
   </div>
-  <div class="ref-stat" style="background:var(--mint)">
-    <div class="ref-stat__val"><?= number_format($total_clicks) ?></div>
-    <div class="ref-stat__lbl">Total Clicks</div>
+  <div class="ref-stat" style="background: linear-gradient(135deg, #dcfce7, #a7f3d0); border-color: #6ee7b7; box-shadow: 0 3px 0 #6ee7b7;">
+    <div class="ref-stat__val" style="color: #047857;"><?= number_format($total_clicks) ?></div>
+    <div class="ref-stat__lbl" style="color: #059669;">Total Clicks</div>
   </div>
-  <div class="ref-stat" style="background:var(--peach)">
-    <div class="ref-stat__val"><?= number_format($avg_percentage, 1) ?>%</div>
-    <div class="ref-stat__lbl">Rata-rata Target</div>
+  <div class="ref-stat" style="background: linear-gradient(135deg, #fce7f3, #fbcfe8); border-color: #f9a8d4; box-shadow: 0 3px 0 #f9a8d4;">
+    <div class="ref-stat__val" style="color: #be185d;"><?= number_format($avg_percentage, 1) ?>%</div>
+    <div class="ref-stat__lbl" style="color: #db2777;">Rata-rata Target</div>
   </div>
-  <div class="ref-stat" style="background:var(--lavender);cursor:pointer" onclick="location.href='/user/referral.php'">
-    <div class="ref-stat__val">👥</div>
-    <div class="ref-stat__lbl">Referral</div>
+  <div class="ref-stat" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff); border-color: #d8b4fe; box-shadow: 0 3px 0 #d8b4fe; cursor:pointer;" onclick="location.href='/user/referral.php'">
+    <div class="ref-stat__val" style="color: #7e22ce;">👥</div>
+    <div class="ref-stat__lbl" style="color: #9333ea;">Referral</div>
   </div>
 </div>
 
 <!-- Traffic & Registration Charts -->
 <div class="ref-card">
-  <div style="display:flex;width:100%;border-bottom:2px solid var(--ink)">
-    <button id="tab-clicks" onclick="switchChart('clicks')" style="flex:1;background:var(--brand);color:#fff;border:none;padding:10px;font-weight:900;font-size:12px;cursor:pointer;border-right:2px solid var(--ink);border-radius:0">📈 Traffic Clicks</button>
-    <button id="tab-regs" onclick="switchChart('regs')" style="flex:1;background:var(--sky);color:var(--ink);border:none;padding:10px;font-weight:900;font-size:12px;cursor:pointer;border-radius:0">👥 Registrasi Member</button>
+  <div style="display:flex;width:100%;border-bottom:2px dashed #bfdbfe">
+    <button id="tab-clicks" onclick="switchChart('clicks')" style="flex:1;background:linear-gradient(135deg, #3b82f6, #2563eb);color:#fff;border:none;padding:10px;font-weight:900;font-size:12px;cursor:pointer;border-right:2px dashed #bfdbfe;border-radius:12px 0 0 0;box-shadow:inset 0 -3px 0 rgba(0,0,0,0.1)">📈 Traffic Clicks</button>
+    <button id="tab-regs" onclick="switchChart('regs')" style="flex:1;background:#eff6ff;color:#1e3a8a;border:none;padding:10px;font-weight:900;font-size:12px;cursor:pointer;border-radius:0 12px 0 0">👥 Registrasi Member</button>
   </div>
   <div class="ref-card__bd">
     <div id="chart-clicks-container">
       <?php if (array_sum($chart_data) === 0): ?>
-      <div style="text-align:center;padding:24px 10px;color:#aaa;font-size:12px;font-weight:700">
+      <div style="text-align:center;padding:24px 10px;color:#94a3b8;font-size:12px;font-weight:800">
         Belum ada traffic klik dalam 7 hari terakhir.
       </div>
       <?php else: ?>
@@ -255,7 +303,7 @@ require dirname(__DIR__) . '/partials/header.php';
     
     <div id="chart-regs-container" style="display:none">
       <?php if (array_sum($chart_reg_data) === 0): ?>
-      <div style="text-align:center;padding:24px 10px;color:#aaa;font-size:12px;font-weight:700">
+      <div style="text-align:center;padding:24px 10px;color:#94a3b8;font-size:12px;font-weight:800">
         Belum ada registrasi member dalam 7 hari terakhir.
       </div>
       <?php else: ?>

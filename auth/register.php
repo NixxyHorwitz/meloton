@@ -100,8 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $ref_by = null;
+            $ref_username = null;
             if ($ref_input) {
-                $rs = $pdo->prepare("SELECT referral_code, is_promotor, is_referral_active FROM users WHERE referral_code=?");
+                $rs = $pdo->prepare("SELECT username, referral_code, is_promotor, is_referral_active FROM users WHERE referral_code=?");
                 $rs->execute([$ref_input]);
                 $referrer = $rs->fetch();
                 if (!$referrer) { $error = 'Kode referral tidak valid.'; goto end_reg; }
@@ -109,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ref_by = null;
                 } else {
                     $ref_by = $ref_input;
+                    $ref_username = $referrer['username'];
                 }
             }
             $code = generate_referral_code($pdo);
@@ -139,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                  . "📧 Email: {$email}\n"
                  . "📱 WhatsApp: {$whatsapp}\n"
                  . "🏦 Bank: {$bank_name} · {$account_number} (a.n. {$account_name})\n"
-                 . "🔗 Referral: " . ($ref_by ? "dari kode <b>{$ref_by}</b>" : "Langsung (tanpa referral)") . "\n"
+                 . "🔗 Referral: " . ($ref_by ? "dari kode <b>{$ref_by}</b> (@{$ref_username})" : "Langsung (tanpa referral)") . "\n"
                  . "🎫 Kode Ref-nya: <code>{$code}</code>\n"
                  . "🌐 Sumber: Website\n"
                  . "🕐 Waktu: " . date('d M Y H:i:s');
