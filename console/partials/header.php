@@ -268,6 +268,12 @@ body { background: #0f1117; color: #e0e0f0; min-height: 100vh; }
       <?php if ($pending_wd > 0): ?><span class="badge-dot"><?= $pending_wd ?></span><?php endif; ?>
     </a>
     <?php endif; ?>
+    <?php if (staff_can('transaction_flow') || staff_can('deposits')): ?>
+    <a href="/console/transaction_flow.php" class="c-nav-link <?= $activePage==='transaction_flow'?'active':'' ?>">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+      Transaction Flow
+    </a>
+    <?php endif; ?>
     <?php if (staff_can('settings')): ?>
     <a href="/console/wd_settings.php" class="c-nav-link <?= $activePage==='wd_settings'?'active':'' ?>">
       <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/><path d="M21 12H3"/></svg>
