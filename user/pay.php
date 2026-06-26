@@ -128,40 +128,23 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 /* Scoped overrides */
-.exp-pill {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  background: linear-gradient(135deg, #fef08a, #fde047); border: 2.5px solid #ca8a04;
-  border-radius: 20px; padding: 10px 16px; margin-bottom: 16px;
-  box-shadow: 0 5px 0 #ca8a04; color: #854d0e; font-weight: 900; font-size: 14px;
-}
-.exp-pill__dot {
-  width: 12px; height: 12px; border-radius: 50%; background: #ef4444;
-  animation: blink 1s infinite; border: 2.5px solid #b91c1c;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-.exp-pill__time { font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+.pay-ticket { background: #fff; border-radius: 20px; border: 2.5px solid var(--ink); box-shadow: 0 4px 0 var(--ink); overflow: hidden; margin-bottom: 16px; }
+.pay-ticket__head { background: var(--brand-light); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--ink); }
+.pay-ticket__body { padding: 24px 16px; text-align: center; }
+.pay-ticket__timer { font-weight: 900; color: #dc2626; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.qr-min { width: 180px; height: 180px; margin: 0 auto 16px; border: 2.5px dashed #cbd5e1; border-radius: 16px; padding: 10px; background: #fff; display: block; }
+.btn-min { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 1; padding: 10px 8px; font-size: 12px; font-weight: 800; border: 2px solid var(--ink); border-radius: 12px; cursor: pointer; text-decoration: none; color: var(--ink); box-shadow: 0 3px 0 var(--ink); transition: transform 0.1s, box-shadow 0.1s; }
+.btn-min:active { transform: translateY(3px); box-shadow: none; }
+.btn-min--dark { background: var(--brand); color: #fff; border-color: #0369a1; box-shadow: 0 3px 0 #0369a1; }
+.btn-min--light { background: #fff; }
 
-.qr-wrapper {
-  background: #fff; padding: 12px; border-radius: 24px;
-  border: 4px dashed var(--brand); display: inline-block; margin-bottom: 16px;
-  box-shadow: 0 12px 24px rgba(8,145,178,0.15); position: relative;
-}
-.qr-wrapper img { width: 240px; height: 240px; display: block; border-radius: 12px; }
-.qr-wrapper::before, .qr-wrapper::after {
-  content: ''; position: absolute; width: 28px; height: 28px; border: 5px solid var(--brand);
-}
-.qr-wrapper::before { top: -5px; left: -5px; border-right: none; border-bottom: none; border-radius: 16px 0 0 0; }
-.qr-wrapper::after { bottom: -5px; right: -5px; border-left: none; border-top: none; border-radius: 0 0 16px 0; }
+.mini-steps { background: #fff; border: 2.5px solid var(--ink); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 0 var(--ink); }
+.mini-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.4; }
+.mini-step:last-child { margin-bottom: 0; }
+.mini-step span { width: 22px; height: 22px; background: var(--yellow); border: 1.5px solid var(--ink); color: var(--ink); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; flex-shrink: 0; margin-top: -1px; }
 
-.step-bubble {
-  width: 28px; height: 28px; background: #fff; border: 2.5px solid #d97706;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 900; color: #b45309; flex-shrink: 0;
-  box-shadow: 0 3px 0 #d97706; margin-top: 2px;
-}
-.step-item { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
-.step-item:last-child { margin-bottom: 0; }
-.step-text { font-size: 13px; font-weight: 700; color: #78350f; line-height: 1.4; padding-top: 4px; }
+.text-btn { display: inline-block; background: none; border: none; font-size: 12px; font-weight: 800; color: #ef4444; cursor: pointer; padding: 8px; width: 100%; text-align: center; font-family: inherit; }
+.text-btn:disabled { color: #fca5a5; cursor: not-allowed; text-decoration: none; }
 
 /* Toast */
 #toast-container { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; width:calc(100% - 32px); max-width:380px; }
@@ -178,115 +161,101 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 <div id="toast-container"></div>
 <div class="app-shell" style="background:var(--bg); margin:0 auto; padding-bottom:40px; min-height:100dvh;">
 
-  <div class="topbar">
-    <a href="/deposit" style="color:#fff; text-decoration:none; font-weight:800; display:flex; align-items:center; gap:6px;">
+  <!-- Minimal Topbar -->
+  <div class="topbar" style="background:var(--bg); border-bottom:none; box-shadow:none;">
+    <a href="/deposit" style="color:var(--ink); text-decoration:none; font-weight:800; display:flex; align-items:center; gap:6px;">
       <i class="fas fa-chevron-left"></i> Kembali
     </a>
-    <div style="color:#fff; font-weight:900; font-size:16px; text-shadow:0 1px 0 #075985;">Bayar QRIS</div>
-    <div style="background:#fde68a; color:#0e7490; font-weight:900; font-size:12px; padding:4px 10px; border-radius:12px; box-shadow:0 2px 0 #0c4a6e; border:1.5px solid #fff;"><?= format_rp($amount) ?></div>
+    <div style="color:var(--ink); font-weight:900; font-size:16px;">Deposit QRIS</div>
+    <div style="width: 24px;"></div> <!-- spacer -->
   </div>
 
-  <div style="padding:16px 14px; display:flex; flex-direction:column; gap:16px;">
+  <div style="padding:0 16px; display:flex; flex-direction:column;">
     <?php if ($flash): ?>
     <div class="alert alert--<?= $flashType==='error'?'error':'success' ?>" style="box-shadow:var(--shadow-sm);"><i class="fas fa-<?= $flashType==='error'?'exclamation-circle':'check-circle' ?>"></i> <?= htmlspecialchars($flash) ?></div>
     <?php endif; ?>
 
     <?php if ($dep['status'] === 'confirmed'): ?>
-    <div class="card card--lime" style="text-align:center; padding:32px 16px; border-color:#22c55e; box-shadow:0 6px 0 #16a34a;">
-      <div style="font-size:56px; margin-bottom:10px; text-shadow:0 4px 0 rgba(0,0,0,0.1)">🎉</div>
-      <div style="font-size:22px; font-weight:900; margin-bottom:6px; color:#14532d;">Pembayaran Sukses!</div>
-      <div style="font-size:13px; color:#166534; font-weight:700; margin-bottom:24px;">Saldo belimu sudah otomatis ditambahkan.</div>
-      <a href="/home" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #22c55e, #16a34a); border-color:#86efac; box-shadow:0 5px 0 #15803d;"><i class="fas fa-home"></i> Ke Beranda</a>
+    <div class="pay-ticket" style="text-align:center; padding:40px 16px;">
+      <div style="font-size:64px; margin-bottom:12px;">🎉</div>
+      <div style="font-size:22px; font-weight:900; color:var(--ink); margin-bottom:8px;">Pembayaran Sukses</div>
+      <div style="font-size:13px; color:var(--text-muted); font-weight:600; margin-bottom:32px;">Saldo belimu sudah otomatis ditambahkan.</div>
+      <a href="/home" class="btn btn--primary btn--full"><i class="fas fa-home"></i> Ke Beranda</a>
     </div>
 
     <?php elseif ($dep['proof_image']): ?>
-    <div class="card card--sky" style="text-align:center; padding:32px 16px; border-color:#3b82f6; box-shadow:0 6px 0 #2563eb;">
-      <div style="font-size:56px; margin-bottom:10px; text-shadow:0 4px 0 rgba(0,0,0,0.1)">⏳</div>
-      <div style="font-size:20px; font-weight:900; margin-bottom:6px; color:#1e3a8a;">Bukti Diterima</div>
-      <div style="font-size:13px; color:#1e40af; font-weight:700; margin-bottom:24px;">Tim admin sedang mengecek pembayaranmu.<br>Biasanya proses memakan waktu 1–15 menit.</div>
-      <a href="/history" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #3b82f6, #2563eb); border-color:#93c5fd; box-shadow:0 5px 0 #1d4ed8;"><i class="fas fa-history"></i> Lihat Riwayat</a>
+    <div class="pay-ticket" style="text-align:center; padding:40px 16px;">
+      <div style="font-size:64px; margin-bottom:12px;">⏳</div>
+      <div style="font-size:20px; font-weight:900; color:var(--ink); margin-bottom:8px;">Bukti Diterima</div>
+      <div style="font-size:13px; color:var(--text-muted); font-weight:600; margin-bottom:32px;">Tim kami sedang mengecek pembayaranmu (1–15 menit).</div>
+      <a href="/history" class="btn btn--primary btn--full"><i class="fas fa-history"></i> Lihat Riwayat</a>
     </div>
 
     <?php else: ?>
 
-    <div class="exp-pill" id="exp-strip">
-      <div class="exp-pill__dot" id="exp-dot"></div>
-      <div style="flex:1;" id="exp-lbl">Menunggu Pembayaran</div>
-      <div class="exp-pill__time" id="exp-timer">--:--</div>
-    </div>
-
-    <?php if ($qr_url): ?>
-    <div class="card" style="text-align:center; padding:28px 16px 20px;">
-      <div class="qr-wrapper">
-        <img id="qr-img" src="<?= htmlspecialchars($qr_url) ?>" alt="QRIS">
+    <!-- Compact Ticket -->
+    <div class="pay-ticket">
+      <div class="pay-ticket__head" id="exp-strip">
+        <span style="font-size:12px; font-weight:800; color:var(--ink);">#<?= $dep_id ?></span>
+        <div class="pay-ticket__timer">
+          <i class="fas fa-stopwatch"></i> <span id="exp-timer">--:--</span>
+        </div>
       </div>
-      <div style="font-size:32px; font-weight:900; color:var(--ink); letter-spacing:-1px; text-shadow:0 2px 0 var(--brand-light); line-height:1; margin-bottom:8px;"><?= format_rp($amount) ?></div>
-      <div style="margin-bottom:20px;"><span style="font-size:12px; font-weight:800; color:var(--brand); background:var(--brand-light); padding:4px 12px; border-radius:20px; border:1.5px solid var(--accent-2);">ID Depo: #<?= $dep_id ?></span></div>
-      
-      <div style="font-size:13px; color:var(--text-muted); font-weight:700; margin-bottom:20px; line-height:1.4;">Scan menggunakan aplikasi Bank atau E-Wallet<br>(OVO, Dana, GoPay, dll)</div>
-      
-      <div style="display:flex; gap:10px; width:100%;">
-        <a href="<?= htmlspecialchars($qr_dl_url) ?>" class="btn btn--primary" style="flex:1; background:linear-gradient(135deg, #f59e0b, #d97706); border-color:#fde68a; box-shadow:0 5px 0 #b45309;"><i class="fas fa-download"></i> Unduh QR</a>
-        <a href="<?= htmlspecialchars($qr_url) ?>" target="_blank" class="btn btn--ghost" style="flex:1; background:#fff; color:var(--brand); border-color:var(--brand-light); box-shadow:0 5px 0 var(--brand-light); text-shadow:none;"><i class="fas fa-external-link-alt"></i> Buka QR</a>
-      </div>
-    </div>
-    <?php else: ?>
-    <div class="alert alert--warn" style="box-shadow:var(--shadow-sm);"><i class="fas fa-exclamation-triangle"></i> QRIS belum dikonfigurasi. Hubungi admin.</div>
-    <?php endif; ?>
-
-    <div class="alert alert--warn" style="align-items:flex-start; box-shadow:var(--shadow-sm); border-style:dashed;">
-      <i class="fas fa-lightbulb" style="font-size:20px; color:#d97706; margin-top:2px;"></i>
-      <div>
-        <div style="font-weight:900; margin-bottom:4px; font-size:14px;">Keberatan nominal unik?</div>
-        <div style="font-size:12px; font-weight:600; line-height:1.4;">Jika saldo e-wallet tidak pas, hubungi <strong>LiveChat Admin</strong> untuk bantuan transfer nominal bulat.</div>
-      </div>
-    </div>
-
-    <div class="card card--yellow" style="border-color:#ca8a04; box-shadow:0 6px 0 #ca8a04;">
-      <div class="card__body" style="background:transparent; padding:16px;">
-        <div style="font-weight:900; font-size:15px; color:#9a3412; margin-bottom:18px; display:flex; align-items:center; gap:8px;"><i class="fas fa-list-ol"></i> Cara Bayar Praktis</div>
-        <div class="step-item"><div class="step-bubble">1</div><div class="step-text">Buka aplikasi E-Wallet (OVO, Dana, GoPay, LinkAja) atau m-Banking kamu.</div></div>
-        <div class="step-item"><div class="step-bubble">2</div><div class="step-text">Pilih menu Scan QR / Bayar, lalu arahkan kamera ke QR Code di atas.</div></div>
-        <div class="step-item"><div class="step-bubble">3</div><div class="step-text">Nominal akan terisi otomatis. Cek kesesuaian dan Konfirmasi pembayaran.</div></div>
-        <?php if ($confirm_mode === 'manual'): ?>
-        <div class="step-item"><div class="step-bubble">4</div><div class="step-text">Screenshot bukti berhasil dan upload di kolom bawah ini.</div></div>
+      <div class="pay-ticket__body">
+        <?php if ($qr_url): ?>
+        <img id="qr-img" src="<?= htmlspecialchars($qr_url) ?>" alt="QRIS" class="qr-min">
+        <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Total Bayar</div>
+        <div style="font-size:32px; font-weight:900; color:var(--ink); letter-spacing:-1px; line-height:1; margin-bottom:20px;"><?= format_rp($amount) ?></div>
+        
+        <div style="display:flex; gap:12px;">
+          <a href="<?= htmlspecialchars($qr_dl_url) ?>" class="btn-min btn-min--dark"><i class="fas fa-download"></i> Unduh</a>
+          <a href="<?= htmlspecialchars($qr_url) ?>" target="_blank" class="btn-min btn-min--light"><i class="fas fa-external-link-alt"></i> Buka QR</a>
+        </div>
         <?php else: ?>
-        <div class="step-item"><div class="step-bubble">4</div><div class="step-text">Selesai! Tunggu beberapa detik dan saldomu akan otomatis masuk.</div></div>
+        <div class="alert alert--warn" style="margin:0;"><i class="fas fa-exclamation-triangle"></i> QRIS belum dikonfigurasi. Hubungi admin.</div>
         <?php endif; ?>
       </div>
     </div>
 
+    <!-- Micro Notice -->
+    <div style="text-align:center; margin-bottom:16px;">
+      <a href="javascript:void(0)" onclick="alert('Silakan chat Admin di pojok kanan bawah jika saldo e-wallet Anda tidak bisa disesuaikan nominal uniknya.')" style="font-size:11px; font-weight:800; color:#b45309; text-decoration:none; background:#fef3c7; padding:6px 12px; border-radius:20px; border:1.5px solid #fde68a; display:inline-flex; align-items:center; gap:6px;">
+        <i class="fas fa-info-circle"></i> Keberatan nominal unik? Hubungi Admin.
+      </a>
+    </div>
+
+    <!-- Compact Steps -->
+    <div class="mini-steps">
+      <div style="font-size:13px; font-weight:900; color:var(--ink); margin-bottom:12px;">📋 Cara Bayar Praktis</div>
+      <div class="mini-step"><span>1</span> Buka aplikasi E-Wallet (OVO, Dana, dll) atau m-Banking.</div>
+      <div class="mini-step"><span>2</span> Scan QR di atas. Nominal akan terisi otomatis, mohon jangan diubah.</div>
+      <div class="mini-step"><span>3</span> <?= $confirm_mode === 'manual' ? 'Selesaikan pembayaran, lalu upload bukti di bawah.' : 'Selesaikan pembayaran, saldo masuk seketika.' ?></div>
+    </div>
+
+    <!-- Upload Proof (Compact) -->
     <?php 
     $pending_secs = time() - $created_ts;
     $show_upload = ($confirm_mode !== 'auto' || $pending_secs >= 300);
     ?>
-    <div class="card" id="upload-proof-card" style="display: <?= $show_upload ? 'block' : 'none' ?>; border-color:#8b5cf6; box-shadow:0 6px 0 #7c3aed;">
-      <div class="card__header" style="background:linear-gradient(135deg, #a78bfa, #8b5cf6); border-bottom-color:#ddd6fe;">
-        <div class="card__title"><i class="fas fa-camera-retro"></i> Upload Bukti Transfer</div>
-      </div>
-      <div class="card__body">
-        <form method="POST" enctype="multipart/form-data">
-          <?= csrf_field() ?>
-          <input type="hidden" name="action" value="upload_proof">
-          <div class="form-group">
-            <label class="form-label" style="font-weight:800; color:#4c1d95;">Pilih Screenshot Bukti</label>
-            <input class="form-control" type="file" name="proof" accept="image/*" required style="border-color:#c4b5fd; background:#f5f3ff;">
-          </div>
-          <button type="submit" class="btn btn--primary btn--full" style="background:linear-gradient(135deg, #8b5cf6, #7c3aed); border-color:#c4b5fd; box-shadow:0 5px 0 #5b21b6;"><i class="fas fa-cloud-upload-alt"></i> Kirim Bukti</button>
-        </form>
-      </div>
+    <div id="upload-proof-card" style="display: <?= $show_upload ? 'block' : 'none' ?>; margin-bottom:16px;">
+      <form method="POST" enctype="multipart/form-data" style="background:#fff; border:2.5px solid var(--ink); border-radius:16px; padding:16px; box-shadow:0 4px 0 var(--ink);">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="upload_proof">
+        <div style="font-size:13px; font-weight:900; margin-bottom:10px;"><i class="fas fa-camera"></i> Upload Struk Pembayaran</div>
+        <input type="file" name="proof" accept="image/*" required style="width:100%; font-size:12px; margin-bottom:12px; background:#f8fafc; border:1px solid #cbd5e1; padding:8px; border-radius:8px;">
+        <button type="submit" class="btn btn--primary btn--full" style="padding:10px; font-size:13px; border-radius:10px;"><i class="fas fa-paper-plane"></i> Kirim Bukti</button>
+      </form>
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:14px; margin-top:8px;">
-      <button id="btn-check-status" onclick="manualCheckStatus()" class="btn btn--primary btn--full" style="padding:14px; font-size:15px; border-radius:16px;">
+    <!-- Actions Stack -->
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button id="btn-check-status" onclick="manualCheckStatus()" class="btn btn--primary btn--full" style="padding:14px; font-size:14px; border-radius:16px; background:var(--white); color:var(--ink); border:2.5px solid var(--ink); box-shadow:0 4px 0 var(--ink); text-shadow:none;">
         <i class="fas fa-sync-alt"></i> Cek Status Pembayaran
       </button>
-      <form method="POST" style="margin:0">
+      <form method="POST" style="margin:0; margin-top:8px;">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="cancel_deposit">
-        <button id="btn-cancel-dep" type="submit" class="btn" style="width:100%; padding:14px; font-size:14px; font-weight:800; border-radius:16px; background:transparent; border:2px solid #fca5a5; color:#ef4444; box-shadow:0 4px 0 #fca5a5;">
-          <i class="fas fa-times-circle"></i> Batalkan Deposit
-        </button>
+        <button id="btn-cancel-dep" type="submit" class="text-btn">Batalkan Deposit</button>
       </form>
     </div>
 
@@ -310,16 +279,12 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 
     let expSecs = EXPIRE_SECS;
     const timerEl = document.getElementById('exp-timer');
-    const lblEl   = document.getElementById('exp-lbl');
-    const dotEl   = document.getElementById('exp-dot');
     const stripEl = document.getElementById('exp-strip');
 
     function updateExpTimer() {
       if (expSecs <= 0) {
-        if (timerEl) timerEl.textContent = '00:00';
-        if (lblEl)   lblEl.textContent   = 'Deposit kedaluwarsa';
-        if (dotEl)   { dotEl.style.background = '#ef4444'; dotEl.style.animation = 'none'; dotEl.style.borderColor = '#991b1b'; }
-        if (stripEl) { stripEl.style.background = '#fef2f2'; stripEl.style.borderColor = '#fca5a5'; stripEl.style.color = '#b91c1c'; stripEl.style.boxShadow = '0 4px 0 #fca5a5'; }
+        if (timerEl) { timerEl.textContent = '00:00'; timerEl.style.color = '#ef4444'; }
+        if (stripEl) { stripEl.style.background = '#fef2f2'; }
         return;
       }
       const m = Math.floor(expSecs / 60), s = expSecs % 60;
@@ -353,10 +318,8 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
 
     function confirmAndRedirect() {
       clearInterval(pollTimer); clearInterval(expTimer);
-      if (lblEl) lblEl.textContent = 'Dikonfirmasi! Mengalihkan...';
-      if (timerEl) timerEl.textContent = '✓';
-      if (dotEl) { dotEl.style.background='#22c55e'; dotEl.style.animation='none'; dotEl.style.borderColor='#166534'; }
-      if (stripEl) { stripEl.style.background='#f0fdf4'; stripEl.style.borderColor='#4ade80'; stripEl.style.color='#15803d'; stripEl.style.boxShadow='0 4px 0 #4ade80'; }
+      if (timerEl) { timerEl.textContent = 'Sukses'; timerEl.style.color = '#10b981'; }
+      if (stripEl) stripEl.style.background = '#d1fae5';
       setTimeout(()=>location.href='/history?tab=deposit', 1500);
     }
 
@@ -382,12 +345,12 @@ $qr_dl_url   = '?id=' . $dep_id . '&action=dl_qr';
     let cancelSecs = <?= $cancel_secs_left ?>;
     const cancelBtn = document.getElementById('btn-cancel-dep');
     if (cancelBtn && cancelSecs > 0) {
-      cancelBtn.disabled=true; cancelBtn.style.opacity='0.6'; cancelBtn.style.cursor='not-allowed';
-      cancelBtn.innerHTML='<i class="fas fa-hourglass-half"></i> Batalkan (Tunggu '+cancelSecs+'s)';
+      cancelBtn.disabled=true;
+      cancelBtn.textContent='Tunggu '+cancelSecs+'s untuk membatalkan';
       const ci = setInterval(()=>{
         cancelSecs--;
-        cancelBtn.innerHTML = cancelSecs>0 ? '<i class="fas fa-hourglass-half"></i> Batalkan (Tunggu '+cancelSecs+'s)' : '<i class="fas fa-times-circle"></i> Batalkan Deposit';
-        if(cancelSecs<=0){ clearInterval(ci); cancelBtn.disabled=false; cancelBtn.style.opacity='1'; cancelBtn.style.cursor='pointer'; }
+        cancelBtn.textContent = cancelSecs>0 ? 'Tunggu '+cancelSecs+'s untuk membatalkan' : 'Batalkan Deposit';
+        if(cancelSecs<=0){ clearInterval(ci); cancelBtn.disabled=false; cancelBtn.style.textDecoration='underline'; }
       },1000);
     }
     </script>
