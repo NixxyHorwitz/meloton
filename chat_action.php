@@ -269,7 +269,6 @@ switch ($action) {
             $tgRes = tg_api($pdo, 'createForumTopic', [
                 'chat_id'    => $chatId,
                 'name'       => mb_substr($threadTitle, 0, 128),
-                'icon_color' => 7322096,
             ]);
             $tgDebug = $tgRes;
 
