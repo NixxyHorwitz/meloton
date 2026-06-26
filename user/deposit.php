@@ -140,7 +140,7 @@ require dirname(__DIR__) . '/partials/header.php';
 
 <style>
 /* ══════════════════════════════════════════════
-   DEPOSIT PAGE — CASUAL GAME STYLE
+   DEPOSIT PAGE — CASUAL GAME STYLE (V2)
    ══════════════════════════════════════════════ */
 .dep-page { padding: 0 0 20px; }
 
@@ -150,27 +150,27 @@ require dirname(__DIR__) . '/partials/header.php';
   border: 3px solid #1e40af;
   border-radius: 16px;
   box-shadow: 0 5px 0 #1e3a8a;
-  padding: 12px;
+  padding: 14px;
   text-align: center;
   position: relative;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
 }
 .dep-hero::before { content:''; position:absolute; top:-20px; left:-20px; width:80px; height:80px; background:url('/assets/dollar.png') no-repeat center/contain; opacity:0.1; transform:rotate(-15deg); pointer-events:none; }
 .dep-hero::after { content:''; position:absolute; bottom:-20px; right:-20px; width:100px; height:100px; background:rgba(255,255,255,0.06); border-radius:50%; pointer-events:none; }
 .dep-hero-star { position:absolute; top:10px; right:30px; color:#fde68a; font-size:20px; opacity:0.3; transform:rotate(20deg); pointer-events:none; }
 .dep-hero-dot { position:absolute; bottom:15px; left:40px; width:6px; height:6px; background:#fde68a; border-radius:50%; opacity:0.4; pointer-events:none; }
 
-.dep-hero__lbl { font-size:10px; font-weight:900; color:rgba(255,255,255,0.7); margin-bottom:2px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:4px; position:relative; z-index:1; }
-.dep-hero__val { font-size:24px; font-weight:900; color:#eff6ff; text-shadow:0 2px 4px rgba(0,0,0,0.2); letter-spacing:-1px; position:relative; z-index:1; }
+.dep-hero__lbl { font-size:11px; font-weight:900; color:rgba(255,255,255,0.7); margin-bottom:2px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:4px; position:relative; z-index:1; }
+.dep-hero__val { font-size:28px; font-weight:900; color:#eff6ff; text-shadow:0 2px 4px rgba(0,0,0,0.2); letter-spacing:-1px; position:relative; z-index:1; margin-top: 4px; }
 
 /* ── Alerts ── */
 .dep-alert {
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 10px; font-weight: 800;
-  display: flex; gap: 6px; align-items: center;
-  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 11px; font-weight: 800;
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 16px;
   border: 2px solid;
   line-height: 1.3;
 }
@@ -178,103 +178,100 @@ require dirname(__DIR__) . '/partials/header.php';
 .dep-alert--warn { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
 .dep-alert--succ { background: #f0fdf4; color: #166534; border-color: #86efac; }
 .dep-alert--info { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }
-.dep-alert-icon { font-size: 16px; flex-shrink: 0; }
+.dep-alert-icon { font-size: 18px; flex-shrink: 0; }
 
-/* ── Method Card (Accordion style) ── */
-.dep-method {
-  background: #fff;
-  border: 2px solid #93c5fd;
-  border-radius: 14px;
-  box-shadow: 0 4px 0 #93c5fd;
-  overflow: hidden; margin-bottom: 10px; transition: transform 0.1s;
-}
-.dep-method:active { transform: translateY(2px); box-shadow: 0 2px 0 #93c5fd; }
-.dep-method__hd { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; user-select: none; }
-.dep-method__ico { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #fff; box-shadow: 0 2px 0 #d97706; }
-.dep-method__info { flex: 1; min-width: 0; }
-.dep-method__name { font-weight: 900; font-size: 13px; color: #1e3a8a; }
-.dep-method__sub { font-size: 9px; color: #64748b; font-weight: 700; margin-top:2px; }
-.dep-method__chev { font-size: 12px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0; }
-.dep-method.open .dep-method__chev { transform: rotate(180deg); color: #1e3a8a; }
-.dep-method__bd { padding: 0 12px 12px; border-top: 2px dashed #bfdbfe; display: none; background: #f8fafc; }
+/* ── Horizontal History (New Look) ── */
+.hist-wrap { margin-bottom: 20px; }
+.hist-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.hist-head h3 { font-size: 14px; font-weight: 900; color: #1e3a8a; margin: 0; display:flex; align-items:center; gap:6px; }
+.hist-head a { font-size: 11px; font-weight: 900; color: #3b82f6; text-decoration: none; background: #eff6ff; padding: 4px 10px; border-radius: 12px; border: 1.5px solid #bfdbfe; }
+.hist-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; padding-top: 2px; scroll-snap-type: x mandatory; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+.hist-scroll::-webkit-scrollbar { display: none; }
+.hist-card { flex: 0 0 140px; background: #fff; border: 2.5px solid #bfdbfe; border-radius: 14px; padding: 12px; box-shadow: 0 4px 0 #bfdbfe; scroll-snap-align: start; position: relative; }
+.hist-card-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 8px; }
+.hist-card-amt { font-size: 14px; font-weight: 900; color: #1e3a8a; letter-spacing: -0.5px; }
+.hist-card-date { font-size: 10px; font-weight: 800; color: #64748b; margin-top: 2px; }
+.hist-badge { position: absolute; top: 12px; right: 12px; font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; text-transform: uppercase; }
+
+/* ── Segmented Tabs ── */
+.dep-tabs { display: flex; background: #e2e8f0; border-radius: 14px; padding: 4px; margin-bottom: 16px; border: 2px solid #cbd5e1; }
+.dep-tab { flex: 1; text-align: center; padding: 12px; font-size: 13px; font-weight: 900; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+.dep-tab.active { background: #fff; color: #1e3a8a; box-shadow: 0 3px 0 #cbd5e1; }
+.dep-tab.active i { color: #3b82f6; }
+
+/* ── Form Card ── */
+.dep-form-card { background: #fff; border: 2.5px solid #93c5fd; border-radius: 16px; box-shadow: 0 5px 0 #93c5fd; padding: 16px; margin-bottom: 16px; display: none; }
+.dep-form-card.active { display: block; animation: fadein 0.3s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Bank Account Info ── */
-.dep-rek { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #bfdbfe; border-radius: 10px; padding: 10px; margin: 10px 0; text-align: center; }
-.dep-rek__lbl { font-size: 9px; color: #3b82f6; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.dep-rek__bank { font-size: 11px; font-weight: 900; color: #1e3a8a; }
-.dep-rek__num { font-size: 18px; font-weight: 900; letter-spacing: 1px; margin: 2px 0; color: #1e3a8a; }
-.dep-rek__name { font-size: 10px; color: #64748b; font-weight: 800; }
+.dep-rek { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-bottom: 16px; text-align: center; }
+.dep-rek__lbl { font-size: 10px; color: #3b82f6; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.dep-rek__bank { font-size: 12px; font-weight: 900; color: #1e3a8a; }
+.dep-rek__num { font-size: 20px; font-weight: 900; letter-spacing: 1px; margin: 4px 0; color: #1e3a8a; }
+.dep-rek__name { font-size: 11px; color: #64748b; font-weight: 800; }
 .dep-rek__copy {
-  margin-top: 8px; width: 100%;
-  background: #fff; border: 2px solid #93c5fd; border-radius: 8px;
-  padding: 6px; font-size: 10px; font-weight: 900; color: #2563eb;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
-  box-shadow: 0 2px 0 #93c5fd; transition: transform 0.1s;
+  margin-top: 10px; width: 100%;
+  background: #fff; border: 2px solid #93c5fd; border-radius: 10px;
+  padding: 8px; font-size: 11px; font-weight: 900; color: #2563eb;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: 0 3px 0 #93c5fd; transition: transform 0.1s;
 }
-.dep-rek__copy:active { transform: translateY(2px); box-shadow: 0 0 0 #93c5fd; }
+.dep-rek__copy:active { transform: translateY(2px); box-shadow: 0 1px 0 #93c5fd; }
 
 /* ── Amount Grid ── */
-.dep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.dep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
 .dep-amt-btn {
-  background: #fff; border: 2px solid #cbd5e1; border-radius: 10px;
-  padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.1s; box-shadow: 0 2px 0 #cbd5e1; outline: none; position: relative;
+  background: #fff; border: 2px solid #cbd5e1; border-radius: 12px;
+  padding: 10px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.1s; box-shadow: 0 3px 0 #cbd5e1; outline: none; position: relative;
 }
-.dep-amt-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #cbd5e1; }
-.dep-amt-btn.active { background: linear-gradient(135deg, #60a5fa, #3b82f6); border-color: #1d4ed8; box-shadow: 0 2px 0 #1e40af; color: #fff; }
+.dep-amt-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #cbd5e1; }
+.dep-amt-btn.active { background: linear-gradient(135deg, #60a5fa, #3b82f6); border-color: #1d4ed8; box-shadow: 0 3px 0 #1e40af; color: #fff; }
 .dep-amt-btn.active:active { transform: translateY(2px); box-shadow: 0 0 0 #1e40af; }
-.dep-amt-val { font-size: 11px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+.dep-amt-val { font-size: 12px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
 .dep-amt-btn.active .dep-amt-val { color: #fff; }
 
 /* ── Inputs ── */
-.dep-group { margin-bottom: 10px; }
-.dep-label { font-size: 10px; font-weight: 900; color: #475569; margin-bottom: 4px; display: block; }
+.dep-group { margin-bottom: 12px; }
+.dep-label { font-size: 11px; font-weight: 900; color: #475569; margin-bottom: 6px; display: block; }
 .dep-input-wrap { position: relative; }
-.dep-input-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-weight: 900; color: #1e3a8a; font-size: 13px; }
+.dep-input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-weight: 900; color: #1e3a8a; font-size: 15px; }
 .dep-input {
   width: 100%; background: #fff;
-  border: 2px solid #cbd5e1; border-radius: 10px;
-  padding: 10px 10px 10px 32px; font-size: 14px; font-weight: 900; color: #1e3a8a;
+  border: 2px solid #cbd5e1; border-radius: 12px;
+  padding: 12px 14px 12px 40px; font-size: 16px; font-weight: 900; color: #1e3a8a;
   font-family: inherit; outline: none; transition: border-color 0.2s;
   box-sizing: border-box;
 }
 .dep-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
 .dep-file {
   width: 100%; background: #fff;
-  border: 2px dashed #94a3b8; border-radius: 10px;
-  padding: 8px; font-size: 11px; font-weight: 800; color: #475569;
+  border: 2px dashed #94a3b8; border-radius: 12px;
+  padding: 10px; font-size: 12px; font-weight: 800; color: #475569;
   cursor: pointer;
   box-sizing: border-box;
 }
-.dep-file::file-selector-button { background: #e2e8f0; border: none; border-radius: 6px; padding: 4px 8px; margin-right: 8px; font-weight: 900; color: #334155; cursor: pointer; }
+.dep-file::file-selector-button { background: #e2e8f0; border: none; border-radius: 8px; padding: 6px 10px; margin-right: 10px; font-weight: 900; color: #334155; cursor: pointer; }
 
 /* ── Submit Button ── */
 .dep-submit {
-  width: 100%; padding: 12px;
+  width: 100%; padding: 14px;
   background: linear-gradient(135deg, #34d399, #10b981);
-  border: 2px solid #6ee7b7;
-  border-radius: 12px;
-  color: #fff; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;
-  box-shadow: 0 4px 0 #059669;
+  border: 2.5px solid #6ee7b7;
+  border-radius: 14px;
+  color: #fff; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;
+  box-shadow: 0 5px 0 #059669;
   cursor: pointer; transition: transform 0.1s;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.dep-submit:active { transform: translateY(3px); box-shadow: 0 1px 0 #059669; }
+.dep-submit:active { transform: translateY(4px); box-shadow: 0 1px 0 #059669; }
 
-/* ── History Activity Feed ── */
-.activity-feed { background: #fff; border: 2.5px solid #93c5fd; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 0 #93c5fd; margin-bottom: 12px; }
-.activity-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1.5px solid #eff6ff; }
-.activity-item:last-child { border-bottom: none; }
-.activity-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-.activity-text { flex: 1; min-width: 0; }
-.activity-title { font-size: 12px; font-weight: 900; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom:2px; }
-.activity-date { font-size: 10px; color: #64748b; font-weight: 700; }
-.activity-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.activity-badge { font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 6px; text-transform: uppercase; }
-.activity-badge.pending { background: #fef3c7; color: #b45309; }
-.activity-badge.confirmed { background: #d1fae5; color: #065f46; }
-.activity-badge.rejected { background: #fee2e2; color: #991b1b; }
-.activity-badge.error { background: #fee2e2; color: #991b1b; }
+.dep-badge { font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 6px; text-transform: uppercase; }
+.dep-badge.pending { background: #fef3c7; color: #b45309; }
+.dep-badge.confirmed { background: #d1fae5; color: #065f46; }
+.dep-badge.rejected { background: #fee2e2; color: #991b1b; }
+.dep-badge.error { background: #fee2e2; color: #991b1b; }
 </style>
 
 <div class="dep-page">
@@ -286,11 +283,6 @@ require dirname(__DIR__) . '/partials/header.php';
     <div class="dep-hero__val"><?= format_rp((float)$user['balance_dep']) ?></div>
   </div>
 
-  <div class="dep-alert dep-alert--warn">
-    <div class="dep-alert-icon">💡</div>
-    <div style="flex:1">Minimal top up <strong><?= format_rp($min_deposit) ?></strong>.</div>
-  </div>
-
   <?php if ($flash): ?>
   <div class="dep-alert dep-alert--<?= $flashType === 'error' ? 'err' : 'succ' ?>">
     <div class="dep-alert-icon"><?= $flashType === 'error' ? '❌' : '✨' ?></div>
@@ -298,133 +290,15 @@ require dirname(__DIR__) . '/partials/header.php';
   </div>
   <?php endif; ?>
 
-  <?php if ($bank_enabled): ?>
-  <!-- Bank Transfer -->
-  <div class="dep-method" id="card-bank">
-    <div class="dep-method__hd" onclick="toggleCard('bank')">
-      <div class="dep-method__ico" style="background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 3px 0 #1d4ed8;"><i class="ph-bold ph-bank"></i></div>
-      <div class="dep-method__info">
-        <div class="dep-method__name">Transfer Bank</div>
-        <div class="dep-method__sub">BCA · Mandiri · BNI · BRI dll</div>
-      </div>
-      <div class="dep-method__chev" id="chev-bank"><i class="ph-bold ph-caret-down"></i></div>
-    </div>
-    <div class="dep-method__bd" id="body-bank">
-      <div class="dep-rek">
-        <div class="dep-rek__lbl">Rekening Tujuan</div>
-        <div class="dep-rek__bank">Bank <?= htmlspecialchars($bankName) ?></div>
-        <div class="dep-rek__num" id="rek-num"><?= htmlspecialchars($bankAccount) ?></div>
-        <div class="dep-rek__name">a.n. <?= htmlspecialchars($bankHolder) ?></div>
-        <button type="button" class="dep-rek__copy" onclick="copyRek()"><i class="ph-bold ph-copy"></i> Salin Nomor</button>
-      </div>
-      <form method="POST" enctype="multipart/form-data">
-        <?= csrf_field() ?>
-        <input type="hidden" name="form_token" value="<?= htmlspecialchars($_form_token) ?>">
-        <input type="hidden" name="action" value="submit_bank">
-        
-        <div class="dep-group">
-          <label class="dep-label">Nominal Top Up</label>
-          <div class="dep-input-wrap">
-            <span class="dep-input-prefix">Rp</span>
-            <input class="dep-input" id="bank-amount" type="number" name="amount" min="<?= $min_deposit ?>" step="any" placeholder="<?= number_format($min_deposit,0,'','') ?>" required>
-          </div>
-        </div>
-        
-        <div class="dep-grid">
-          <?php foreach ([10000,25000,50000,100000,200000,500000] as $q): ?>
-          <div class="dep-amt-btn" onclick="setAmt('bank',<?= $q ?>, this)">
-            <div class="dep-amt-val"><?= format_rp($q) ?></div>
-          </div>
-          <?php endforeach; ?>
-        </div>
-        
-        <?php if ($u_enabled): ?>
-        <input type="hidden" name="unique_code" value="<?= $unique_code ?>">
-        <?php endif; ?>
-
-        <div class="dep-group">
-          <label class="dep-label">Upload Bukti <span style="font-weight:700;color:#94a3b8;font-size:10px">(JPG/PNG/WEBP)</span></label>
-          <input class="dep-file" type="file" name="proof" accept="image/*" required>
-        </div>
-        <button type="submit" class="dep-submit no-dbl-submit"><i class="ph-bold ph-paper-plane-tilt"></i> Kirim Bukti</button>
-      </form>
-    </div>
-  </div>
-  <?php endif; ?>
-
-  <?php if ($qris_enabled && !empty($qris_raw)): ?>
-  <!-- QRIS -->
-  <div class="dep-method" id="card-qris">
-    <div class="dep-method__hd" onclick="toggleCard('qris')">
-      <div class="dep-method__ico" style="background: #fff; padding: 2px; border: 2px solid #cbd5e1; box-shadow: 0 3px 0 #cbd5e1;">
-        <img src="/assets/banks/qris.jpg" style="width:100%;height:100%;object-fit:contain;border-radius:8px">
-      </div>
-      <div class="dep-method__info">
-        <div class="dep-method__name">QRIS <span style="background:#10b981;color:#fff;font-size:8px;padding:2px 4px;border-radius:4px;vertical-align:middle;margin-left:4px;">Otomatis</span></div>
-        <div class="dep-method__sub">GoPay · OVO · Dana · ShopeePay</div>
-      </div>
-      <div class="dep-method__chev" id="chev-qris"><i class="ph-bold ph-caret-down"></i></div>
-    </div>
-    <div class="dep-method__bd" id="body-qris">
-      <form method="POST" id="qris-form">
-        <?= csrf_field() ?>
-        <input type="hidden" name="form_token" value="<?= htmlspecialchars($_form_token) ?>">
-        <input type="hidden" name="action" value="submit_qris">
-        
-        <div class="dep-group" style="margin-top:12px;">
-          <label class="dep-label">Nominal Top Up</label>
-          <div class="dep-input-wrap">
-            <span class="dep-input-prefix">Rp</span>
-            <input class="dep-input" id="qris-amount" type="number" name="amount" min="<?= $min_deposit ?>" step="any" placeholder="<?= number_format($min_deposit,0,'','') ?>" required>
-          </div>
-        </div>
-        
-        <div class="dep-grid">
-          <?php foreach ([10000,25000,50000,100000,200000,500000] as $q): ?>
-          <div class="dep-amt-btn" onclick="setAmt('qris',<?= $q ?>, this)">
-            <div class="dep-amt-val"><?= format_rp($q) ?></div>
-          </div>
-          <?php endforeach; ?>
-        </div>
-        
-        <?php if ($u_enabled): ?>
-        <input type="hidden" name="unique_code" value="<?= $unique_code ?>">
-        <?php endif; ?>
-
-        <div class="dep-alert dep-alert--info" style="margin-bottom:12px;">
-          <div class="dep-alert-icon"><i class="ph-fill ph-lightning" style="color:#2563eb"></i></div>
-          <div style="flex:1">Klik Lanjut untuk bayar pakai QRIS Otomatis.</div>
-        </div>
-        <button type="submit" class="dep-submit no-dbl-submit" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-color: #93c5fd; box-shadow: 0 5px 0 #1e3a8a;"><i class="ph-bold ph-qr-code"></i> Lanjut Bayar QRIS</button>
-      </form>
-    </div>
-  </div>
-  <?php endif; ?>
-
-  <?php if (!$bank_enabled && (!$qris_enabled || empty($qris_raw))): ?>
-  <div class="dep-alert dep-alert--warn">
-    <div class="dep-alert-icon">⚠️</div>
-    <div style="flex:1">Tidak ada metode deposit aktif. Hubungi admin.</div>
-  </div>
-  <?php endif; ?>
-
-  <!-- Riwayat -->
+  <!-- RIWAYAT (Horizontal Scroll) -->
   <?php if (!empty($deps)): ?>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;">
-    <div style="font-size:14px;font-weight:900;color:#1e3a8a;display:flex;align-items:center;gap:6px;"><i class="ph-fill ph-clock-counter-clockwise"></i> Riwayat Top Up</div>
-    <a href="/history" style="font-size:11px;font-weight:900;color:#3b82f6;text-decoration:none;background:#eff6ff;padding:4px 10px;border-radius:12px;border:1.5px solid #bfdbfe;">Semua →</a>
-  </div>
-  <div class="activity-feed">
-    <?php foreach ($deps as $d): ?>
-    <div class="activity-item">
-      <div class="activity-icon" style="background:<?= $d['method']==='qris'?'#d1fae5':'#dbeafe' ?>;color:<?= $d['method']==='qris'?'#059669':'#2563eb' ?>;">
-        <i class="<?= $d['method']==='qris' ? 'ph-bold ph-qr-code' : 'ph-bold ph-bank' ?>"></i>
-      </div>
-      <div class="activity-text">
-        <div class="activity-title"><?= format_rp((float)$d['amount']) ?></div>
-        <div class="activity-date"><?= strtoupper($d['method']) ?> · <?= date('d M H:i', strtotime($d['created_at'])) ?></div>
-      </div>
-      <div class="activity-right">
+  <div class="hist-wrap">
+    <div class="hist-head">
+      <h3><i class="ph-fill ph-clock-counter-clockwise"></i> Riwayat Terakhir</h3>
+      <a href="/history">Semua →</a>
+    </div>
+    <div class="hist-scroll">
+      <?php foreach ($deps as $d): ?>
         <?php
         $st = strtolower($d['status']);
         $bclass = 'error';
@@ -432,54 +306,191 @@ require dirname(__DIR__) . '/partials/header.php';
         elseif ($st === 'confirmed' || $st === 'approved') $bclass = 'confirmed';
         elseif ($st === 'rejected') $bclass = 'rejected';
         ?>
-        <span class="activity-badge <?= $bclass ?>"><?= ucfirst($d['status']) ?></span>
-        <?php if ($st === 'pending' && $d['method'] === 'qris'): ?>
-        <a href="/pay?id=<?= $d['id'] ?>" style="font-size:9px;font-weight:900;color:#fff;background:#3b82f6;padding:4px 8px;border-radius:6px;text-decoration:none;box-shadow:0 2px 0 #1d4ed8;margin-top:2px"><i class="ph-bold ph-arrow-right"></i> Bayar</a>
-        <?php endif; ?>
+        <div class="hist-card">
+          <span class="hist-badge <?= $bclass ?>"><?= ucfirst($d['status']) ?></span>
+          <div class="hist-card-icon" style="background:<?= $d['method']==='qris'?'#d1fae5':'#dbeafe' ?>;color:<?= $d['method']==='qris'?'#059669':'#2563eb' ?>;">
+            <i class="<?= $d['method']==='qris' ? 'ph-bold ph-qr-code' : 'ph-bold ph-bank' ?>"></i>
+          </div>
+          <div class="hist-card-amt"><?= format_rp((float)$d['amount']) ?></div>
+          <div class="hist-card-date"><?= strtoupper($d['method']) ?> · <?= date('d M H:i', strtotime($d['created_at'])) ?></div>
+          <?php if ($st === 'pending' && $d['method'] === 'qris'): ?>
+          <a href="/pay?id=<?= $d['id'] ?>" style="display:inline-block; margin-top:8px; font-size:10px; font-weight:900; color:#fff; background:#3b82f6; padding:6px 12px; border-radius:8px; text-decoration:none; box-shadow:0 3px 0 #1d4ed8;"><i class="ph-bold ph-arrow-right"></i> Bayar QRIS</a>
+          <?php endif; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <div class="dep-alert dep-alert--warn">
+    <div class="dep-alert-icon">💡</div>
+    <div style="flex:1">Minimal top up <strong><?= format_rp($min_deposit) ?></strong>.</div>
+  </div>
+
+  <?php if (!$bank_enabled && (!$qris_enabled || empty($qris_raw))): ?>
+  <div class="dep-alert dep-alert--err">
+    <div class="dep-alert-icon">⚠️</div>
+    <div style="flex:1">Tidak ada metode deposit aktif. Hubungi admin.</div>
+  </div>
+  <?php else: ?>
+
+  <!-- SEGMENTED TABS -->
+  <div class="dep-tabs">
+    <?php if ($qris_enabled && !empty($qris_raw)): ?>
+    <div class="dep-tab" id="tab-qris" onclick="switchForm('qris')">
+      <i class="ph-bold ph-qr-code"></i> QRIS
+    </div>
+    <?php endif; ?>
+    <?php if ($bank_enabled): ?>
+    <div class="dep-tab" id="tab-bank" onclick="switchForm('bank')">
+      <i class="ph-bold ph-bank"></i> Bank Transfer
+    </div>
+    <?php endif; ?>
+  </div>
+
+  <?php if ($qris_enabled && !empty($qris_raw)): ?>
+  <!-- QRIS FORM -->
+  <div class="dep-form-card" id="form-qris">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:40px;height:40px;background:#fff;border:2px solid #cbd5e1;border-radius:10px;padding:4px;box-shadow:0 3px 0 #cbd5e1;">
+        <img src="/assets/banks/qris.jpg" style="width:100%;height:100%;object-fit:contain;border-radius:6px">
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:900;color:#1e3a8a;">QRIS <span style="background:#10b981;color:#fff;font-size:9px;padding:2px 6px;border-radius:6px;vertical-align:middle;margin-left:4px;">Otomatis</span></div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-top:2px;">GoPay · OVO · Dana · ShopeePay</div>
       </div>
     </div>
-    <?php endforeach; ?>
+    <form method="POST">
+      <?= csrf_field() ?>
+      <input type="hidden" name="form_token" value="<?= htmlspecialchars($_form_token) ?>">
+      <input type="hidden" name="action" value="submit_qris">
+      
+      <div class="dep-group">
+        <label class="dep-label">Nominal Top Up</label>
+        <div class="dep-input-wrap">
+          <span class="dep-input-prefix">Rp</span>
+          <input class="dep-input" id="qris-amount" type="number" name="amount" min="<?= $min_deposit ?>" step="any" placeholder="<?= number_format($min_deposit,0,'','') ?>" required>
+        </div>
+      </div>
+      
+      <div class="dep-grid">
+        <?php foreach ([10000,25000,50000,100000,200000,500000] as $q): ?>
+        <div class="dep-amt-btn" onclick="setAmt('qris',<?= $q ?>, this)">
+          <div class="dep-amt-val"><?= format_rp($q) ?></div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      
+      <?php if ($u_enabled): ?>
+      <input type="hidden" name="unique_code" value="<?= $unique_code ?>">
+      <?php endif; ?>
+
+      <div class="dep-alert dep-alert--info" style="margin-bottom:16px;">
+        <div class="dep-alert-icon"><i class="ph-fill ph-lightning" style="color:#2563eb"></i></div>
+        <div style="flex:1">Klik Lanjut untuk bayar instan pakai QRIS.</div>
+      </div>
+      <button type="submit" class="dep-submit no-dbl-submit" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-color: #93c5fd; box-shadow: 0 5px 0 #1e3a8a;"><i class="ph-bold ph-qr-code"></i> Lanjut Bayar QRIS</button>
+    </form>
   </div>
+  <?php endif; ?>
+
+  <?php if ($bank_enabled): ?>
+  <!-- BANK FORM -->
+  <div class="dep-form-card" id="form-bank">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:40px;height:40px;background:linear-gradient(135deg, #60a5fa, #3b82f6);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;box-shadow:0 3px 0 #1d4ed8;">
+        <i class="ph-bold ph-bank"></i>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:900;color:#1e3a8a;">Transfer Bank</div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-top:2px;">Cek rekening tujuan di bawah ini</div>
+      </div>
+    </div>
+    <div class="dep-rek">
+      <div class="dep-rek__lbl">Rekening Tujuan</div>
+      <div class="dep-rek__bank">Bank <?= htmlspecialchars($bankName) ?></div>
+      <div class="dep-rek__num" id="rek-num"><?= htmlspecialchars($bankAccount) ?></div>
+      <div class="dep-rek__name">a.n. <?= htmlspecialchars($bankHolder) ?></div>
+      <button type="button" class="dep-rek__copy" onclick="copyRek()"><i class="ph-bold ph-copy"></i> Salin Nomor</button>
+    </div>
+    <form method="POST" enctype="multipart/form-data">
+      <?= csrf_field() ?>
+      <input type="hidden" name="form_token" value="<?= htmlspecialchars($_form_token) ?>">
+      <input type="hidden" name="action" value="submit_bank">
+      
+      <div class="dep-group">
+        <label class="dep-label">Nominal Top Up</label>
+        <div class="dep-input-wrap">
+          <span class="dep-input-prefix">Rp</span>
+          <input class="dep-input" id="bank-amount" type="number" name="amount" min="<?= $min_deposit ?>" step="any" placeholder="<?= number_format($min_deposit,0,'','') ?>" required>
+        </div>
+      </div>
+      
+      <div class="dep-grid">
+        <?php foreach ([10000,25000,50000,100000,200000,500000] as $q): ?>
+        <div class="dep-amt-btn" onclick="setAmt('bank',<?= $q ?>, this)">
+          <div class="dep-amt-val"><?= format_rp($q) ?></div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      
+      <?php if ($u_enabled): ?>
+      <input type="hidden" name="unique_code" value="<?= $unique_code ?>">
+      <?php endif; ?>
+
+      <div class="dep-group">
+        <label class="dep-label">Upload Bukti <span style="font-weight:700;color:#94a3b8;font-size:10px">(JPG/PNG)</span></label>
+        <input class="dep-file" type="file" name="proof" accept="image/*" required>
+      </div>
+      <button type="submit" class="dep-submit no-dbl-submit"><i class="ph-bold ph-paper-plane-tilt"></i> Kirim Bukti</button>
+    </form>
+  </div>
+  <?php endif; ?>
   <?php endif; ?>
 
 </div>
 
 <script>
-function toggleCard(id) {
-  ['bank','qris'].forEach(k => {
-    const el = document.getElementById('card-' + k);
-    const b = document.getElementById('body-' + k);
-    if (b) b.style.display = 'none';
-    if (el) el.classList.remove('open');
-  });
-  const card = document.getElementById('card-' + id);
-  const body = document.getElementById('body-' + id);
-  if (body && body.style.display === 'none') {
-    body.style.display = 'block';
-    if (card) card.classList.add('open');
-  }
+function switchForm(id) {
+  const tabs = document.querySelectorAll('.dep-tab');
+  const forms = document.querySelectorAll('.dep-form-card');
+  tabs.forEach(t => t.classList.remove('active'));
+  forms.forEach(f => f.classList.remove('active'));
+  
+  const targetTab = document.getElementById('tab-' + id);
+  const targetForm = document.getElementById('form-' + id);
+  
+  if (targetTab) targetTab.classList.add('active');
+  if (targetForm) targetForm.classList.add('active');
 }
+
 function setAmt(type, v, btn) {
   if (type === 'bank') {
     document.getElementById('bank-amount').value = v;
-    const btns = document.querySelectorAll('#body-bank .dep-amt-btn');
+    const btns = document.querySelectorAll('#form-bank .dep-amt-btn');
     btns.forEach(b => b.classList.remove('active'));
   }
   if (type === 'qris') {
     document.getElementById('qris-amount').value = v;
-    const btns = document.querySelectorAll('#body-qris .dep-amt-btn');
+    const btns = document.querySelectorAll('#form-qris .dep-amt-btn');
     btns.forEach(b => b.classList.remove('active'));
   }
   if (btn) btn.classList.add('active');
-  if (typeof updateTotals === 'function') updateTotals();
 }
+
 function copyRek() {
   const t = document.getElementById('rek-num').textContent.trim();
   nToast.copy ? nToast.copy(t, 'Nomor rekening') : navigator.clipboard.writeText(t);
 }
+
 document.addEventListener('DOMContentLoaded', () => {
-  const cards = ['bank','qris'].filter(k => document.getElementById('card-' + k));
-  if (cards.length === 1) toggleCard(cards[0]);
+  const tabQris = document.getElementById('tab-qris');
+  const tabBank = document.getElementById('tab-bank');
+  if (tabQris) {
+    switchForm('qris');
+  } else if (tabBank) {
+    switchForm('bank');
+  }
 });
 </script>
 
