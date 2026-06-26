@@ -112,22 +112,48 @@ $_fsvg = [
 ];
 ?>
 <style>
-.float-contact-wrap{position:fixed;bottom:80px;right:14px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.float-btn{width:48px;height:48px;border-radius:14px;border:2.5px solid #1A1A1A;box-shadow:3px 3px 0 #1A1A1A;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:transform .1s,box-shadow .1s;overflow:hidden;position:relative}
-.float-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #1A1A1A}
-.float-btn img{width:100%;height:100%;object-fit:cover}
-.float-btn__label{position:absolute;right:54px;top:50%;transform:translateY(-50%);background:#1A1A1A;color:#fff;font-size:10px;font-weight:800;white-space:nowrap;padding:4px 8px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s}
-.float-btn:hover .float-btn__label{opacity:1}
+.float-contact-wrap { position:fixed; bottom:80px; right:14px; z-index:500; display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.float-btn {
+  width: 52px; height: 52px;
+  border-radius: 18px;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 10px 15px rgba(0,0,0,0.1);
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+  transition: transform 0.1s, box-shadow 0.1s;
+  overflow: hidden; position: relative;
+}
+.float-btn::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+.float-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.15), 0 4px 6px rgba(0,0,0,0.1);
+}
+.float-btn img { width: 100%; height: 100%; object-fit: cover; }
+.float-btn__label {
+  position: absolute; right: 64px; top: 50%; transform: translateY(-50%);
+  background: #0c4a6e; color: #fff; font-size: 11px; font-weight: 900;
+  white-space: nowrap; padding: 6px 12px; border-radius: 12px;
+  border: 2px solid #075985; box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-right: -10px;
+}
+.float-btn:hover .float-btn__label {
+  opacity: 1; margin-right: 0;
+}
 </style>
 <div class="float-contact-wrap" id="float-contacts">
   <?php foreach ($_float_btns as $_fb): ?>
   <a href="<?= htmlspecialchars($_fb['url']) ?>" target="_blank" rel="noopener"
-     class="float-btn" style="background:<?= htmlspecialchars($_fb['bg_color']) ?>"
+     class="float-btn" style="background-color:<?= htmlspecialchars($_fb['bg_color']) ?>"
      title="<?= htmlspecialchars($_fb['label']) ?>">
     <?php if ($_fb['icon_type'] === 'custom'): ?>
       <img src="<?= htmlspecialchars($_fb['icon_value']) ?>" alt="<?= htmlspecialchars($_fb['label']) ?>">
     <?php else: ?>
-      <span style="color:#fff;display:flex;align-items:center;justify-content:center;"><?= $_fsvg[$_fb['icon_value']] ?? '<i class="ph-fill ph-headset" style="font-size:24px"></i>' ?></span>
+      <span style="color:#fff;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;"><?= $_fsvg[$_fb['icon_value']] ?? '<i class="ph-fill ph-headset" style="font-size:26px"></i>' ?></span>
     <?php endif; ?>
     <span class="float-btn__label"><?= htmlspecialchars($_fb['label']) ?></span>
   </a>
