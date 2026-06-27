@@ -84,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Insert if no errors
             if (!$flash) {
+                $db_target_type = ($target_type === 'level') ? 'has_membership' : $target_type;
                 $expires_val = ($expires_at && strtotime($expires_at)) ? $expires_at : null;
                 $pdo->prepare(
                     "INSERT INTO notifications (title, message, type, icon, target_type, target_user_ids, action_url, action_text, expires_at)
@@ -91,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 )->execute([
                     $title, $message, $type,
                     $icon ?: null,
-                    $target_type,
+                    $db_target_type,
                     $target_user_ids,
                     $action_url ?: null,
                     $action_text ?: null,

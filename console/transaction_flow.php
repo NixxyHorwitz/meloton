@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $success_count = 0;
             foreach ($ids as $id) {
-                $dep = $pdo->prepare("SELECT d.id, d.amount, d.user_id, u.referred_by FROM deposits d JOIN users u ON u.id = d.user_id WHERE d.id = ? AND d.status = 'confirmed'");
-                $dep->execute([$id]);
-                $dep = $dep->fetch();
+                $stmtDep = $pdo->prepare("SELECT d.id, d.amount, d.user_id, u.referred_by FROM deposits d JOIN users u ON u.id = d.user_id WHERE d.id = ? AND d.status = 'confirmed'");
+                $stmtDep->execute([$id]);
+                $dep = $stmtDep->fetch();
                 
                 if (!$dep) continue;
                 
