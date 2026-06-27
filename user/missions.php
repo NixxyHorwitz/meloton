@@ -462,7 +462,7 @@ require dirname(__DIR__) . '/partials/header.php';
       <div id="chev-games" style="font-size: 14px; color: #94a3b8; transition: transform 0.2s; flex-shrink: 0;"><i class="ph-bold ph-caret-down"></i></div>
     </div>
     <div id="body-games" style="padding: 14px; border-top: 2px dashed #bfdbfe; display: none; background: #f8fafc;">
-      <a href="/minigame" style="display:block; background:linear-gradient(135deg, #fef08a, #f59e0b); border:3px solid #fff; border-radius:20px; box-shadow:0 8px 0 #d97706; padding:16px; text-decoration:none; margin-bottom:20px; position:relative; overflow:hidden; transition:transform 0.2s;" onclick="this.style.transform='translateY(4px)'; this.style.boxShadow='0 4px 0 #d97706'; setTimeout(()=>this.style.transform='none',200);">
+      <a href="/minigame" style="display:block; background:linear-gradient(135deg, #fef08a, #f59e0b); border:3px solid #fff; border-radius:20px; box-shadow:0 8px 0 #d97706; padding:16px; text-decoration:none; margin-bottom:12px; position:relative; overflow:hidden; transition:transform 0.2s;" onclick="this.style.transform='translateY(4px)'; this.style.boxShadow='0 4px 0 #d97706'; setTimeout(()=>this.style.transform='none',200);">
         <div style="position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;">
             <div>
                 <h3 style="margin:0 0 4px; font-size:18px; font-weight:900; color:#78350f; text-shadow:1px 1px 0 #fde047;">TAP-TAP FRENZY 🪅</h3>
@@ -473,6 +473,19 @@ require dirname(__DIR__) . '/partials/header.php';
             </div>
         </div>
         <i class="ph-fill ph-coin" style="position:absolute; right:-10px; bottom:-20px; font-size:80px; color:rgba(255,255,255,0.3); z-index:1;"></i>
+      </a>
+      
+      <a href="/luckycard" style="display:block; background:linear-gradient(135deg, #e9d5ff, #a855f7); border:3px solid #fff; border-radius:20px; box-shadow:0 8px 0 #9333ea; padding:16px; text-decoration:none; margin-bottom:20px; position:relative; overflow:hidden; transition:transform 0.2s;" onclick="this.style.transform='translateY(4px)'; this.style.boxShadow='0 4px 0 #9333ea'; setTimeout(()=>this.style.transform='none',200);">
+        <div style="position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+                <h3 style="margin:0 0 4px; font-size:18px; font-weight:900; color:#4c1d95; text-shadow:1px 1px 0 #d8b4fe;">LUCKY CARD 🃏</h3>
+                <p style="margin:0; font-size:12px; font-weight:800; color:#581c87;">Pilih kartu keberuntunganmu dan menangkan kejutan!</p>
+            </div>
+            <div style="background:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#9333ea; font-size:24px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <i class="ph-fill ph-cards"></i>
+            </div>
+        </div>
+        <i class="ph-fill ph-sparkle" style="position:absolute; right:-10px; bottom:-20px; font-size:80px; color:rgba(255,255,255,0.3); z-index:1;"></i>
       </a>
 
       <div class="spin-container" style="background: linear-gradient(135deg, #a78bfa, #818cf8); border: 4px solid #c4b5fd; border-radius: 24px; padding: 20px; margin-bottom: 0; box-shadow: 0 8px 0 #6366f1; text-align: center; position: relative; overflow: hidden;">
