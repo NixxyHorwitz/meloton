@@ -596,6 +596,19 @@ require dirname(__DIR__) . '/partials/header.php';
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 <!-- 3. QUICK ACTIONS 4-COLUMN              -->
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<a href="/frogjump" style="display:block; background:linear-gradient(135deg, #38bdf8, #0284c7); border:2.5px solid #bae6fd; border-radius:16px; padding:12px 14px; box-shadow:0 5px 0 #0369a1; text-decoration:none; margin-bottom:12px; position:relative; overflow:hidden; transition:transform 0.1s;" onclick="this.style.transform='translateY(3px)'; this.style.boxShadow='0 2px 0 #0369a1'; setTimeout(()=>this.style.transform='none',150);">
+  <div style="position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between;">
+      <div>
+          <h3 style="margin:0 0 2px; font-size:16px; font-weight:900; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3);">LOMPAT KATAK 🐸</h3>
+          <p style="margin:0; font-size:10px; font-weight:800; color:#e0f2fe;">Mainkan game berhadiah Rp 5.000/hari!</p>
+      </div>
+      <div style="background:#fff; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#0284c7; font-size:20px; box-shadow:0 3px 0 rgba(0,0,0,0.1);">
+          <i class="ph-fill ph-play"></i>
+      </div>
+  </div>
+  <i class="ph-fill ph-leaf" style="position:absolute; right:-10px; bottom:-10px; font-size:60px; color:rgba(255,255,255,0.2); z-index:1; transform:rotate(-15deg);"></i>
+</a>
+
 <div class="qa-grid" style="margin-bottom:10px">
   <a href="/history" class="qa-item">
     <div class="qa-item__icon" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 3px 0 #5b21b6;color:#fff"><i class="ph-fill ph-receipt"></i></div>
