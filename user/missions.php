@@ -153,6 +153,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
             $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 10000 WHERE id=?")->execute([$user['id']]);
         }
 
+        $tgMsg = "🎁 <b>MEMBER MENANG SPIN!</b>\n";
+        $tgMsg .= "Username: <code>" . htmlspecialchars($user['username']) . "</code>\n";
+        $tgMsg .= "Hadiah: <b>" . htmlspecialchars($winner['name']) . "</b>\n";
+        if ($winner['id'] === 3) {
+            $tgMsg .= "Kode Voucher: <code>" . $code . "</code>\n";
+        }
+        send_telegram_notif($pdo, $tgMsg, [], 'log');
+
         $pdo->commit();
         echo json_encode(['ok'=>true, 'prize_index'=>$winner['id'], 'msg'=>$msg, 'prize_name'=>$winner['name']]);
     } catch (\Throwable $e) {

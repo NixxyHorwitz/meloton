@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$token || !$chat_id) {
             $flash = 'Isi Token Bot dan Chat ID Admin terlebih dahulu!'; $flashType = 'error';
         } else {
+            $topic_key = $_POST['topic_key'] ?? '';
             $topics = [
                 'log' => '📝 Log Aktivitas',
                 'wd' => '💸 Withdraw',
@@ -87,6 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'user_baru' => '🆕 User Baru',
                 'permintaan' => '💬 Permintaan'
             ];
+            if ($topic_key && isset($topics[$topic_key])) {
+                $topics = [$topic_key => $topics[$topic_key]];
+            }
             $success_count = 0;
             $errors = [];
             foreach ($topics as $key => $name) {
@@ -324,15 +328,33 @@ $tabs = [
                 <input type="text" name="tg_chat_id" class="c-form-control" value="<?= htmlspecialchars($s('tg_chat_id')) ?>" placeholder="-100123456789"></div>
               <button type="submit" class="btn btn-sm text-white" style="background:var(--brand)">Simpan Telegram</button>
             </form>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap mb-2">
               <form method="POST">
                 <?= csrf_field() ?><input type="hidden" name="action" value="sync_tg_webhook">
                 <button type="submit" class="btn btn-sm btn-info text-white">🔄 Sync Webhook</button>
               </form>
               <form method="POST">
                 <?= csrf_field() ?><input type="hidden" name="action" value="auto_create_topics">
-                <button type="submit" class="btn btn-sm btn-success text-white" onclick="return confirm('Peringatan: Grup tujuan harus berupa Supergroup yang fitur Forum-nya AKTIF. Apakah Anda yakin ingin membuat 5 topic notifikasi secara otomatis di grup tersebut?')">⚙️ Auto-Create Topics di Grup</button>
+                <button type="submit" class="btn btn-sm btn-success text-white" onclick="return confirm('Peringatan: Grup tujuan harus berupa Supergroup yang fitur Forum-nya AKTIF. Apakah Anda yakin ingin membuat SEMUA topic notifikasi secara otomatis di grup tersebut?')">⚙️ Auto-Create Semua Topics</button>
               </form>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <?php
+              $tg_topics = [
+                  'log' => '📝 Log Aktivitas',
+                  'wd' => '💸 Withdraw',
+                  'depo' => '💰 Deposit',
+                  'user_baru' => '🆕 User Baru',
+                  'permintaan' => '💬 Permintaan'
+              ];
+              foreach ($tg_topics as $tk => $tn): ?>
+              <form method="POST">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="auto_create_topics">
+                <input type="hidden" name="topic_key" value="<?= $tk ?>">
+                <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirm('Buat topic <?= $tn ?> di grup?')">+ <?= $tn ?></button>
+              </form>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
