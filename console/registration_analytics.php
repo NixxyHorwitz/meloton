@@ -53,7 +53,7 @@ try {
 
     // Recent Registrations
     $recent_users = $pdo->query(
-        "SELECT id, username, whatsapp, referral_code, referred_by, ip_address, created_at
+        "SELECT id, username, whatsapp, referral_code, referred_by, created_at
          FROM users
          ORDER BY created_at DESC LIMIT 50"
     )->fetchAll(PDO::FETCH_ASSOC);
@@ -276,7 +276,6 @@ new Chart(document.getElementById('hourly-chart'), {
             <th class="px-3 py-3" style="font-weight: 700;">WhatsApp</th>
             <th class="px-3 py-3" style="font-weight: 700;">Kode Ref (Sbg Upline)</th>
             <th class="px-3 py-3" style="font-weight: 700;">Daftar Lewat (Downline dr)</th>
-            <th class="px-3 py-3" style="font-weight: 700;">IP Address</th>
           </tr>
         </thead>
         <tbody>
@@ -303,9 +302,6 @@ new Chart(document.getElementById('hourly-chart'), {
                 </td>
                 <td class="px-3 py-3" style="color:#4CAF82">
                   <?= htmlspecialchars($u['referred_by'] ?: '-') ?>
-                </td>
-                <td class="px-3 py-3" style="color:#aaa;">
-                  <?= htmlspecialchars($u['ip_address'] ?? 'Unknown') ?>
                 </td>
               </tr>
             <?php endforeach; ?>
