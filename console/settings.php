@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_general') {
         $keys = ['site_name','site_tagline','free_watch_limit','referral_bonus',
                  'referral_commission_percent','checkin_reward_min','checkin_reward_max','min_deposit',
-                 'min_balance_edit_rek',
                  'depo_unique_code_min','depo_unique_code_max',
                  'target_deposit_daily','target_member_daily'];
         foreach ($keys as $k) {
@@ -210,12 +209,10 @@ $tabs = [
             </div>
 
             <div class="row g-2">
-              <div class="col-md-4"><div class="c-form-group"><label class="c-label">Minimum Deposit (Rp)</label>
+              <div class="col-md-6"><div class="c-form-group"><label class="c-label">Minimum Deposit (Rp)</label>
                 <input type="number" name="min_deposit" class="c-form-control" value="<?= $s('min_deposit','10000') ?>" min="0"></div></div>
-              <div class="col-md-4"><div class="c-form-group"><label class="c-label">% Komisi Referral</label>
+              <div class="col-md-6"><div class="c-form-group"><label class="c-label">% Komisi Referral</label>
                 <input type="number" name="referral_commission_percent" class="c-form-control" value="<?= $s('referral_commission_percent','5') ?>" min="0" max="100" step="0.1"></div></div>
-              <div class="col-md-4"><div class="c-form-group"><label class="c-label">Min. Saldo u/ Edit Rek (Rp)</label>
-                <input type="number" name="min_balance_edit_rek" class="c-form-control" value="<?= $s('min_balance_edit_rek','10000') ?>" min="0"></div></div>
             </div>
             
             <div class="row g-2">
