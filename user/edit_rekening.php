@@ -20,15 +20,12 @@ if (!$user_mem) {
 }
 
 $can_edit_bank     = (bool)($user_mem['allow_edit_bank'] ?? 0);
-$edit_bank_min_dep = (int)($user['edit_bank_deposit_min'] ?? 50000);
-$dep_ok_for_edit   = (float)$user['balance_dep'] >= $edit_bank_min_dep;
 $level_name        = $user_mem['name'] ?? 'Free';
 
-// Promotor bypass: skip semua pembatasan level dan saldo
+// Promotor bypass: skip semua pembatasan level
 $is_promotor = ((int)($user['is_promotor'] ?? 0) === 1);
 if ($is_promotor) {
     $can_edit_bank   = true;
-    $dep_ok_for_edit = true;
 }
 
 $flash = $flashType = '';
@@ -44,8 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $flash = '❌ Data rekening kamu sebelumnya masih dalam verifikasi.'; $flashType = 'error';
     } elseif (!$can_edit_bank) {
         $flash = '❌ Level kamu belum memiliki izin untuk mengubah rekening.'; $flashType = 'error';
-    } elseif (!$dep_ok_for_edit) {
-        $flash = '❌ Saldo beli kamu belum mencukupi syarat minimum.'; $flashType = 'error';
     } else {
         $new_bank    = trim($_POST['bank_name']      ?? '');
         $new_accnum  = trim($_POST['account_number'] ?? '');
@@ -232,25 +227,6 @@ require dirname(__DIR__) . '/partials/header.php';
          <div style="font-size:10px">Level <?= htmlspecialchars($level_name) ?> belum memiliki izin untuk mengubah data rekening.</div>
       </div>
       <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
-    </div>
-  <?php elseif (!$dep_ok_for_edit): ?>
-    <?php
-      $dep_pct = min(100, (int)round(((float)$user['balance_dep'] / $edit_bank_min_dep) * 100));
-      $dep_kurang = $edit_bank_min_dep - (float)$user['balance_dep'];
-    ?>
-    <div class="wd-card" style="border-color:#f59e0b;box-shadow:0 5px 0 #f59e0b">
-       <div class="wd-card-title" style="color:#d97706;border-bottom-color:#fef3c7">🛡️ Syarat Ubah Rekening</div>
-       <div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:12px;line-height:1.4">
-          Kamu harus memiliki akumulasi Saldo Beli minimal Rp <?= number_format($edit_bank_min_dep,0,',','.') ?> untuk membuka fitur ini.
-       </div>
-       <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:900;color:#64748b;margin-bottom:4px">
-         <span>Progres: <?= $dep_pct ?>%</span>
-         <span style="color:#f59e0b">Kurang Rp <?= number_format($dep_kurang,0,',','.') ?></span>
-       </div>
-       <div style="height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">
-         <div style="height:100%;width:<?= $dep_pct ?>%;background:#f59e0b;border-radius:4px"></div>
-       </div>
-       <a href="/deposit" class="wd-submit" style="background:linear-gradient(135deg, #fde68a, #f59e0b);border-color:#fef3c7;box-shadow:0 4px 0 #d97706;color:#78350f;padding:10px;margin-top:12px">Isi Saldo Sekarang</a>
     </div>
   <?php else: ?>
     <!-- FORM UBAH REKENING -->

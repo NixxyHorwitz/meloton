@@ -245,7 +245,7 @@ function editPlan(p) {
       <label class="form-check-label text-warning fw-bold" for="ep-wd-hold" style="font-size:13px">Tahan Withdraw (Auto Hold)</label></div>
     <div class="form-check ms-1 mb-2"><input class="form-check-input" type="checkbox" name="allow_edit_bank" id="ep-allow-edit-bank" ${p.allow_edit_bank==1?'checked':''}>
       <label class="form-check-label text-info fw-bold" for="ep-allow-edit-bank" style="font-size:13px">✏️ Izinkan Edit Rekening Bank</label>
-      <div style="font-size:10px;color:#888;margin-top:2px">User di level ini bisa edit rekening (dengan syarat saldo beli)</div></div>
+      <div style="font-size:10px;color:#888;margin-top:2px">User di level ini bisa edit rekening</div></div>
     <div class="form-check ms-1"><input class="form-check-input" type="checkbox" name="is_active" id="ep-active" ${p.is_active==1?'checked':''}>
       <label class="form-check-label text-secondary" for="ep-active" style="font-size:13px">Aktif</label></div>`;
   new bootstrap.Modal(document.getElementById('editPlanModal')).show();
