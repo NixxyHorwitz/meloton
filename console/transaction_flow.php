@@ -14,7 +14,7 @@ $sql = "
         d.id AS deposit_id, d.amount, d.confirmed_at,
         u1.id AS depositor_id, u1.username AS depositor_name, u1.email AS depositor_email,
         u2.id AS upline_id, u2.username AS upline_name, u2.is_promotor,
-        0 AS commission_amount
+        COALESCE((SELECT SUM(amount) FROM referral_commissions rc WHERE rc.deposit_id = d.id), 0) AS commission_amount
     FROM deposits d
     JOIN users u1 ON u1.id = d.user_id
     JOIN users u2 ON u2.referral_code = u1.referred_by
@@ -47,9 +47,9 @@ require __DIR__ . '/partials/header.php';
     border-radius: 12px; padding: 12px;
 }
 .tf-depositors {
-    display: flex; flex-direction: column; gap: 6px; flex: 1;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; flex: 1;
     border-right: 2px solid #363b57; padding-right: 16px;
-    justify-content: center; position: relative;
+    align-content: start; position: relative;
 }
 .tf-upline-wrapper {
     display: flex; align-items: center; justify-content: center;
@@ -61,21 +61,25 @@ require __DIR__ . '/partials/header.php';
 }
 .tf-upline-wrapper::after {
     content: ''; position: absolute; left: 16px; top: calc(50% - 4px);
-    border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 5px solid #363b57;
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 6px solid #363b57;
 }
 
 .tf-dep-node {
-    background: #232736; border: 1px solid #06b6d4; padding: 6px 10px;
-    border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
+    background: #232736; border: 1px solid #06b6d4; padding: 8px 10px;
+    border-radius: 8px; display: flex; flex-direction: column; gap: 4px;
     position: relative; font-size: 11px; color: #ccc;
 }
-.tf-dep-node::after {
-    content: ''; position: absolute; right: -16px; top: 50%;
-    width: 16px; height: 2px; background: #363b57;
+.tf-dep-header {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.tf-dep-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid #363b57; padding-top: 4px; margin-top: 2px;
 }
 .tf-dep-name { font-weight: 800; color: #fff; font-size: 12px; }
 .tf-dep-amt { color: #4CAF82; font-weight: 800; font-size: 12px; }
-.tf-dep-time { font-size: 9px; color: #666; margin-left: 8px; }
+.tf-dep-time { font-size: 9px; color: #666; }
+.tf-dep-com { color: #f59e0b; font-size: 10px; font-weight: 700; }
 
 .tf-up-node {
     background: #232736; border: 1.5px solid #f59e0b; padding: 8px 12px;
@@ -89,10 +93,9 @@ require __DIR__ . '/partials/header.php';
 @media (max-width: 600px) {
     .tf-group { flex-direction: column; padding: 10px; }
     .tf-depositors { border-right: none; border-bottom: 2px solid #363b57; padding-right: 0; padding-bottom: 16px; }
-    .tf-dep-node::after { right: 50%; top: 100%; width: 2px; height: 16px; }
     .tf-upline-wrapper { padding-left: 0; padding-top: 20px; }
     .tf-upline-wrapper::before { left: 50%; top: 0; width: 2px; height: 20px; }
-    .tf-upline-wrapper::after { left: calc(50% - 4px); top: 16px; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #363b57; border-bottom: none; }
+    .tf-upline-wrapper::after { left: calc(50% - 5px); top: 16px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #363b57; border-bottom: none; }
 }
 </style>
 
@@ -114,11 +117,13 @@ require __DIR__ . '/partials/header.php';
                         'upline_name' => $row['upline_name'],
                         'is_promotor' => $row['is_promotor'],
                         'deposits' => [],
-                        'total_deposit' => 0
+                        'total_deposit' => 0,
+                        'total_commission' => 0
                     ];
                 }
                 $groups[$uid]['deposits'][] = $row;
                 $groups[$uid]['total_deposit'] += (float)$row['amount'];
+                $groups[$uid]['total_commission'] += (float)$row['commission_amount'];
             }
         ?>
         <?php foreach ($groups as $g): ?>
@@ -126,11 +131,14 @@ require __DIR__ . '/partials/header.php';
                 <div class="tf-depositors">
                     <?php foreach ($g['deposits'] as $d): ?>
                         <div class="tf-dep-node">
-                            <div>
+                            <div class="tf-dep-header">
                                 <span class="tf-dep-name"><?= htmlspecialchars($d['depositor_name']) ?></span>
                                 <span class="tf-dep-time"><?= date('H:i', strtotime($d['confirmed_at'])) ?></span>
                             </div>
-                            <div class="tf-dep-amt"><?= format_rp((float)$d['amount']) ?></div>
+                            <div class="tf-dep-footer">
+                                <div class="tf-dep-amt">Depo: <?= format_rp((float)$d['amount']) ?></div>
+                                <div class="tf-dep-com">Komisi: <?= format_rp((float)$d['commission_amount']) ?></div>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -140,6 +148,8 @@ require __DIR__ . '/partials/header.php';
                         <div class="tf-up-name"><?= htmlspecialchars($g['upline_name']) ?></div>
                         <div style="font-size:10px;color:#888;margin-top:8px">Total Masuk:</div>
                         <div style="font-size:12px;color:#4CAF82;font-weight:900;"><?= format_rp($g['total_deposit']) ?></div>
+                        <div style="font-size:10px;color:#888;margin-top:4px">Total Komisi:</div>
+                        <div style="font-size:12px;color:#f59e0b;font-weight:900;"><?= format_rp($g['total_commission']) ?></div>
                     </div>
                 </div>
             </div>
