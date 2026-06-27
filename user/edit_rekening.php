@@ -236,18 +236,46 @@ require dirname(__DIR__) . '/partials/header.php';
       </div>
       <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
     </div>
-  <?php elseif (!$has_enough_balance): ?>
-    <div class="wd-alert wd-alert--err">
-      <div class="wd-alert-icon">💰</div>
-      <div style="flex:1">
-         <div style="margin-bottom:2px"><strong>Saldo Mengendap Kurang!</strong></div>
-         <div style="font-size:10px">Syarat ganti rekening: Harus ada Saldo Beli minimal <?= format_rp($min_saldo_edit) ?> di akun kamu.</div>
-      </div>
-      <a href="/deposit" class="wd-alert-btn" style="background:#3b82f6;border-color:#60a5fa;box-shadow:0 3px 0 #2563eb">Deposit</a>
-    </div>
   <?php else: ?>
+    <!-- NOTICES & CONDITIONS UNTUK SALDO -->
+    <?php if (!$has_enough_balance): ?>
+      <?php
+         $pct = $min_saldo_edit > 0 ? ((float)$user['balance_dep'] / $min_saldo_edit) * 100 : 0;
+         if ($pct > 100) $pct = 100;
+         if ($pct < 0) $pct = 0;
+      ?>
+      <div class="wd-alert wd-alert--err" style="display:block; padding-bottom:16px;">
+        <div style="display:flex; align-items:flex-start; gap:12px;">
+            <div class="wd-alert-icon" style="flex-shrink:0;">💰</div>
+            <div style="flex:1">
+               <div style="margin-bottom:2px"><strong>Saldo Mengendap Kurang!</strong></div>
+               <div style="font-size:10px; line-height:1.4;">Syarat ganti rekening: Harus ada Saldo Beli minimal <?= format_rp($min_saldo_edit) ?> di akun kamu.</div>
+            </div>
+            <a href="/deposit" class="wd-alert-btn" style="background:#3b82f6;border-color:#60a5fa;box-shadow:0 3px 0 #2563eb;flex-shrink:0;">Deposit</a>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div style="background:rgba(0,0,0,0.06); border-radius:10px; height:14px; overflow:hidden; border: 1px solid rgba(0,0,0,0.05); margin-top:14px; position:relative;">
+          <div style="background:linear-gradient(90deg, #ef4444, #f59e0b); height:100%; width:<?= $pct ?>%; transition:width 0.5s;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; color:#ef4444; margin-top:6px; padding:0 2px;">
+           <span>Terkumpul: <?= format_rp((float)$user['balance_dep']) ?></span>
+           <span>Target: <?= format_rp($min_saldo_edit) ?></span>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <!-- FORM UBAH REKENING -->
-    <div class="wd-card">
+    <div class="wd-card" style="position:relative; overflow:hidden;">
+      <?php if (!$has_enough_balance): ?>
+      <!-- Lock Overlay -->
+      <div style="position:absolute; inset:0; background:rgba(255,255,255,0.7); backdrop-filter:blur(3px); z-index:20; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
+          <div style="font-size:38px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1)); animation: popIn 0.4s ease-out;">🔒</div>
+          <div style="font-size:15px; font-weight:900; color:#0f172a; margin-top:8px;">Form Terkunci</div>
+          <div style="font-size:11px; font-weight:700; color:#64748b; margin-top:4px; max-width:80%;">Penuhi target Saldo Mengendap untuk membuka.</div>
+      </div>
+      <?php endif; ?>
+
       <div class="wd-card-title">✏️ Form Ganti Rekening</div>
       
       <form method="POST" id="edit-rek-form">
