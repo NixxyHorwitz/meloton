@@ -32,7 +32,7 @@ RewriteRule ^missions/?$    user/missions.php    [L,QSA]
 RewriteRule ^redeem/?$      user/redeem.php      [L,QSA]
 RewriteRule ^invest/?$      user/invest.php      [L,QSA]
 RewriteRule ^minigame/?$    user/minigame.php    [L,QSA]
-
+RewriteRule ^luckycard/?$   user/luckycard.php   [L,QSA]
 RewriteRule ^events/?$      user/events.php      [L,QSA]
 RewriteRule ^referral/?$    user/referral.php    [L,QSA]
 RewriteRule ^history/?$     user/history.php     [L,QSA]
