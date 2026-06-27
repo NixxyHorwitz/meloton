@@ -34,35 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $upline = $ref->fetch();
                 
                 if ($action === 'delete' || $action === 'bulk_delete') {
-                    $pdo->prepare("UPDATE users SET balance_dep = balance_dep - ? WHERE id = ?")->execute([$old_amount, $depositor_id]);
-                    
-                    if ($upline && (int)$upline['is_promotor'] !== 1) {
-                        $old_comm = round(($old_amount * $pct) / 100, 2);
-                        if ($old_comm > 0) {
-                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd - ? WHERE id = ?")->execute([$old_comm, $upline['id']]);
-                            $pdo->prepare("INSERT INTO referral_commissions (user_id, from_user_id, amount) VALUES (?, ?, ?)")->execute([$upline['id'], $depositor_id, -$old_comm]);
-                        }
-                    }
-                    
                     $pdo->prepare("DELETE FROM deposits WHERE id = ?")->execute([$id]);
                     $success_count++;
                 } 
                 elseif (($action === 'edit' || $action === 'bulk_edit') && $new_amount > 0 && $new_amount != $old_amount) {
-                    $diff = $new_amount - $old_amount;
-                    
-                    $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$diff, $depositor_id]);
-                    
-                    if ($upline && (int)$upline['is_promotor'] !== 1) {
-                        $old_comm = round(($old_amount * $pct) / 100, 2);
-                        $new_comm = round(($new_amount * $pct) / 100, 2);
-                        $comm_diff = $new_comm - $old_comm;
-                        
-                        if ($comm_diff != 0) {
-                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? WHERE id = ?")->execute([$comm_diff, $upline['id']]);
-                            $pdo->prepare("INSERT INTO referral_commissions (user_id, from_user_id, amount) VALUES (?, ?, ?)")->execute([$upline['id'], $depositor_id, $comm_diff]);
-                        }
-                    }
-                    
                     $pdo->prepare("UPDATE deposits SET amount = ? WHERE id = ?")->execute([$new_amount, $id]);
                     $success_count++;
                 }
@@ -187,7 +162,7 @@ require __DIR__ . '/partials/header.php';
   <div id="bulk-actions" style="display:none; gap: 8px;">
       <span style="font-size: 12px; font-weight: bold; margin-right: 8px;" id="bulk-count">0 terpilih</span>
       <button class="btn btn-sm btn-primary" onclick="openBulkEditModal()" style="font-size: 11px;">✏️ Bulk Edit</button>
-      <form id="bulk-delete-form" method="POST" style="display:inline;" onsubmit="return confirm('Hapus semua deposit yang dipilih? Saldo user & upline akan dikurangi.');">
+      <form id="bulk-delete-form" method="POST" style="display:inline;" onsubmit="return confirm('Hapus semua deposit yang dipilih? (Hanya riwayat)');">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="bulk_delete">
           <input type="hidden" name="ids" id="bulk-delete-ids">
@@ -237,7 +212,7 @@ require __DIR__ . '/partials/header.php';
                             </div>
                             <div style="display:flex; gap: 4px; margin-top: 6px; border-top: 1px dashed #363b57; padding-top: 6px;">
                                 <button onclick="openEditModal(<?= $d['deposit_id'] ?>, <?= (float)$d['amount'] ?>)" class="btn btn-sm btn-primary" style="font-size: 9px; padding: 2px 6px; flex: 1;">Edit</button>
-                                <form method="POST" style="flex: 1; display:flex;" onsubmit="return confirm('Hapus deposit ini? Saldo akan dikurangi.');">
+                                <form method="POST" style="flex: 1; display:flex;" onsubmit="return confirm('Hapus deposit ini? (Hanya menghapus riwayat).');">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="ids" value="<?= $d['deposit_id'] ?>">
@@ -281,7 +256,7 @@ require __DIR__ . '/partials/header.php';
 <div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#1a1d27; border: 1px solid #363b57; padding: 20px; border-radius: 12px; width: 300px; max-width: 90%;">
         <h6 id="editModalTitle" style="color:#fff; margin-bottom: 16px; font-weight: bold;">Edit Nominal Deposit</h6>
-        <form method="POST" id="editForm" onsubmit="return confirm('Update deposit ini? Saldo & komisi akan disesuaikan otomatis.');">
+        <form method="POST" id="editForm" onsubmit="return confirm('Update deposit ini? (Saldo tidak terpengaruh).');">
             <?= csrf_field() ?>
             <input type="hidden" name="action" id="editAction" value="edit">
             <input type="hidden" name="ids" id="editIds">
