@@ -9,12 +9,13 @@ $limit = 50;
 $offset = ($page - 1) * $limit;
 
 // Fetch confirmed deposits that have an upline
+$pct = (float)setting($pdo, 'referral_commission_percent', '5');
 $sql = "
     SELECT 
         d.id AS deposit_id, d.amount, d.confirmed_at,
         u1.id AS depositor_id, u1.username AS depositor_name, u1.email AS depositor_email,
         u2.id AS upline_id, u2.username AS upline_name, u2.is_promotor,
-        COALESCE((SELECT SUM(amount) FROM referral_commissions rc WHERE rc.deposit_id = d.id), 0) AS commission_amount
+        IF(u2.is_promotor = 1, 0, ROUND((d.amount * {$pct}) / 100, 2)) AS commission_amount
     FROM deposits d
     JOIN users u1 ON u1.id = d.user_id
     JOIN users u2 ON u2.referral_code = u1.referred_by

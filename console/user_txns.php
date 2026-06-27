@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $commission = round(($dep['amount'] * $pct) / 100, 2);
                     if ($commission > 0) {
                         $pdo->prepare("UPDATE users SET balance_wd=balance_wd+? WHERE id=?")->execute([$commission, $ref['id']]);
-                        $pdo->prepare("INSERT INTO referral_commissions (user_id,from_user_id,deposit_id,amount) VALUES (?,?,?,?)")->execute([$ref['id'], $dep['user_id'], $id, $commission]);
+                        $pdo->prepare("INSERT INTO referral_commissions (user_id,from_user_id,amount) VALUES (?,?,?)")->execute([$ref['id'], $dep['user_id'], $commission]);
                     }
                 }
                 $pdo->commit();

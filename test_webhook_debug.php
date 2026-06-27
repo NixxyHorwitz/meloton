@@ -28,7 +28,7 @@ try {
     
     // Test referral commissions table
     echo "Testing referral_commissions table insert query simulation...\n";
-    $pdo->prepare("SELECT user_id, from_user_id, deposit_id, amount FROM referral_commissions LIMIT 1")->execute();
+    $pdo->prepare("SELECT user_id, from_user_id, amount FROM referral_commissions LIMIT 1")->execute();
     echo "referral_commissions OK.\n";
     
     // Test users table for refund_cut_percent
