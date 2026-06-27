@@ -115,6 +115,51 @@ function setting_set(PDO $pdo, string $key, string $value): void {
         ->execute([$key, $value, $value]);
 }
 
+// ============================================================
+// MAINTENANCE MODE ENFORCEMENT
+// ============================================================
+if (setting($pdo, 'maintenance_mode', '0') === '1') {
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    
+    // Allow /console/ (Admin Area) and API callbacks to bypass
+    $is_console = str_starts_with($uri, '/console');
+    $is_webhook = str_starts_with($uri, '/webhook.php') || str_starts_with($uri, '/api/');
+    
+    // Allow logged in admins/staff to bypass frontend maintenance
+    $is_admin = !empty($_SESSION['admin']) || !empty($_SESSION['staff_username']);
+
+    if (!$is_console && !$is_admin && !$is_webhook) {
+        $msg = setting($pdo, 'maintenance_message', 'Sistem sedang dalam perbaikan.');
+        http_response_code(503);
+        echo '<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Under Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { background:#0f1117; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; font-family:"Inter",sans-serif; text-align:center; padding:20px; box-sizing:border-box; }
+        .box { background:#131520; border:1px solid #1f2235; padding:40px 30px; border-radius:16px; max-width:400px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .icon { font-size:48px; margin-bottom:16px; animation: pulse 2s infinite; }
+        h1 { color:#FF6B35; font-size:22px; font-weight:900; margin:0 0 10px 0; }
+        p { color:#a0a4b8; font-size:14px; line-height:1.6; margin:0; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="icon">🔧</div>
+        <h1>Sedang Perbaikan</h1>
+        <p>' . nl2br(htmlspecialchars($msg)) . '</p>
+    </div>
+</body>
+</html>';
+        exit;
+    }
+}
+
+
 // Process referral commission recursively
 function process_referral_commission(PDO $pdo, int $user_id, float $amount, int $depth = 1): void {
     if ($depth > 3) return;
