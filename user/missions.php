@@ -108,18 +108,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
         // SET TINGKAT KESULITAN (WEIGHT / PELUANG) DI SINI
         // Semakin besar angka, semakin mudah/sering muncul
         $rate_silver = 1;   // Sangat Sulit
-        $rate_100k   = 3;   // Sangat Sulit
-        $rate_50k    = 5;   // Sulit
-        $rate_diskon = 20;  // Sedang
-        $rate_beli   = 30;  // Mudah
-        $rate_10k    = 40;  // Sangat Mudah
+        $rate_100k   = 5;   // Sangat Sulit
+        $rate_50k    = 10;  // Sulit
+        $rate_diskon = 50;  // Sedang
+        $rate_beli   = 10;  // Dipersulit (Sebelumnya Mudah)
+        $rate_10k    = 200; // Sangat Mudah
 
         $prizes = [
             ['id'=>0, 'name'=>$level2_name, 'weight'=>$rate_silver],
             ['id'=>1, 'name'=>'Tarik Rp 100k', 'weight'=>$rate_100k],
             ['id'=>2, 'name'=>'Tarik Rp 50k', 'weight'=>$rate_50k],
             ['id'=>3, 'name'=>'Diskon Rp 10k', 'weight'=>$rate_diskon],
-            ['id'=>4, 'name'=>'Beli Rp 20k', 'weight'=>$rate_beli],
+            ['id'=>4, 'name'=>'Beli Rp 10k', 'weight'=>$rate_beli],
             ['id'=>5, 'name'=>'Tarik Rp 10k', 'weight'=>$rate_10k],
         ];
 
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'spin_
             $pdo->prepare("INSERT INTO discount_vouchers (code, discounts, max_claims, claims_count) VALUES (?, ?, 1, 0)")->execute([$code, $discountsJson]);
             $msg .= ". Kode Vouchermu: " . $code;
         } elseif ($winner['id'] === 4) {
-            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + 20000 WHERE id=?")->execute([$user['id']]);
+            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + 10000 WHERE id=?")->execute([$user['id']]);
         } elseif ($winner['id'] === 5) {
             $pdo->prepare("UPDATE users SET balance_wd = balance_wd + 10000 WHERE id=?")->execute([$user['id']]);
         }
@@ -203,6 +203,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'claim
         $ticketSql = $is_daily ? ", spin_tickets = spin_tickets + 1" : "";
         $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? {$ticketSql} WHERE id=?")
             ->execute([$mission['reward'], $user['id']]);
+
+        $tgMsg = "🎯 <b>MEMBER KLAIM MISI!</b>\n";
+        $tgMsg .= "Username: <code>" . htmlspecialchars($user['username']) . "</code>\n";
+        $tgMsg .= "Misi: <b>" . htmlspecialchars($mission['title']) . "</b>\n";
+        $tgMsg .= "Reward: Rp " . number_format($mission['reward'], 0, ',', '.') . "\n";
+        if ($is_daily) {
+            $tgMsg .= "Tambahan: +1 Tiket Spin\n";
+        }
+        send_telegram_notif($pdo, $tgMsg, [], 'misi');
+
         $pdo->commit();
         
         $msg = '🎉 Reward diklaim! +'.number_format($mission['reward'],0,',','.').' ke Saldo Tarik.';
@@ -481,7 +491,7 @@ require dirname(__DIR__) . '/partials/header.php';
                   <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(60deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>100k</div>
                   <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(120deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/moneybag_v2.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>50k</div>
                   <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(180deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><i class="ph-fill ph-ticket" style="font-size:24px; display:block; margin:0 auto 2px;"></i>Diskon<br>10k</div>
-                  <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Beli<br>20k</div>
+                  <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(240deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Beli<br>10k</div>
                   <div style="position:absolute; top: 0; left: 50%; width: 80px; height: 50%; margin-left: -40px; transform-origin: bottom center; transform: rotate(300deg); padding-top: 15px; text-align: center; font-weight: 900; font-size: 11px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 2px #000; line-height: 1.1;"><img src="/assets/dollar.png" style="width:24px; height:24px; display:block; margin:0 auto 2px; object-fit:contain;">Tarik<br>10k</div>
               </div>
               <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid #ef4444; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));"></div>
