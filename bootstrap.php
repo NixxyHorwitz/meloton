@@ -130,6 +130,13 @@ if (setting($pdo, 'maintenance_mode', '0') === '1') {
 
     if (!$is_console && !$is_admin && !$is_webhook) {
         $msg = setting($pdo, 'maintenance_message', 'Sistem sedang dalam perbaikan.');
+        
+        // Anti-Cache Headers
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Cache-Control: post-check=0, pre-check=0', false);
+        header('Pragma: no-cache');
+        header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+        
         http_response_code(503);
         echo '<!DOCTYPE html>
 <html lang="id">
