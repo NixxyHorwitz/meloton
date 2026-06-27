@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $expires_at  = trim($_POST['expires_at'] ?? '');
 
         $valid_types   = ['info','success','warning','alert','congrats'];
-        $valid_targets = ['all','single','selected','has_balance','has_membership'];
+        $valid_targets = ['all','single','selected','has_balance','has_membership','level'];
 
         if (!$title || !$message) {
             $flash = 'Judul dan pesan wajib diisi.'; $flashType = 'error';
@@ -71,6 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $s = $pdo->query("SELECT id FROM users WHERE membership_id IS NOT NULL AND membership_expires_at > NOW() AND is_active=1");
                 $ids = $s->fetchAll(PDO::FETCH_COLUMN);
                 if (empty($ids)) { $flash = 'Tidak ada user dengan membership aktif.'; $flashType = 'error'; }
+                else { $target_user_ids = json_encode(array_values(array_map('intval', $ids))); }
+
+            } elseif ($target_type === 'level') {
+                $level_id = (int)($_POST['target_level_id'] ?? 0);
+                $s = $pdo->prepare("SELECT id FROM users WHERE membership_id = ? AND membership_expires_at > NOW() AND is_active=1");
+                $s->execute([$level_id]);
+                $ids = $s->fetchAll(PDO::FETCH_COLUMN);
+                if (empty($ids)) { $flash = 'Tidak ada user aktif pada level tersebut.'; $flashType = 'error'; }
                 else { $target_user_ids = json_encode(array_values(array_map('intval', $ids))); }
             }
 
@@ -125,6 +133,7 @@ $notifs = $pdo->query(
 // User count for stats
 $total_users = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE is_active=1")->fetchColumn();
 $users_list  = $pdo->query("SELECT id, username, email FROM users WHERE is_active=1 ORDER BY username ASC")->fetchAll();
+$memberships_list = $pdo->query("SELECT id, name FROM memberships ORDER BY sort_order ASC")->fetchAll();
 
 $pageTitle  = 'Push Notifikasi';
 $activePage = 'notifications';
@@ -139,6 +148,7 @@ $type_cfg = [
 ];
 $target_labels = [
     'all'            => ['lbl' => 'Semua User',         'icon' => '👥'],
+    'level'          => ['lbl' => 'Level Tertentu',     'icon' => '⭐'],
     'single'         => ['lbl' => 'Satu User',          'icon' => '👤'],
     'selected'       => ['lbl' => 'User Tertentu',      'icon' => '🎯'],
     'has_balance'    => ['lbl' => 'User Bersaldo',      'icon' => '💰'],
@@ -207,6 +217,16 @@ $target_labels = [
             <select name="target_type" class="c-form-control" id="target-type" onchange="toggleTargetFields()">
               <?php foreach ($target_labels as $k => $v): ?>
               <option value="<?= $k ?>"><?= $v['icon'] ?> <?= $v['lbl'] ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          
+          <!-- Specific Level -->
+          <div id="field-level" class="c-form-group mb-3" style="display:none">
+            <label class="c-label">Pilih Level</label>
+            <select name="target_level_id" class="c-form-control">
+              <?php foreach ($memberships_list as $m): ?>
+              <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -426,6 +446,7 @@ function toggleTargetFields() {
   document.getElementById('field-single').style.display   = t === 'single'   ? '' : 'none';
   document.getElementById('field-selected').style.display = t === 'selected' ? '' : 'none';
   document.getElementById('field-balance').style.display  = t === 'has_balance' ? '' : 'none';
+  document.getElementById('field-level').style.display    = t === 'level' ? '' : 'none';
 }
 
 function applyTemplate(t) {
