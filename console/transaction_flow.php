@@ -2,6 +2,81 @@
 declare(strict_types=1);
 require_once __DIR__ . '/auth.php';
 staff_require('transaction_flow');
+csrf_enforce();
+
+$flash = '';
+$flashType = '';
+$pct = (float)setting($pdo, 'referral_commission_percent', '5');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $ids = isset($_POST['ids']) ? explode(',', $_POST['ids']) : [];
+    $new_amount = (float)($_POST['new_amount'] ?? 0);
+    
+    $ids = array_filter(array_map('intval', $ids));
+
+    if (!empty($ids) && in_array($action, ['delete', 'bulk_delete', 'edit', 'bulk_edit'])) {
+        $pdo->beginTransaction();
+        try {
+            $success_count = 0;
+            foreach ($ids as $id) {
+                $dep = $pdo->prepare("SELECT d.id, d.amount, d.user_id, u.referred_by FROM deposits d JOIN users u ON u.id = d.user_id WHERE d.id = ? AND d.status = 'confirmed'");
+                $dep->execute([$id]);
+                $dep = $dep->fetch();
+                
+                if (!$dep) continue;
+                
+                $old_amount = (float)$dep['amount'];
+                $depositor_id = $dep['user_id'];
+                
+                $ref = $pdo->prepare("SELECT id, is_promotor FROM users WHERE referral_code = ? LIMIT 1");
+                $ref->execute([$dep['referred_by']]);
+                $upline = $ref->fetch();
+                
+                if ($action === 'delete' || $action === 'bulk_delete') {
+                    $pdo->prepare("UPDATE users SET balance_dep = balance_dep - ? WHERE id = ?")->execute([$old_amount, $depositor_id]);
+                    
+                    if ($upline && (int)$upline['is_promotor'] !== 1) {
+                        $old_comm = round(($old_amount * $pct) / 100, 2);
+                        if ($old_comm > 0) {
+                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd - ? WHERE id = ?")->execute([$old_comm, $upline['id']]);
+                            $pdo->prepare("INSERT INTO referral_commissions (user_id, from_user_id, amount) VALUES (?, ?, ?)")->execute([$upline['id'], $depositor_id, -$old_comm]);
+                        }
+                    }
+                    
+                    $pdo->prepare("DELETE FROM deposits WHERE id = ?")->execute([$id]);
+                    $success_count++;
+                } 
+                elseif (($action === 'edit' || $action === 'bulk_edit') && $new_amount > 0 && $new_amount != $old_amount) {
+                    $diff = $new_amount - $old_amount;
+                    
+                    $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$diff, $depositor_id]);
+                    
+                    if ($upline && (int)$upline['is_promotor'] !== 1) {
+                        $old_comm = round(($old_amount * $pct) / 100, 2);
+                        $new_comm = round(($new_amount * $pct) / 100, 2);
+                        $comm_diff = $new_comm - $old_comm;
+                        
+                        if ($comm_diff != 0) {
+                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? WHERE id = ?")->execute([$comm_diff, $upline['id']]);
+                            $pdo->prepare("INSERT INTO referral_commissions (user_id, from_user_id, amount) VALUES (?, ?, ?)")->execute([$upline['id'], $depositor_id, $comm_diff]);
+                        }
+                    }
+                    
+                    $pdo->prepare("UPDATE deposits SET amount = ? WHERE id = ?")->execute([$new_amount, $id]);
+                    $success_count++;
+                }
+            }
+            $pdo->commit();
+            $flash = "✅ Berhasil memproses {$success_count} transaksi.";
+            $flashType = 'success';
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            $flash = "❌ Error: " . $e->getMessage();
+            $flashType = 'error';
+        }
+    }
+}
 
 // Pagination
 $page = max(1, (int)($_GET['page'] ?? 1));
@@ -100,8 +175,25 @@ require __DIR__ . '/partials/header.php';
 }
 </style>
 
+<?php if ($flash): ?>
+<div class="alert alert-<?= $flashType === 'error' ? 'danger' : 'success' ?> py-2 mb-3" style="border-radius:10px;font-size:13px">
+    <?= htmlspecialchars($flash) ?>
+</div>
+<?php endif; ?>
+
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div><h6 class="mb-0 fw-bold">🔄 Transaction Flow</h6></div>
+  
+  <div id="bulk-actions" style="display:none; gap: 8px;">
+      <span style="font-size: 12px; font-weight: bold; margin-right: 8px;" id="bulk-count">0 terpilih</span>
+      <button class="btn btn-sm btn-primary" onclick="openBulkEditModal()" style="font-size: 11px;">✏️ Bulk Edit</button>
+      <form id="bulk-delete-form" method="POST" style="display:inline;" onsubmit="return confirm('Hapus semua deposit yang dipilih? Saldo user & upline akan dikurangi.');">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="bulk_delete">
+          <input type="hidden" name="ids" id="bulk-delete-ids">
+          <button type="submit" class="btn btn-sm btn-danger" style="font-size: 11px;">🗑️ Bulk Delete</button>
+      </form>
+  </div>
 </div>
 
 <div class="tf-container">
@@ -133,12 +225,24 @@ require __DIR__ . '/partials/header.php';
                     <?php foreach ($g['deposits'] as $d): ?>
                         <div class="tf-dep-node">
                             <div class="tf-dep-header">
-                                <span class="tf-dep-name"><?= htmlspecialchars($d['depositor_name']) ?></span>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0;">
+                                    <input type="checkbox" class="dep-cb" value="<?= $d['deposit_id'] ?>" onchange="updateBulkUI()">
+                                    <span class="tf-dep-name"><?= htmlspecialchars($d['depositor_name']) ?></span>
+                                </label>
                                 <span class="tf-dep-time"><?= date('H:i', strtotime($d['confirmed_at'])) ?></span>
                             </div>
                             <div class="tf-dep-footer">
                                 <div class="tf-dep-amt">Depo: <?= format_rp((float)$d['amount']) ?></div>
                                 <div class="tf-dep-com">Komisi: <?= format_rp((float)$d['commission_amount']) ?></div>
+                            </div>
+                            <div style="display:flex; gap: 4px; margin-top: 6px; border-top: 1px dashed #363b57; padding-top: 6px;">
+                                <button onclick="openEditModal(<?= $d['deposit_id'] ?>, <?= (float)$d['amount'] ?>)" class="btn btn-sm btn-primary" style="font-size: 9px; padding: 2px 6px; flex: 1;">Edit</button>
+                                <form method="POST" style="flex: 1; display:flex;" onsubmit="return confirm('Hapus deposit ini? Saldo akan dikurangi.');">
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="ids" value="<?= $d['deposit_id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-danger" style="font-size: 9px; padding: 2px 6px; width: 100%;">Delete</button>
+                                </form>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -172,5 +276,73 @@ require __DIR__ . '/partials/header.php';
   </div>
 </div>
 <?php endif; ?>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#1a1d27; border: 1px solid #363b57; padding: 20px; border-radius: 12px; width: 300px; max-width: 90%;">
+        <h6 id="editModalTitle" style="color:#fff; margin-bottom: 16px; font-weight: bold;">Edit Nominal Deposit</h6>
+        <form method="POST" id="editForm" onsubmit="return confirm('Update deposit ini? Saldo & komisi akan disesuaikan otomatis.');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" id="editAction" value="edit">
+            <input type="hidden" name="ids" id="editIds">
+            
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 11px; color: #aaa; margin-bottom: 4px; display: block;">Nominal Baru</label>
+                <input type="number" name="new_amount" id="editAmount" class="form-control" style="background:#0f1117; color:#fff; border:1px solid #363b57;" required>
+            </div>
+            
+            <div style="display:flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="closeEditModal()">Batal</button>
+                <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateBulkUI() {
+    const cbs = document.querySelectorAll('.dep-cb:checked');
+    const panel = document.getElementById('bulk-actions');
+    const countSpan = document.getElementById('bulk-count');
+    const deleteIds = document.getElementById('bulk-delete-ids');
+    
+    if (cbs.length > 0) {
+        panel.style.display = 'flex';
+        countSpan.textContent = cbs.length + ' terpilih';
+        
+        let ids = [];
+        cbs.forEach(cb => ids.push(cb.value));
+        deleteIds.value = ids.join(',');
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function openEditModal(id, amount) {
+    document.getElementById('editModal').style.display = 'flex';
+    document.getElementById('editAction').value = 'edit';
+    document.getElementById('editIds').value = id;
+    document.getElementById('editAmount').value = amount;
+    document.getElementById('editModalTitle').textContent = 'Edit Nominal Deposit';
+}
+
+function openBulkEditModal() {
+    const cbs = document.querySelectorAll('.dep-cb:checked');
+    let ids = [];
+    cbs.forEach(cb => ids.push(cb.value));
+    
+    if (ids.length === 0) return;
+    
+    document.getElementById('editModal').style.display = 'flex';
+    document.getElementById('editAction').value = 'bulk_edit';
+    document.getElementById('editIds').value = ids.join(',');
+    document.getElementById('editAmount').value = '';
+    document.getElementById('editModalTitle').textContent = 'Bulk Edit (' + ids.length + ' transaksi)';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+</script>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>
