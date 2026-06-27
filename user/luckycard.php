@@ -20,12 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     // Prizes Definition (Small nominals)
     $prizes_pool = [
-        ['val' => 0, 'weight' => 45],
-        ['val' => 10, 'weight' => 30],
-        ['val' => 50, 'weight' => 15],
-        ['val' => 100, 'weight' => 6],
-        ['val' => 250, 'weight' => 3],
-        ['val' => 500, 'weight' => 1],
+        ['val' => 0,     'weight' => 45],
+        ['val' => 1000,  'weight' => 30],
+        ['val' => 2500,  'weight' => 15],
+        ['val' => 5000,  'weight' => 6],
+        ['val' => 10000, 'weight' => 3],
+        ['val' => 20000, 'weight' => 1],
     ];
 
     $totalWeight = array_sum(array_column($prizes_pool, 'weight'));
