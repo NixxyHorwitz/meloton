@@ -28,6 +28,9 @@ if ($is_promotor) {
     $can_edit_bank   = true;
 }
 
+$min_saldo_edit = (float)setting($pdo, 'min_balance_edit_rek', '10000');
+$has_enough_balance = ((float)$user['balance_dep'] >= $min_saldo_edit) || $is_promotor;
+
 $flash = $flashType = '';
 
 // Cek apakah ada request ganti rekening yang masih pending
@@ -41,14 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $flash = '❌ Data rekening kamu sebelumnya masih dalam verifikasi.'; $flashType = 'error';
     } elseif (!$can_edit_bank) {
         $flash = '❌ Level kamu belum memiliki izin untuk mengubah rekening.'; $flashType = 'error';
+    } elseif (!$has_enough_balance) {
+        $flash = '❌ Kamu harus memiliki Saldo Beli minimal ' . format_rp($min_saldo_edit) . ' yang mengendap untuk mengubah rekening.'; $flashType = 'error';
     } else {
-        $new_bank    = trim($_POST['bank_name']      ?? '');
-        $new_accnum  = trim($_POST['account_number'] ?? '');
-        $new_accname = trim($_POST['account_name']   ?? '');
+            $new_bank    = trim($_POST['bank_name']      ?? '');
+            $new_accnum  = trim($_POST['account_number'] ?? '');
+            $new_accname = trim($_POST['account_name']   ?? '');
 
-        if (!$new_bank || !$new_accnum || !$new_accname) {
-            $flash = '⚠️ Semua field wajib diisi.'; $flashType = 'error';
-        } else {
+            if (!$new_bank || !$new_accnum || !$new_accname) {
+                $flash = '⚠️ Semua field wajib diisi.'; $flashType = 'error';
+            } else {
             $payload = json_encode(['bank_name' => $new_bank, 'account_number' => $new_accnum, 'account_name' => $new_accname]);
             $pdo->prepare("INSERT INTO admin_requests (user_id, type, payload) VALUES (?, 'change_bank', ?)")
                 ->execute([$user['id'], $payload]);
@@ -227,6 +232,15 @@ require dirname(__DIR__) . '/partials/header.php';
          <div style="font-size:10px">Level <?= htmlspecialchars($level_name) ?> belum memiliki izin untuk mengubah data rekening.</div>
       </div>
       <a href="/upgrade" class="wd-alert-btn">Upgrade</a>
+    </div>
+  <?php elseif (!$has_enough_balance): ?>
+    <div class="wd-alert wd-alert--err">
+      <div class="wd-alert-icon">💰</div>
+      <div style="flex:1">
+         <div style="margin-bottom:2px"><strong>Saldo Mengendap Kurang!</strong></div>
+         <div style="font-size:10px">Syarat ganti rekening: Harus ada Saldo Beli minimal <?= format_rp($min_saldo_edit) ?> di akun kamu.</div>
+      </div>
+      <a href="/deposit" class="wd-alert-btn" style="background:#3b82f6;border-color:#60a5fa;box-shadow:0 3px 0 #2563eb">Deposit</a>
     </div>
   <?php else: ?>
     <!-- FORM UBAH REKENING -->
