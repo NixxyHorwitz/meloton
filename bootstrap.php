@@ -131,26 +131,47 @@ if (setting($pdo, 'maintenance_mode', '0') === '1') {
     if (!$is_console && !$is_admin && !$is_webhook) {
         $msg = setting($pdo, 'maintenance_message', 'Sistem sedang dalam perbaikan.');
         
-        // Anti-Cache Headers
+        // Ensure session lock is released immediately to prevent hanging requests!
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        
+        // Anti-Cache Headers (extremely aggressive)
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
         header('Cache-Control: post-check=0, pre-check=0', false);
         header('Pragma: no-cache');
         header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+        header('Connection: close');
+        header('Clear-Site-Data: "cache"');
         
         http_response_code(503);
+        
+        // If it is an AJAX/Fetch request, return JSON so JS does not choke on HTML
+        $is_ajax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || 
+                   str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
+                   
+        if ($is_ajax) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Maintenance', 'message' => $msg]);
+            exit;
+        }
+
         echo '<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Under Maintenance</title>
+    <meta http-equiv="refresh" content="30">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { background:#0f1117; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; font-family:"Inter",sans-serif; text-align:center; padding:20px; box-sizing:border-box; }
         .box { background:#131520; border:1px solid #1f2235; padding:40px 30px; border-radius:16px; max-width:400px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
         .icon { font-size:48px; margin-bottom:16px; animation: pulse 2s infinite; }
         h1 { color:#FF6B35; font-size:22px; font-weight:900; margin:0 0 10px 0; }
-        p { color:#a0a4b8; font-size:14px; line-height:1.6; margin:0; }
+        p { color:#a0a4b8; font-size:14px; line-height:1.6; margin:0; margin-bottom:20px; }
+        .btn { background:#3b82f6; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:700; display:inline-block; transition:0.2s; }
+        .btn:hover { background:#2563eb; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
@@ -159,6 +180,7 @@ if (setting($pdo, 'maintenance_mode', '0') === '1') {
         <div class="icon">🔧</div>
         <h1>Sedang Perbaikan</h1>
         <p>' . nl2br(htmlspecialchars($msg)) . '</p>
+        <a href="' . htmlspecialchars($uri) . '" class="btn">🔄 Coba Muat Ulang</a>
     </div>
 </body>
 </html>';
