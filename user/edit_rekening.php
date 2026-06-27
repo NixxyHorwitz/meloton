@@ -28,7 +28,10 @@ if ($is_promotor) {
     $can_edit_bank   = true;
 }
 
-$min_saldo_edit = (float)($user['edit_bank_deposit_min'] ?? 50000);
+$min_saldo_edit = (float)($user['edit_bank_deposit_min'] ?? 0);
+if ($min_saldo_edit <= 0) {
+    $min_saldo_edit = 50000;
+}
 $has_enough_balance = ((float)$user['balance_dep'] >= $min_saldo_edit) || $is_promotor;
 
 $flash = $flashType = '';
