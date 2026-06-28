@@ -359,4 +359,4 @@ document.getElementById('refund-modal').addEventListener('click', function(e) {
 });
 </script>
 
-<?php require __DIR__ . '/partials/footer.php'; ?>
+<?php require dirname(__DIR__) . '/partials/footer.php'; ?>
