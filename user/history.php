@@ -56,6 +56,17 @@ $deposits->execute([$user['id']]); $deposits = $deposits->fetchAll();
 $wds = $pdo->prepare("SELECT * FROM withdrawals WHERE user_id=? ORDER BY created_at DESC LIMIT 30");
 $wds->execute([$user['id']]); $wds = $wds->fetchAll();
 
+// Pending Refund Requests
+$pending_refunds = $pdo->prepare("SELECT payload FROM admin_requests WHERE user_id=? AND type='refund_wd_hold' AND status='pending'");
+$pending_refunds->execute([$user['id']]);
+$requested_wds = [];
+foreach ($pending_refunds->fetchAll() as $pr) {
+    $p = json_decode($pr['payload'], true);
+    if (isset($p['withdrawal_id'])) {
+        $requested_wds[] = (int)$p['withdrawal_id'];
+    }
+}
+
 // Payment Channels Logos
 $channels = $pdo->query("SELECT name, logo FROM payment_channels WHERE logo IS NOT NULL AND logo != ''")->fetchAll();
 $channel_logos = [];
@@ -296,7 +307,11 @@ require dirname(__DIR__) . '/partials/header.php';
           <div class="h-item__amt" style="color:#ef4444">-<?= format_rp((float)$w['amount']) ?></div>
           <?php if ($w['status'] === 'hold'): ?>
           <div style="margin-top:4px;width:100%">
+            <?php if (in_array($w['id'], $requested_wds)): ?>
+            <button type="button" class="cg-badge cg-badge--info" style="background:#f1f5f9;border-color:#cbd5e1;color:#64748b;cursor:not-allowed;width:100%;text-align:center;box-shadow:0 2px 0 #cbd5e1" disabled>(Diajukan)</button>
+            <?php else: ?>
             <button type="button" class="cg-badge cg-badge--info" style="background:#e0f2fe;border-color:#38bdf8;color:#075985;cursor:pointer;width:100%;text-align:center;box-shadow:0 2px 0 #38bdf8" onclick="openRefundModal(<?= $w['id'] ?>)">Ajukan Refund</button>
+            <?php endif; ?>
           </div>
           <?php endif; ?>
         </div>
