@@ -2,6 +2,42 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/auth/guard.php';
 
+$flash = $flashType = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'refund_wd_hold') {
+    $wd_id = (int)($_POST['wd_id'] ?? 0);
+    $stmtPending = $pdo->prepare("SELECT id FROM admin_requests WHERE user_id=? AND type='refund_wd_hold' AND status='pending' AND payload LIKE ?");
+    $stmtPending->execute([$user['id'], '%"withdrawal_id":'.$wd_id.'%']);
+    if ($stmtPending->fetchColumn()) {
+        $flash = '❌ Permintaan pengembalian untuk WD ini sudah diajukan.'; $flashType = 'error';
+    } else {
+        $w = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? AND user_id=? AND status='hold'");
+        $w->execute([$wd_id, $user['id']]);
+        $wData = $w->fetch();
+        if (!$wData) {
+            $flash = '❌ Withdraw tidak ditemukan atau bukan berstatus Hold.'; $flashType = 'error';
+        } else {
+            $payload = json_encode(['withdrawal_id' => $wd_id]);
+            $pdo->prepare("INSERT INTO admin_requests (user_id, type, payload) VALUES (?, 'refund_wd_hold', ?)")
+                ->execute([$user['id'], $payload]);
+            $req_id = $pdo->lastInsertId();
+            
+            $msg  = "💰 <b>REQUEST PENGEMBALIAN WD HOLD</b>\n\n";
+            $msg .= "👤 User: <code>{$user['username']}</code>\n";
+            $msg .= "💸 Jumlah WD: <b>" . format_rp((float)$wData['amount']) . "</b>\n";
+            $msg .= "🏦 Tujuan Awal: {$wData['bank_name']} - {$wData['account_number']}\n\n";
+            $msg .= "⚠️ <i>Refund ini akan mengembalikan saldo WD yang ditahan (Hold) ke Saldo Beli user secara utuh.</i>\n";
+            $kb = [
+                [['text'=>'✅ Approve Refund', 'callback_data'=>'req_approve_'.$req_id], ['text'=>'❌ Reject', 'callback_data'=>'req_reject_'.$req_id]]
+            ];
+            send_telegram_notif($pdo, $msg, $kb, 'permintaan');
+            
+            $flash = '✅ Permintaan pengembalian dana telah masuk dan sedang diverifikasi admin.';
+            $flashType = 'success';
+        }
+    }
+    $_GET['tab'] = 'withdraw'; // force stay on withdraw tab
+}
+
 $tab = $_GET['tab'] ?? 'reward';
 
 // Reward / watch history
@@ -117,6 +153,12 @@ require dirname(__DIR__) . '/partials/header.php';
 
 <div class="history-page">
   <!-- Title -->
+
+  <?php if ($flash): ?>
+  <div style="background:<?= $flashType==='error'?'#fef2f2':'#f0fdf4' ?>;border:2.5px solid <?= $flashType==='error'?'#f87171':'#34d399' ?>;border-radius:14px;padding:12px 16px;color:<?= $flashType==='error'?'#991b1b':'#065f46' ?>;font-weight:800;font-size:12px;margin-bottom:16px;box-shadow:0 4px 0 <?= $flashType==='error'?'#fca5a5':'#6ee7b7' ?>;">
+    <?= htmlspecialchars($flash) ?>
+  </div>
+  <?php endif; ?>
 
   <!-- Summary stats -->
   <div class="h-stats">
@@ -241,6 +283,13 @@ require dirname(__DIR__) . '/partials/header.php';
             <?= match($w['status']){'approved'=>'Sukses', 'pending'=>'Menunggu', 'hold'=>'Ditahan', 'rejected'=>'Ditolak', 'refunded'=>'Dikembalikan', default=>ucfirst($w['status'])} ?>
           </span>
           <div class="h-item__amt" style="color:#ef4444">-<?= format_rp((float)$w['amount']) ?></div>
+          <?php if ($w['status'] === 'hold'): ?>
+          <form method="POST" style="margin-top:4px;width:100%" onsubmit="return confirm('Ajukan pengembalian saldo ke Saldo Beli?')">
+            <input type="hidden" name="action" value="refund_wd_hold">
+            <input type="hidden" name="wd_id" value="<?= $w['id'] ?>">
+            <button type="submit" class="cg-badge cg-badge--info" style="background:#e0f2fe;border-color:#38bdf8;color:#075985;cursor:pointer;width:100%;text-align:center;box-shadow:0 2px 0 #38bdf8">Ajukan Refund</button>
+          </form>
+          <?php endif; ?>
         </div>
       </div>
       <?php endforeach; ?>

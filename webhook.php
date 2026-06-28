@@ -406,10 +406,36 @@ if (isset($update['callback_query'])) {
                             answer_cb($token, $cb_id, '⚠️ User tidak memiliki level aktif untuk di-refund.');
                             http_response_code(200); exit;
                         }
+                    } elseif ($req['type'] === 'refund_wd_hold') {
+                        $payload = json_decode($req['payload'], true) ?: [];
+                        $wd_id = $payload['withdrawal_id'] ?? 0;
+                        $wd = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? AND status='hold' FOR UPDATE");
+                        $wd->execute([$wd_id]);
+                        $wd = $wd->fetch();
+                        if ($wd) {
+                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Beli', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
+                            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$wd['amount'], $req['user_id']]);
+                            
+                            $notifTitle = "Refund WD Disetujui ✅";
+                            $notifMsg = "Refund untuk WD senilai " . format_rp((float)$wd['amount']) . " telah disetujui. Saldo dikembalikan ke Saldo Beli kamu secara utuh.";
+                            $pdo->prepare("INSERT INTO notifications (title, message, type, icon, target_type, target_user_ids, action_url, action_text) VALUES (?, ?, 'success', '💰', 'single', ?, '/history?tab=withdraw', 'Cek Saldo')")
+                                ->execute([$notifTitle, $notifMsg, json_encode([$req['user_id']])]);
+                                
+                            $msg = "✅ <b>REQUEST REFUND WD HOLD (APPROVED)</b>\n";
+                            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                            $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";
+                            $msg .= "💵 <b>Dikembalikan:</b> <code>" . format_rp((float)$wd['amount']) . "</code> (ke Saldo Beli)\n";
+                            $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                            $msg .= "<i>Refund telah disetujui dan saldo dikembalikan.</i>";
+                        } else {
+                            $pdo->rollBack();
+                            answer_cb($token, $cb_id, '⚠️ WD tidak ditemukan atau sudah tidak berstatus Hold.');
+                            http_response_code(200); exit;
+                        }
                     }
                 } else {
                     // Rejected
-                    $title = $req['type'] === 'change_bank' ? 'GANTI REKENING' : 'REFUND LEVEL';
+                    $title = $req['type'] === 'change_bank' ? 'GANTI REKENING' : ($req['type'] === 'refund_level' ? 'REFUND LEVEL' : 'REFUND WD HOLD');
                     $msg = "❌ <b>REQUEST {$title} (REJECTED)</b>\n";
                     $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
                     $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";

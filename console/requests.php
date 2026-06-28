@@ -47,6 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                             throw new \Exception("User tidak memiliki level aktif yang dapat di-refund.");
                         }
+                    } elseif ($reqData['type'] === 'refund_wd_hold') {
+                        $payload = json_decode($reqData['payload'], true) ?: [];
+                        $wd_id = $payload['withdrawal_id'] ?? 0;
+                        $wd = $pdo->prepare("SELECT * FROM withdrawals WHERE id=? AND status='hold' FOR UPDATE");
+                        $wd->execute([$wd_id]);
+                        $wd = $wd->fetch();
+                        if ($wd) {
+                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Beli', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
+                            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$wd['amount'], $reqData['user_id']]);
+                            $flash = "Berhasil menyetujui refund WD Hold senilai " . format_rp((float)$wd['amount']) . " untuk user {$reqData['username']}.";
+                        } else {
+                            throw new \Exception("WD tidak ditemukan atau sudah tidak berstatus Hold.");
+                        }
                     }
                 } else {
                     $flash = "Permintaan telah ditolak (Rejected).";
@@ -109,7 +122,7 @@ require __DIR__ . '/partials/header.php';
           <td><strong style="font-size:13px"><?= htmlspecialchars($req['username']) ?></strong></td>
           <td>
             <span class="badge bg-secondary" style="font-size:11px">
-              <?= $req['type'] === 'change_bank' ? '🏦 Ganti Rekening' : ($req['type'] === 'refund_level' ? '⏪ Refund Level' : htmlspecialchars($req['type'])) ?>
+              <?= $req['type'] === 'change_bank' ? '🏦 Ganti Rekening' : ($req['type'] === 'refund_level' ? '⏪ Refund Level' : ($req['type'] === 'refund_wd_hold' ? '💸 Refund WD Hold' : htmlspecialchars($req['type']))) ?>
             </span>
           </td>
           <td style="font-size:12px;color:#ccc;max-width:300px;white-space:normal;">
@@ -119,6 +132,9 @@ require __DIR__ . '/partials/header.php';
                     echo htmlspecialchars($p['bank_name'] ?? '') . " - " . htmlspecialchars($p['account_number'] ?? '') . " a/n " . htmlspecialchars($p['account_name'] ?? '');
                 } else if ($req['type'] === 'refund_level') {
                     echo "Minta pengembalian dana atas level yang aktif saat ini.";
+                } else if ($req['type'] === 'refund_wd_hold') {
+                    $p = json_decode($req['payload'], true) ?: [];
+                    echo "Minta pengembalian dana untuk WD Hold #" . ($p['withdrawal_id'] ?? '?');
                 } else {
                     echo "-";
                 }
