@@ -413,18 +413,18 @@ if (isset($update['callback_query'])) {
                         $wd->execute([$wd_id]);
                         $wd = $wd->fetch();
                         if ($wd) {
-                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Beli', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
-                            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$wd['amount'], $req['user_id']]);
+                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Tarik', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
+                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? WHERE id = ?")->execute([$wd['amount'], $req['user_id']]);
                             
                             $notifTitle = "Refund WD Disetujui ✅";
-                            $notifMsg = "Refund untuk WD senilai " . format_rp((float)$wd['amount']) . " telah disetujui. Saldo dikembalikan ke Saldo Beli kamu secara utuh.";
+                            $notifMsg = "Refund untuk WD senilai " . format_rp((float)$wd['amount']) . " telah disetujui. Saldo dikembalikan ke Saldo Tarik kamu secara utuh.";
                             $pdo->prepare("INSERT INTO notifications (title, message, type, icon, target_type, target_user_ids, action_url, action_text) VALUES (?, ?, 'success', '💰', 'single', ?, '/history?tab=withdraw', 'Cek Saldo')")
                                 ->execute([$notifTitle, $notifMsg, json_encode([$req['user_id']])]);
                                 
                             $msg = "✅ <b>REQUEST REFUND WD HOLD (APPROVED)</b>\n";
                             $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
                             $msg .= "👤 <b>User:</b> <code>{$req['username']}</code>\n";
-                            $msg .= "💵 <b>Dikembalikan:</b> <code>" . format_rp((float)$wd['amount']) . "</code> (ke Saldo Beli)\n";
+                            $msg .= "💵 <b>Dikembalikan:</b> <code>" . format_rp((float)$wd['amount']) . "</code> (ke Saldo Tarik)\n";
                             $msg .= "━━━━━━━━━━━━━━━━━━━━━━\n";
                             $msg .= "<i>Refund telah disetujui dan saldo dikembalikan.</i>";
                         } else {

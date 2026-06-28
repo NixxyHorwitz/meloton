@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'refun
             $msg .= "👤 User: <code>{$user['username']}</code>\n";
             $msg .= "💸 Jumlah WD: <b>" . format_rp((float)$wData['amount']) . "</b>\n";
             $msg .= "🏦 Tujuan Awal: {$wData['bank_name']} - {$wData['account_number']}\n\n";
-            $msg .= "⚠️ <i>Refund ini akan mengembalikan saldo WD yang ditahan (Hold) ke Saldo Beli user secara utuh.</i>\n";
+            $msg .= "⚠️ <i>Refund ini akan mengembalikan saldo WD yang ditahan (Hold) ke Saldo Tarik user secara utuh.</i>\n";
             $kb = [
                 [['text'=>'✅ Approve Refund', 'callback_data'=>'req_approve_'.$req_id], ['text'=>'❌ Reject', 'callback_data'=>'req_reject_'.$req_id]]
             ];
@@ -149,6 +149,17 @@ require dirname(__DIR__) . '/partials/header.php';
 .h-empty { text-align:center; padding:40px 20px; background:#fff; border:3px dashed #cbd5e1; border-radius:20px; }
 .h-empty-ico { font-size:48px; margin-bottom:12px; opacity:0.4; }
 .h-empty-txt { font-size:13px; font-weight:900; color:#94a3b8; }
+/* ── Modals ── */
+.cg-modal { display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.6); align-items:center; justify-content:center; backdrop-filter:blur(3px); padding:20px; }
+.cg-modal-card { background:#fff; border-radius:24px; border:3px solid #0f172a; width:100%; max-width:380px; box-shadow:0 8px 0 #0f172a; animation:popIn .3s cubic-bezier(.175,.885,.32,1.275); padding:24px; position:relative; overflow:hidden; }
+@keyframes popIn { 0% { transform:scale(0.8); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+.cg-mc-hdr { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 6px; display:flex; align-items:center; gap:8px; }
+.cg-mc-sub { font-size: 12px; font-weight: 800; color: #64748b; margin-bottom: 16px; }
+.cg-btn-row { display: flex; gap: 10px; }
+.cg-btn { flex: 1; border: 2.5px solid #0f172a; border-radius: 12px; font-size: 13px; font-weight: 900; padding: 12px; box-shadow: 0 4px 0 #0f172a; cursor: pointer; text-align:center; }
+.cg-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #0f172a; }
+.cg-btn--cancel { background: #f1f5f9; color: #475569; }
+
 </style>
 
 <div class="history-page">
@@ -284,11 +295,9 @@ require dirname(__DIR__) . '/partials/header.php';
           </span>
           <div class="h-item__amt" style="color:#ef4444">-<?= format_rp((float)$w['amount']) ?></div>
           <?php if ($w['status'] === 'hold'): ?>
-          <form method="POST" style="margin-top:4px;width:100%" onsubmit="return confirm('Ajukan pengembalian saldo ke Saldo Beli?')">
-            <input type="hidden" name="action" value="refund_wd_hold">
-            <input type="hidden" name="wd_id" value="<?= $w['id'] ?>">
-            <button type="submit" class="cg-badge cg-badge--info" style="background:#e0f2fe;border-color:#38bdf8;color:#075985;cursor:pointer;width:100%;text-align:center;box-shadow:0 2px 0 #38bdf8">Ajukan Refund</button>
-          </form>
+          <div style="margin-top:4px;width:100%">
+            <button type="button" class="cg-badge cg-badge--info" style="background:#e0f2fe;border-color:#38bdf8;color:#075985;cursor:pointer;width:100%;text-align:center;box-shadow:0 2px 0 #38bdf8" onclick="openRefundModal(<?= $w['id'] ?>)">Ajukan Refund</button>
+          </div>
           <?php endif; ?>
         </div>
       </div>
@@ -298,4 +307,41 @@ require dirname(__DIR__) . '/partials/header.php';
   <?php endif; ?>
 </div>
 
-<?php require dirname(__DIR__) . '/partials/footer.php'; ?>
+<!-- Refund Modal -->
+<div id="refund-modal" class="cg-modal">
+  <div class="cg-modal-card" style="border-color:#0369a1;box-shadow:0 8px 0 #0369a1">
+    <div class="cg-mc-hdr" style="color:#0284c7">💸 Ajukan Refund WD?</div>
+    <div class="cg-mc-sub">Kamu yakin ingin mengajukan pengembalian saldo dari penarikan yang ditahan ini?</div>
+    
+    <div style="background:#f0f9ff;border:2.5px solid #bae6fd;border-radius:14px;padding:12px;margin-bottom:16px;font-size:11px;font-weight:800;color:#0369a1;line-height:1.4">
+      Saldo akan dikembalikan utuh ke <strong>Saldo Tarik</strong> jika pengajuan disetujui oleh admin.
+    </div>
+    
+    <form method="POST" id="refund-form">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="refund_wd_hold">
+      <input type="hidden" name="wd_id" id="refund-wd-id" value="">
+      <div class="cg-btn-row">
+        <button type="button" class="cg-btn cg-btn--cancel" onclick="closeRefundModal()">Batal</button>
+        <button type="submit" class="cg-btn" style="background:linear-gradient(135deg, #38bdf8, #0ea5e9);color:#fff;border-color:#fff;box-shadow:0 4px 0 #0284c7;text-shadow:0 1px 1px rgba(0,0,0,0.3)" onclick="this.disabled=true;this.textContent='Memproses...';document.getElementById('refund-form').submit();">Ajukan Sekarang</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openRefundModal(wdId) {
+  document.getElementById('refund-wd-id').value = wdId;
+  document.getElementById('refund-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeRefundModal() {
+  document.getElementById('refund-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('refund-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRefundModal();
+});
+</script>
+
+<?php require __DIR__ . '/partials/footer.php'; ?>

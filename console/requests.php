@@ -54,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $wd->execute([$wd_id]);
                         $wd = $wd->fetch();
                         if ($wd) {
-                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Beli', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
-                            $pdo->prepare("UPDATE users SET balance_dep = balance_dep + ? WHERE id = ?")->execute([$wd['amount'], $reqData['user_id']]);
+                            $pdo->prepare("UPDATE withdrawals SET status='refunded', admin_note='Dikembalikan ke Saldo Tarik', processed_at=NOW() WHERE id=?")->execute([$wd_id]);
+                            $pdo->prepare("UPDATE users SET balance_wd = balance_wd + ? WHERE id = ?")->execute([$wd['amount'], $reqData['user_id']]);
                             $flash = "Berhasil menyetujui refund WD Hold senilai " . format_rp((float)$wd['amount']) . " untuk user {$reqData['username']}.";
                         } else {
                             throw new \Exception("WD tidak ditemukan atau sudah tidak berstatus Hold.");
